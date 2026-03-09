@@ -12,7 +12,7 @@ Transform a flat-structured SaaS starter kit into a feature-folder architecture 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Architecture Modernization** - Restructure backend and frontend into feature folders, add shared Zod validation, build plugin system with plugin branches, create CLI generators, and document everything
+- [x] **Phase 1: Architecture Modernization** - Restructure backend and frontend into feature folders, add shared Zod validation, build plugin system with plugin branches, create CLI generators, and document everything
 
 ## Phase Details
 
@@ -39,8 +39,8 @@ Plans:
 - [x] 01-05: Plugin-friendly shared files (nav, i18n namespaces, error groups)
 - [x] 01-06: Plugin infrastructure and plugin branches
 - [x] 01-07: CLI generators and architecture documentation
-- [ ] 01-08: Fix typecheck errors in route test files (gap closure)
-- [ ] 01-09: Wire zCustomMutation and zodToConvex for Zod validation (gap closure)
+- [x] 01-08: Fix typecheck errors in route test files (gap closure)
+- [x] 01-09: Wire zCustomMutation and zodToConvex for Zod validation (gap closure)
 
 **Plan dependency order:** 01-01 -> 01-02 -> 01-03 -> 01-04 -> 01-05 -> 01-06 -> 01-07; 01-08 and 01-09 are independent (wave 1)
 
@@ -65,4 +65,4 @@ Plans 01-01 through 01-07 executed sequentially (complete). Plans 01-08 and 01-0
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Architecture Modernization | 7/9 | Gap Closure |  |
+| 1. Architecture Modernization | 9/9 | Complete | 2026-03-09 |
