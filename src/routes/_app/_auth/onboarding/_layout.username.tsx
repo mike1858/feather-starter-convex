@@ -22,10 +22,10 @@ export const Route = createFileRoute("/_app/_auth/onboarding/_layout/username")(
 );
 
 export default function OnboardingUsername() {
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: completeOnboarding } = useMutation({
-    mutationFn: useConvexMutation(api.app.completeOnboarding),
+    mutationFn: useConvexMutation(api.onboarding.mutations.completeOnboarding),
   });
   const navigate = useNavigate();
 

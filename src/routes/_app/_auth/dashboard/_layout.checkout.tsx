@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_app/_auth/dashboard/_layout/checkout")({
 });
 
 export default function DashboardCheckout() {
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
   const isFreePlan = user?.subscription?.planKey === PLANS.FREE;
   const [isPending, setIsPending] = useState(false);
 

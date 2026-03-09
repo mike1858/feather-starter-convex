@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_app/_auth/dashboard/_layout")({
 });
 
 function DashboardLayout() {
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
   if (!user) {
     return null;
   }

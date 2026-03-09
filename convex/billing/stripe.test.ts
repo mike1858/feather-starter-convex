@@ -1,6 +1,6 @@
 import { describe, expect } from "vitest";
-import { internal } from "./_generated/api";
-import { test, seedPlans, seedSubscription } from "./test.setup";
+import { internal } from "../_generated/api";
+import { test, seedPlans, seedSubscription } from "../test.setup";
 
 // Unhandled rejections from scheduled Stripe actions are suppressed
 // globally in src/test-setup.ts — no per-file handler needed.
@@ -10,7 +10,7 @@ describe("PREAUTH_updateCustomerId", () => {
     testClient,
     userId,
   }) => {
-    await testClient.mutation(internal.stripe.PREAUTH_updateCustomerId, {
+    await testClient.mutation(internal.billing.stripe.PREAUTH_updateCustomerId, {
       userId,
       customerId: "cus_abc123",
     });
@@ -22,7 +22,7 @@ describe("PREAUTH_updateCustomerId", () => {
 
 describe("PREAUTH_getUserById", () => {
   test("returns the user document", async ({ testClient, userId }) => {
-    const user = await testClient.query(internal.stripe.PREAUTH_getUserById, {
+    const user = await testClient.query(internal.billing.stripe.PREAUTH_getUserById, {
       userId,
     });
     expect(user).toBeDefined();
@@ -34,13 +34,13 @@ describe("UNAUTH_getDefaultPlan", () => {
   test("returns the free plan when seeded", async ({ testClient }) => {
     await seedPlans(testClient);
 
-    const plan = await testClient.query(internal.stripe.UNAUTH_getDefaultPlan);
+    const plan = await testClient.query(internal.billing.stripe.UNAUTH_getDefaultPlan);
     expect(plan).toBeDefined();
     expect(plan!.key).toBe("free");
   });
 
   test("returns null when no plans exist", async ({ testClient }) => {
-    const plan = await testClient.query(internal.stripe.UNAUTH_getDefaultPlan);
+    const plan = await testClient.query(internal.billing.stripe.UNAUTH_getDefaultPlan);
     expect(plan).toBeNull();
   });
 });
@@ -57,7 +57,7 @@ describe("PREAUTH_getUserByCustomerId", () => {
     });
 
     const result = await testClient.query(
-      internal.stripe.PREAUTH_getUserByCustomerId,
+      internal.billing.stripe.PREAUTH_getUserByCustomerId,
       { customerId: "cus_test_lookup" },
     );
     expect(result).toBeDefined();
@@ -67,7 +67,7 @@ describe("PREAUTH_getUserByCustomerId", () => {
 
   test("throws when no user matches customerId", async ({ testClient }) => {
     await expect(
-      testClient.query(internal.stripe.PREAUTH_getUserByCustomerId, {
+      testClient.query(internal.billing.stripe.PREAUTH_getUserByCustomerId, {
         customerId: "cus_nonexistent",
       }),
     ).rejects.toThrow("Something went wrong");
@@ -82,7 +82,7 @@ describe("PREAUTH_getUserByCustomerId", () => {
     });
 
     await expect(
-      testClient.query(internal.stripe.PREAUTH_getUserByCustomerId, {
+      testClient.query(internal.billing.stripe.PREAUTH_getUserByCustomerId, {
         customerId: "cus_no_sub",
       }),
     ).rejects.toThrow("Something went wrong");
@@ -128,7 +128,7 @@ describe("PREAUTH_getUserByCustomerId", () => {
     });
 
     await expect(
-      testClient.query(internal.stripe.PREAUTH_getUserByCustomerId, {
+      testClient.query(internal.billing.stripe.PREAUTH_getUserByCustomerId, {
         customerId: "cus_bad_plan",
       }),
     ).rejects.toThrow("Something went wrong");
@@ -139,7 +139,7 @@ describe("PREAUTH_createSubscription", () => {
   test("inserts a new subscription", async ({ testClient, userId }) => {
     const { freePlanId } = await seedPlans(testClient);
 
-    await testClient.mutation(internal.stripe.PREAUTH_createSubscription, {
+    await testClient.mutation(internal.billing.stripe.PREAUTH_createSubscription, {
       userId,
       planId: freePlanId,
       priceStripeId: "price_free_year_usd",
@@ -168,7 +168,7 @@ describe("PREAUTH_createSubscription", () => {
     await seedSubscription(testClient, { userId, planId: freePlanId });
 
     await expect(
-      testClient.mutation(internal.stripe.PREAUTH_createSubscription, {
+      testClient.mutation(internal.billing.stripe.PREAUTH_createSubscription, {
         userId,
         planId: freePlanId,
         priceStripeId: "price_dup",
@@ -196,7 +196,7 @@ describe("PREAUTH_replaceSubscription", () => {
       stripeId: "sub_old",
     });
 
-    await testClient.mutation(internal.stripe.PREAUTH_replaceSubscription, {
+    await testClient.mutation(internal.billing.stripe.PREAUTH_replaceSubscription, {
       userId,
       subscriptionStripeId: "sub_new_replaced",
       input: {
@@ -227,7 +227,7 @@ describe("PREAUTH_replaceSubscription", () => {
     await seedPlans(testClient);
 
     await expect(
-      testClient.mutation(internal.stripe.PREAUTH_replaceSubscription, {
+      testClient.mutation(internal.billing.stripe.PREAUTH_replaceSubscription, {
         userId,
         subscriptionStripeId: "sub_x",
         input: {
@@ -252,7 +252,7 @@ describe("PREAUTH_replaceSubscription", () => {
     await seedSubscription(testClient, { userId, planId: freePlanId });
 
     await expect(
-      testClient.mutation(internal.stripe.PREAUTH_replaceSubscription, {
+      testClient.mutation(internal.billing.stripe.PREAUTH_replaceSubscription, {
         userId,
         subscriptionStripeId: "sub_x",
         input: {
@@ -282,7 +282,7 @@ describe("PREAUTH_deleteSubscription", () => {
       stripeId: "sub_to_delete",
     });
 
-    await testClient.mutation(internal.stripe.PREAUTH_deleteSubscription, {
+    await testClient.mutation(internal.billing.stripe.PREAUTH_deleteSubscription, {
       subscriptionStripeId: "sub_to_delete",
     });
 
@@ -294,7 +294,7 @@ describe("PREAUTH_deleteSubscription", () => {
 
   test("throws when subscription not found", async ({ testClient }) => {
     await expect(
-      testClient.mutation(internal.stripe.PREAUTH_deleteSubscription, {
+      testClient.mutation(internal.billing.stripe.PREAUTH_deleteSubscription, {
         subscriptionStripeId: "sub_nonexistent",
       }),
     ).rejects.toThrow("Something went wrong");
@@ -311,7 +311,7 @@ describe("getCurrentUserSubscription", () => {
     await seedSubscription(testClient, { userId, planId: freePlanId });
 
     const result = await client.query(
-      internal.stripe.getCurrentUserSubscription,
+      internal.billing.stripe.getCurrentUserSubscription,
       { planId: proPlanId },
     );
     expect(result.currentSubscription).toBeDefined();
@@ -325,7 +325,7 @@ describe("getCurrentUserSubscription", () => {
     const { proPlanId } = await seedPlans(testClient);
 
     await expect(
-      testClient.query(internal.stripe.getCurrentUserSubscription, {
+      testClient.query(internal.billing.stripe.getCurrentUserSubscription, {
         planId: proPlanId,
       }),
     ).rejects.toThrow("Something went wrong");
@@ -338,7 +338,7 @@ describe("getCurrentUserSubscription", () => {
     const { proPlanId } = await seedPlans(testClient);
 
     await expect(
-      client.query(internal.stripe.getCurrentUserSubscription, {
+      client.query(internal.billing.stripe.getCurrentUserSubscription, {
         planId: proPlanId,
       }),
     ).rejects.toThrow("Something went wrong");

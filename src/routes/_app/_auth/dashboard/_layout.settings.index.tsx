@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { useForm } from "@tanstack/react-form";
 
 import * as validators from "@/utils/validators";
+import { USERNAME_MAX_LENGTH } from "@/shared/schemas/username";
 import { useSignOut } from "@/utils/misc";
 
 export const Route = createFileRoute("/_app/_auth/dashboard/_layout/settings/")(
@@ -25,21 +26,21 @@ export const Route = createFileRoute("/_app/_auth/dashboard/_layout/settings/")(
 );
 
 export default function DashboardSettings() {
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
   const signOut = useSignOut();
   const { mutateAsync: updateUsername } = useMutation({
-    mutationFn: useConvexMutation(api.app.updateUsername),
+    mutationFn: useConvexMutation(api.users.mutations.updateUsername),
   });
   const { mutateAsync: updateUserImage } = useMutation({
-    mutationFn: useConvexMutation(api.app.updateUserImage),
+    mutationFn: useConvexMutation(api.users.mutations.updateUserImage),
   });
   const { mutateAsync: removeUserImage } = useMutation({
-    mutationFn: useConvexMutation(api.app.removeUserImage),
+    mutationFn: useConvexMutation(api.users.mutations.removeUserImage),
   });
   const { mutateAsync: deleteCurrentUserAccount } = useMutation({
-    mutationFn: useConvexMutation(api.app.deleteCurrentUserAccount),
+    mutationFn: useConvexMutation(api.users.mutations.deleteCurrentUserAccount),
   });
-  const generateUploadUrl = useConvexMutation(api.app.generateUploadUrl);
+  const generateUploadUrl = useConvexMutation(api.uploads.mutations.generateUploadUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startUpload } = useUploadFiles(generateUploadUrl, {
     /* v8 ignore start — callback fired by uploadstuff after server upload completes */
@@ -195,7 +196,7 @@ export default function DashboardSettings() {
         </div>
         <div className="flex min-h-14 w-full items-center justify-between rounded-lg rounded-t-none border-t border-border bg-secondary px-6 dark:bg-card">
           <p className="text-sm font-normal text-primary/60">
-            Please use 32 characters at maximum.
+            {`Please use ${USERNAME_MAX_LENGTH} characters at maximum.`}
           </p>
           <Button type="submit" size="sm">
             Save

@@ -14,16 +14,21 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as app from "../app.js";
 import type * as auth from "../auth.js";
+import type * as billing_actions from "../billing/actions.js";
+import type * as billing_queries from "../billing/queries.js";
+import type * as billing_stripe from "../billing/stripe.js";
 import type * as email_index from "../email/index.js";
 import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
 import type * as init from "../init.js";
+import type * as onboarding_mutations from "../onboarding/mutations.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
 import type * as otp_VerificationCodeEmail from "../otp/VerificationCodeEmail.js";
-import type * as stripe from "../stripe.js";
+import type * as uploads_mutations from "../uploads/mutations.js";
+import type * as users_mutations from "../users/mutations.js";
+import type * as users_queries from "../users/queries.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -34,16 +39,21 @@ import type * as stripe from "../stripe.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  app: typeof app;
   auth: typeof auth;
+  "billing/actions": typeof billing_actions;
+  "billing/queries": typeof billing_queries;
+  "billing/stripe": typeof billing_stripe;
   "email/index": typeof email_index;
   "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;
   env: typeof env;
   http: typeof http;
   init: typeof init;
+  "onboarding/mutations": typeof onboarding_mutations;
   "otp/ResendOTP": typeof otp_ResendOTP;
   "otp/VerificationCodeEmail": typeof otp_VerificationCodeEmail;
-  stripe: typeof stripe;
+  "uploads/mutations": typeof uploads_mutations;
+  "users/mutations": typeof users_mutations;
+  "users/queries": typeof users_queries;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

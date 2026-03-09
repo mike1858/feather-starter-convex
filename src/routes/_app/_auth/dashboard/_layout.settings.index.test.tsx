@@ -58,7 +58,7 @@ test("updates username via form", async ({ client, testClient, userId }) => {
 
   // Verify the backend was updated
   await waitFor(async () => {
-    const updatedUser = await client.query(api.app.getCurrentUser, {});
+    const updatedUser = await client.query(api.users.queries.getCurrentUser, {});
     expect(updatedUser?.username).toBe("newname");
   });
 });
@@ -129,7 +129,7 @@ test("remove image button clears avatar", async ({ client, testClient, userId })
 
   // Verify the backend was updated — avatar should be removed
   await waitFor(async () => {
-    const updatedUser = await client.query(api.app.getCurrentUser, {});
+    const updatedUser = await client.query(api.users.queries.getCurrentUser, {});
     expect(updatedUser?.avatarUrl).toBeUndefined();
   });
 });
@@ -204,7 +204,7 @@ test("delete account double-check flow and confirm", async ({
 
   // Verify the backend user was deleted
   await waitFor(async () => {
-    const deletedUser = await client.query(api.app.getCurrentUser, {});
+    const deletedUser = await client.query(api.users.queries.getCurrentUser, {});
     expect(deletedUser).toBeNull();
   });
 });

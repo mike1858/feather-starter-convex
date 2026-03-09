@@ -51,7 +51,7 @@ test("submits valid username", async ({ client, testClient, userId }) => {
 
   // Verify the backend mutation ran — completeOnboarding sets the username
   await waitFor(async () => {
-    const updatedUser = await client.query(api.app.getCurrentUser, {});
+    const updatedUser = await client.query(api.users.queries.getCurrentUser, {});
     expect(updatedUser?.username).toBe("newuser");
   });
 });

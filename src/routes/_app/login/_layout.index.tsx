@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app/login/_layout/")({
 function Login() {
   const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
   const navigate = useNavigate();
   useEffect(() => {
     if ((isLoading && !isAuthenticated) || !user) {

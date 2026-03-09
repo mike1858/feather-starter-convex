@@ -10,7 +10,7 @@ import schema, {
   PLANS,
 } from "@cvx/schema";
 import { internal } from "@cvx/_generated/api";
-import { stripe } from "@cvx/stripe";
+import { stripe } from "@cvx/billing/stripe";
 
 const seedProducts = [
   {

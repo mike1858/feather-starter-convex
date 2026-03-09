@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context }) => {
     // Ensure the user query is loaded before rendering the app.
     await context.queryClient.ensureQueryData(
-      convexQuery(api.app.getCurrentUser, {}),
+      convexQuery(api.users.queries.getCurrentUser, {}),
     );
   },
 });

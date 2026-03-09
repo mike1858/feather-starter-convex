@@ -14,7 +14,7 @@ export const Route = createFileRoute(
   component: BillingSettings,
   beforeLoad: async ({ context }) => {
     await context.queryClient.ensureQueryData(
-      convexQuery(api.app.getActivePlans, {}),
+      convexQuery(api.billing.queries.getActivePlans, {}),
     );
     return {
       title: "Billing",
@@ -25,8 +25,8 @@ export const Route = createFileRoute(
 });
 
 export default function BillingSettings() {
-  const { data: user } = useQuery(convexQuery(api.app.getCurrentUser, {}));
-  const { data: plans } = useQuery(convexQuery(api.app.getActivePlans, {}));
+  const { data: user } = useQuery(convexQuery(api.users.queries.getCurrentUser, {}));
+  const { data: plans } = useQuery(convexQuery(api.billing.queries.getActivePlans, {}));
 
   const [selectedPlanId, setSelectedPlanId] = useState(
     user?.subscription?.planId,
@@ -41,10 +41,10 @@ export default function BillingSettings() {
   );
 
   const { mutateAsync: createSubscriptionCheckout } = useMutation({
-    mutationFn: useConvexAction(api.stripe.createSubscriptionCheckout),
+    mutationFn: useConvexAction(api.billing.actions.createSubscriptionCheckout),
   });
   const { mutateAsync: createCustomerPortal } = useMutation({
-    mutationFn: useConvexAction(api.stripe.createCustomerPortal),
+    mutationFn: useConvexAction(api.billing.actions.createCustomerPortal),
   });
 
   const currency = getLocaleCurrency();
