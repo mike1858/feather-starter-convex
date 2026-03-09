@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-03-09T09:33:35Z"
-last_activity: 2026-03-09 -- Completed plan 01-04 (Feature folder completion and route thinning)
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-03-09T09:40:12Z"
+last_activity: 2026-03-09 -- Completed plan 01-05 (Plugin extension points)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Phase: 1 of 1 (Architecture Modernization)
-Plan: 4 of 6 in current phase (01-04 complete)
+Plan: 5 of 6 in current phase (01-05 complete)
 Status: Executing
-Last activity: 2026-03-09 -- Completed plan 01-04 (Feature folder completion and route thinning)
+Last activity: 2026-03-09 -- Completed plan 01-05 (Plugin extension points)
 
-Progress: [██████░░░░] 57%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 5.0min
-- Total execution time: 0.33 hours
+- Total plans completed: 5
+- Average duration: 4.8min
+- Total execution time: 0.40 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-architecture-modernization | 4/6 | 20min | 5.0min |
+| 01-architecture-modernization | 5/6 | 24min | 4.8min |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - 01-03: Fixed Element.focus() TS error in feature test copy by casting to HTMLElement
 - 01-04: Navigation uses string path constants instead of Route.fullPath imports (breaks circular feature/route dependency)
 - 01-04: Coverage excludes barrel exports (index.ts) and Navigation shell (Radix dropdown menus)
+- 01-05: Root errors.ts kept as re-export shim for backward compat with convex ~/errors imports
+- 01-05: Empty namespace JSON files created as explicit extension points for plugins
+- 01-05: Navigation dropdown menus remain hardcoded; only tab bar is data-driven via navItems
 
 ### Pending Todos
 
@@ -83,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T09:33:35Z
-Stopped at: Completed 01-04-PLAN.md
-Resume file: .planning/phases/01-architecture-modernization/01-04-SUMMARY.md
+Last session: 2026-03-09T09:40:12Z
+Stopped at: Completed 01-05-PLAN.md
+Resume file: .planning/phases/01-architecture-modernization/01-05-SUMMARY.md

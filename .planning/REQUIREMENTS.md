@@ -20,9 +20,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Plugin System
 
-- [ ] **PLUG-01**: Navigation is data-driven (array of nav items) so plugins can add entries without editing component JSX
-- [ ] **PLUG-02**: i18n uses namespace-based loading so plugins add separate JSON files instead of editing `translation.json`
-- [ ] **PLUG-03**: Error constants are grouped by feature with clear sections for plugin additions
+- [x] **PLUG-01**: Navigation is data-driven (array of nav items) so plugins can add entries without editing component JSX
+- [x] **PLUG-02**: i18n uses namespace-based loading so plugins add separate JSON files instead of editing `translation.json`
+- [x] **PLUG-03**: Error constants are grouped by feature with clear sections for plugin additions
 - [ ] **PLUG-04**: A shell script (`scripts/plugin.sh`) can list, preview, and install plugin branches
 - [ ] **PLUG-05**: GitHub Actions auto-rebase all `plugin/*` branches when `main` is pushed and create issues on conflicts
 - [ ] **PLUG-06**: GitHub Actions run typecheck + lint + tests on every push to `plugin/*` branches
