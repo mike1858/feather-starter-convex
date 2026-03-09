@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-03-09T09:50:41Z"
-last_activity: 2026-03-09 -- Completed plan 01-06 (Plugin system)
+status: phase-complete
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-03-09T12:20:07Z"
+last_activity: 2026-03-09 -- Completed plan 01-07 (Generators and Documentation)
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
-  completed_plans: 6
-  percent: 86
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Phase: 1 of 1 (Architecture Modernization)
-Plan: 6 of 7 in current phase (01-06 complete)
-Status: Executing
-Last activity: 2026-03-09 -- Completed plan 01-06 (Plugin system)
+Plan: 7 of 7 in current phase (01-07 complete)
+Status: Phase Complete
+Last activity: 2026-03-09 -- Completed plan 01-07 (Generators and Documentation)
 
-Progress: [████████░░] 86%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 5.3min
-- Total execution time: 0.53 hours
+- Total plans completed: 7
+- Average duration: 5.6min
+- Total execution time: 0.65 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-architecture-modernization | 6/7 | 32min | 5.3min |
+| 01-architecture-modernization | 7/7 | 39min | 5.6min |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -76,6 +76,9 @@ Recent decisions affecting current work:
 - 01-06: Infra-ci branch cannot push to remote (OAuth token lacks workflow scope) -- local only
 - 01-06: Multi-plugin merge has one i18n ns array conflict (trivial one-line resolve)
 - 01-06: Admin role field is v.optional(roleValidator) for backward compat with existing users
+- 01-07: Plop generators use skipIfExists for convex-function to avoid overwriting existing files
+- 01-07: Separate route templates for auth vs public (not conditional in one template)
+- 01-07: Pre-existing typecheck errors in route test files left as-is (out of scope)
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T09:50:41Z
-Stopped at: Completed 01-06-PLAN.md
-Resume file: .planning/phases/01-architecture-modernization/01-06-SUMMARY.md
+Last session: 2026-03-09T12:20:07Z
+Stopped at: Completed 01-07-PLAN.md (Phase 1 complete)
+Resume file: .planning/phases/01-architecture-modernization/01-07-SUMMARY.md

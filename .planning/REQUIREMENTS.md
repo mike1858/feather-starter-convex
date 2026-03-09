@@ -33,10 +33,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### CLI Generators
 
-- [ ] **GEN-01**: `npm run gen:feature` scaffolds `src/features/{name}/` with components/, hooks/, index.ts and matching `convex/{name}/` directory
-- [ ] **GEN-02**: `npm run gen:route` generates a TanStack Router file at the correct path with auth guard option
-- [ ] **GEN-03**: `npm run gen:convex-function` generates a typed query/mutation/action with auth check boilerplate
-- [ ] **GEN-04**: `npm run gen:form` generates a Zod schema + TanStack Form component with shadcn/ui fields
+- [x] **GEN-01**: `npm run gen:feature` scaffolds `src/features/{name}/` with components/, hooks/, index.ts and matching `convex/{name}/` directory
+- [x] **GEN-02**: `npm run gen:route` generates a TanStack Router file at the correct path with auth guard option
+- [x] **GEN-03**: `npm run gen:convex-function` generates a typed query/mutation/action with auth check boilerplate
+- [x] **GEN-04**: `npm run gen:form` generates a Zod schema + TanStack Form component with shadcn/ui fields
 
 ### Shared Validation
 
@@ -47,9 +47,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Documentation
 
-- [ ] **DOC-01**: `PROVIDERS.md` documents which services use which vendors and how to swap them
-- [ ] **DOC-02**: Main README includes architecture diagram, feature guide, plugin usage, and generator instructions
-- [ ] **DOC-03**: Each `src/features/*/README.md` documents what the feature does, its backend counterpart, and dependencies
+- [x] **DOC-01**: `PROVIDERS.md` documents which services use which vendors and how to swap them
+- [x] **DOC-02**: Main README includes architecture diagram, feature guide, plugin usage, and generator instructions
+- [x] **DOC-03**: Each `src/features/*/README.md` documents what the feature does, its backend counterpart, and dependencies
 
 ## v2 Requirements
 
