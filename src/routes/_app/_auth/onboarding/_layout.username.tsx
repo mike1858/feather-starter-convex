@@ -47,7 +47,7 @@ export default function OnboardingUsername() {
     if (user?.username) {
       navigate({ to: DashboardRoute.fullPath });
     }
-  }, [user?.username]);
+  }, [user?.username, navigate]);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-96 flex-col items-center justify-center gap-6">

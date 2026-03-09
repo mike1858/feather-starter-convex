@@ -14,7 +14,7 @@ const useTheme = () => {
   // A similar script is inlined in the <head> of index.html.
   useEffect(() => {
     if (!initialized) {
-      setInitialized(true);
+      setInitialized(true); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
     if (currentTheme === "system") {
@@ -33,7 +33,7 @@ const useTheme = () => {
       document.documentElement.classList.remove("dark");
       document.documentElement.style.colorScheme = "light";
     }
-  }, [currentTheme]);
+  }, [currentTheme, initialized]);
 
   return [currentTheme, setCurrentTheme] as const;
 };

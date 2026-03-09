@@ -23,13 +23,13 @@ export default function DashboardCheckout() {
 
   useEffect(() => {
     if (isFreePlan) {
-      setIsPending(true);
+      setIsPending(true); // eslint-disable-line react-hooks/set-state-in-effect
     }
     const timeoutId = setTimeout(() => {
       setIsPending(false);
     }, 8000);
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [isFreePlan]);
 
   if (!user) {
     return null;

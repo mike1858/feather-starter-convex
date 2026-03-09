@@ -15,7 +15,7 @@ function AuthLayout() {
     if (!isLoading && !isAuthenticated) {
       navigate({ to: "/login" });
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, navigate]);
 
   if (isLoading && !isAuthenticated) {
     return null;

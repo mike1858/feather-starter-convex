@@ -12,7 +12,9 @@
     "build": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && vite build",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@auth/core": "^0.41.1",
@@ -53,6 +55,7 @@
     "@eslint/js": "^10.0.1",
     "@tanstack/router-devtools": "^1.166.3",
     "@tanstack/router-plugin": "^1.166.3",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

@@ -34,7 +34,7 @@ function Login() {
       navigate({ to: DashboardRoute.fullPath });
       return;
     }
-  }, [user]);
+  }, [user, isLoading, isAuthenticated, navigate]);
 
   if (step === "signIn") {
     return <LoginForm onSubmit={(email) => setStep({ email })} />;

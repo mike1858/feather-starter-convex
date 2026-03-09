@@ -19,30 +19,32 @@ const TanStackRouterDevtools =
         })),
       );
 
+function RootComponent() {
+  const router = useRouter();
+  const matchWithTitle = [...router.state.matches]
+    .reverse()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .find((d) => (d.context as Record<string, any>)?.title);
+  const title =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (matchWithTitle?.context as Record<string, any>)?.title ||
+    "Feather Starter";
+
+  return (
+    <>
+      <Outlet />
+      <Helmet>
+        <title>{title}</title>
+      </Helmet>
+      <Suspense>
+        <TanStackRouterDevtools />
+      </Suspense>
+    </>
+  );
+}
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
-  component: () => {
-    const router = useRouter();
-    const matchWithTitle = [...router.state.matches]
-      .reverse()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .find((d) => (d.context as Record<string, any>)?.title);
-    const title =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (matchWithTitle?.context as Record<string, any>)?.title ||
-      "Feather Starter";
-
-    return (
-      <>
-        <Outlet />
-        <Helmet>
-          <title>{title}</title>
-        </Helmet>
-        <Suspense>
-          <TanStackRouterDevtools />
-        </Suspense>
-      </>
-    );
-  },
+  component: RootComponent,
 });

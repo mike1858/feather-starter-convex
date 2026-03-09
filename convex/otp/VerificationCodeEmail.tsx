@@ -15,6 +15,10 @@ export function VerificationCodeEmail({
   code: string;
   expires: Date;
 }) {
+  const hoursRemaining = Math.floor(
+    (+expires - Date.now()) / (60 * 60 * 1000),
+  );
+
   return (
     <Html>
       <Tailwind>
@@ -30,10 +34,7 @@ export function VerificationCodeEmail({
           <Section className="text-center">
             <Text className="font-semibold">Verification code</Text>
             <Text className="font-bold text-4xl">{code}</Text>
-            <Text>
-              (This code is valid for{" "}
-              {Math.floor((+expires - Date.now()) / (60 * 60 * 1000))} hours)
-            </Text>
+            <Text>(This code is valid for {hoursRemaining} hours)</Text>
           </Section>
         </Container>
       </Tailwind>
