@@ -10,13 +10,13 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Codebase Structure
 
 - [ ] **STRUCT-01**: Frontend code is organized into feature folders (`src/features/auth/`, `src/features/billing/`, etc.) with components, hooks, and barrel exports
-- [ ] **STRUCT-02**: Convex backend is organized by domain (`convex/users/`, `convex/billing/`, `convex/uploads/`) with queries, mutations, and actions in separate files
+- [x] **STRUCT-02**: Convex backend is organized by domain (`convex/users/`, `convex/billing/`, `convex/uploads/`) with queries, mutations, and actions in separate files
 - [x] **STRUCT-03**: Cross-feature code lives in `src/shared/` (hooks, utils, schemas) with clear promotion rules (3+ features = shared)
 - [ ] **STRUCT-04**: Route files are thin wrappers that import page components from feature folders
 - [ ] **STRUCT-05**: Tests are co-located with their source in feature folders
-- [ ] **STRUCT-06**: All `api.*` import paths are updated to reflect new Convex file structure
+- [x] **STRUCT-06**: All `api.*` import paths are updated to reflect new Convex file structure
 - [x] **STRUCT-07**: vitest coverage config uses globs instead of hardcoded file paths
-- [ ] **STRUCT-08**: TypeScript compilation and all existing tests pass after restructure
+- [x] **STRUCT-08**: TypeScript compilation and all existing tests pass after restructure
 
 ### Plugin System
 
@@ -40,10 +40,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Shared Validation
 
-- [ ] **VAL-01**: Shared Zod schemas in `src/shared/schemas/` for username, currency, interval, plan key, email options
-- [ ] **VAL-02**: Convex mutations validate with Zod via `convex-helpers/server/zod4`
-- [ ] **VAL-03**: Username max-length bug fixed (UI references schema constraint dynamically)
-- [ ] **VAL-04**: Convex validators derived from Zod schemas for enums where `zodToConvex` supports Zod v4
+- [x] **VAL-01**: Shared Zod schemas in `src/shared/schemas/` for username, currency, interval, plan key, email options
+- [x] **VAL-02**: Convex mutations validate with Zod via `convex-helpers/server/zod4`
+- [x] **VAL-03**: Username max-length bug fixed (UI references schema constraint dynamically)
+- [x] **VAL-04**: Convex validators derived from Zod schemas for enums where `zodToConvex` supports Zod v4
 
 ### Documentation
 

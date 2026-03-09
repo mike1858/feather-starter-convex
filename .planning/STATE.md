@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-09T09:08:41.982Z"
-last_activity: 2026-03-09 -- Roadmap revised (consolidated 3 phases into 1)
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-09T09:17:05Z"
+last_activity: 2026-03-09 -- Completed plan 01-02 (Convex backend restructure)
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 7
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 28
 ---
 
 # Project State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-03-09)
 ## Current Position
 
 Phase: 1 of 1 (Architecture Modernization)
-Plan: 1 of 6 in current phase (01-01 complete)
+Plan: 2 of 6 in current phase (01-02 complete)
 Status: Executing
-Last activity: 2026-03-09 -- Completed plan 01-01 (shared infrastructure)
+Last activity: 2026-03-09 -- Completed plan 01-02 (Convex backend restructure)
 
-Progress: [█░░░░░░░░░] 14%
+Progress: [██░░░░░░░░] 28%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 2min
-- Total execution time: 0.04 hours
+- Total plans completed: 2
+- Average duration: 4.5min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-architecture-modernization | 1/6 | 2min | 2min |
+| 01-architecture-modernization | 2/6 | 9min | 4.5min |
 
 **Recent Trend:**
 - Last 5 plans: -
@@ -63,6 +63,9 @@ Recent decisions affecting current work:
 - User preference: minimize manual commands by keeping everything in one phase
 - 01-01: Excluded src/routes/** from coverage (routes become thin wrappers)
 - 01-01: Used re-export pattern in validators.ts for backward compatibility during migration
+- 01-02: Kept all Stripe internal functions in billing/stripe.ts (no separate billing/mutations.ts)
+- 01-02: Manually updated _generated/api.d.ts (will be regenerated on next deploy)
+- 01-02: cancelCurrentUserSubscriptions is internalAction in billing/stripe.ts
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T09:08:02Z
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-architecture-modernization/01-01-SUMMARY.md
+Last session: 2026-03-09T09:17:05Z
+Stopped at: Completed 01-02-PLAN.md
+Resume file: .planning/phases/01-architecture-modernization/01-02-SUMMARY.md
