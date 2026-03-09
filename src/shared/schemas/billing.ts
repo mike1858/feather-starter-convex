@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 /**
- * Billing-domain Zod schemas shared between frontend forms and Convex mutations.
- *
- * Values are kept in sync with convex/schema.ts (CURRENCIES, INTERVALS, PLANS).
+ * Billing-domain Zod schemas. These are the single source of truth --
+ * convex/schema.ts derives its validators from these via zodToConvex.
  */
 
 export const CURRENCY_VALUES = ["usd", "eur"] as const;

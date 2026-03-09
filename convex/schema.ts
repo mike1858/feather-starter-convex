@@ -1,35 +1,32 @@
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v, Infer } from "convex/values";
+import { zodToConvex } from "convex-helpers/server/zod4";
+import {
+  currency as currencySchema,
+  interval as intervalSchema,
+  planKey as planKeySchema,
+} from "../src/shared/schemas/billing";
 
 export const CURRENCIES = {
   USD: "usd",
   EUR: "eur",
 } as const;
-export const currencyValidator = v.union(
-  v.literal(CURRENCIES.USD),
-  v.literal(CURRENCIES.EUR),
-);
+export const currencyValidator = zodToConvex(currencySchema);
 export type Currency = Infer<typeof currencyValidator>;
 
 export const INTERVALS = {
   MONTH: "month",
   YEAR: "year",
 } as const;
-export const intervalValidator = v.union(
-  v.literal(INTERVALS.MONTH),
-  v.literal(INTERVALS.YEAR),
-);
+export const intervalValidator = zodToConvex(intervalSchema);
 export type Interval = Infer<typeof intervalValidator>;
 
 export const PLANS = {
   FREE: "free",
   PRO: "pro",
 } as const;
-export const planKeyValidator = v.union(
-  v.literal(PLANS.FREE),
-  v.literal(PLANS.PRO),
-);
+export const planKeyValidator = zodToConvex(planKeySchema);
 export type PlanKey = Infer<typeof planKeyValidator>;
 
 const priceValidator = v.object({
