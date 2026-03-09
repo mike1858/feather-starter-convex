@@ -193,7 +193,7 @@ test("selects plan via keyboard Enter", async ({ client, testClient, userId }) =
 
   // Select the Pro plan card via keyboard
   const proCard = screen.getByText("Pro plan").closest('[role="button"]')!;
-  proCard.focus();
+  (proCard as HTMLElement).focus();
   await user.keyboard("{Enter}");
 
   // The upgrade button should now be enabled
@@ -207,7 +207,7 @@ test("clicking upgrade to pro calls checkout action", async ({
   testClient,
   userId,
 }) => {
-  const { freePlanId, proPlanId } = await seedPlans(testClient);
+  const { freePlanId } = await seedPlans(testClient);
   await seedSubscription(testClient, { userId, planId: freePlanId });
   // Give user a customerId so the checkout action's user check passes
   await testClient.run(async (ctx: any) => {
@@ -296,7 +296,6 @@ test("manage button early-returns when no customerId", async ({
 test("shows Free badge when user has no subscription", async ({
   client,
   testClient,
-  userId,
 }) => {
   await seedPlans(testClient);
   // Do NOT seed a subscription
@@ -361,7 +360,7 @@ test("non-Enter keydown on plan card does not change selection", async ({
 
   // Focus the Pro plan card and press a non-Enter key
   const proCard = screen.getByText("Pro plan").closest('[role="button"]')!;
-  proCard.focus();
+  (proCard as HTMLElement).focus();
   await user.keyboard("a");
 
   // The upgrade button should still be enabled (no plan change happened)

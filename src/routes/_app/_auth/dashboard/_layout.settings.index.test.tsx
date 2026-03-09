@@ -23,7 +23,6 @@ test("renders user info with username", async ({ client, testClient, userId }) =
   await seedSubscription(testClient, { userId, planId: freePlanId });
   // Patch the existing user document (created by the test fixture)
   await testClient.run(async (ctx: any) => {
-    const user = await ctx.db.get(userId);
     await ctx.db.patch(userId, { username: "testuser123" });
   });
 
