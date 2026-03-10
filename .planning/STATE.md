@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: defining_requirements
-stopped_at: "Defining requirements"
+status: ready_to_plan
+stopped_at: "Roadmap created, ready to plan Phase 2"
 last_updated: "2026-03-10T00:00:00.000Z"
-last_activity: 2026-03-10 -- Milestone v2.0 started
+last_activity: 2026-03-10 -- Roadmap created for v2.0
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Defining v2.0 CalmDo Core requirements
+**Current focus:** v2.0 CalmDo Core -- Phase 2 (Auth & DX Infrastructure)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-10 — Milestone v2.0 started
+Phase: 2 of 6 (Auth & DX Infrastructure)
+Plan: -- (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-10 -- Roadmap created with 5 phases covering 49 requirements
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -38,11 +40,21 @@ Last activity: 2026-03-10 — Milestone v2.0 started
 - Total execution time: 41min
 - Commits: 65 | Files changed: 181 | Lines: +17,820 / -5,335
 
+**v2.0 Velocity:**
+- Total plans completed: 0
+- Average duration: --
+- Total execution time: --
+
 ## Accumulated Context
 
 ### Decisions
 
 See: .planning/PROJECT.md Key Decisions table (updated after v2.0 start)
+
+Recent:
+- Vertical slices only (schema+backend+frontend+tests per phase)
+- Skip org layer for v2.0 (user-scoped tasks)
+- Coarse granularity: 5 phases for 49 requirements
 
 ### Pending Todos
 
@@ -54,4 +66,4 @@ None.
 
 ### Tech Debt (carried forward)
 
-- NavItem.i18nKey defined but unused (designed deferral — will resolve when i18n-aware nav rendering is built)
+- NavItem.i18nKey defined but unused (designed deferral -- resolves when i18n-aware nav rendering is built)
