@@ -25,6 +25,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 2: Auth & DX Infrastructure** - Password auth, dev mailbox, pre-commit hooks, and E2E test setup (completed 2026-03-10)
+- [ ] **Phase 02.1: Stripe Plugin Extraction** (INSERTED) - Extract billing/Stripe to optional plugin branch
 - [ ] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views
 - [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
 - [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
@@ -49,6 +50,22 @@ Plans:
 - [ ] 02-02-PLAN.md — Lefthook pre-commit hooks (typecheck + test coverage)
 - [ ] 02-03-PLAN.md — Password reset flow + dev mailbox (reset form, email interception, dev route)
 - [ ] 02-04-PLAN.md — Playwright E2E tests (auth, onboarding, settings flows)
+
+### Phase 02.1: Stripe Plugin Extraction (INSERTED)
+
+**Goal:** Extract all Stripe/billing code from core into an optional plugin/billing git branch so the starter runs without Stripe env vars
+**Requirements**: STRIPE-EXTRACT-01, STRIPE-EXTRACT-02
+**Depends on:** Phase 2
+**Success Criteria** (what must be TRUE):
+  1. Core runs without any Stripe env vars, SDK, or billing tables
+  2. All tests pass with 100% coverage on billing-free main
+  3. plugin/billing branch exists and merging it restores full billing functionality
+  4. All 3 existing plugin branches (infra-ci, command-palette, admin-panel) work with billing-free main
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02.1-01-PLAN.md — Core extraction: delete billing files, edit shared files, fix tests and coverage
+- [ ] 02.1-02-PLAN.md — Plugin branches: create plugin/billing, rebase 3 existing plugins
 
 ### Phase 3: Tasks
 **Goal**: Users can create, manage, and organize tasks with visibility rules, assignment, and status workflow
@@ -115,13 +132,14 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 2 -> 02.1 -> 3 -> 4 -> 5 -> 6
 (Phases 4 and 5 both depend on 3 but not each other; Phase 6 depends on 3, 4, and 5)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Architecture Modernization | v1.0 | 9/9 | Complete | 2026-03-09 |
-| 2. Auth & DX Infrastructure | 4/4 | Complete   | 2026-03-10 | - |
+| 2. Auth & DX Infrastructure | v2.0 | 4/4 | Complete | 2026-03-10 |
+| 02.1 Stripe Plugin Extraction | v2.0 | 0/2 | Not started | - |
 | 3. Tasks | v2.0 | 0/2 | Not started | - |
 | 4. Projects | v2.0 | 0/? | Not started | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
