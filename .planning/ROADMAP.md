@@ -60,12 +60,11 @@ Plans:
   3. User can assign a task to a team member; assigning to someone else auto-flips visibility to shared
   4. User sees their assigned tasks in "My Tasks" view and unassigned shared tasks in "Team Pool" view
   5. Sidebar navigation includes My Tasks, Team Pool, and Projects sections
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Task backend: Zod schemas, Convex table, all mutations and queries with tests
+- [ ] 03-02-PLAN.md — Task frontend: components, routes, nav wiring, i18n, and frontend tests
 
 ### Phase 4: Projects
 **Goal**: Users can organize tasks into projects with status lifecycle and filtered project views
@@ -123,7 +122,7 @@ Phases execute in numeric order: 2 -> 3 -> 4 -> 5 -> 6
 |-------|-----------|----------------|--------|-----------|
 | 1. Architecture Modernization | v1.0 | 9/9 | Complete | 2026-03-09 |
 | 2. Auth & DX Infrastructure | 4/4 | Complete   | 2026-03-10 | - |
-| 3. Tasks | v2.0 | 0/? | Not started | - |
+| 3. Tasks | v2.0 | 0/2 | Not started | - |
 | 4. Projects | v2.0 | 0/? | Not started | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |
