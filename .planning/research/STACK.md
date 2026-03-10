@@ -1,171 +1,344 @@
-# Stack Research
+# Technology Stack: CalmDo Configurable Feature Assembly
 
-**Domain:** Architecture modernization tooling for React + Convex SaaS starter kit
-**Researched:** 2026-03-09
-**Confidence:** HIGH
+**Project:** CalmDo Core -- Configurable task management system
+**Researched:** 2026-03-10
+**Scope:** NEW capabilities only. Existing stack (React 19, Convex, TanStack, Zod v4, Plop.js, etc.) is validated and not re-researched.
 
-## Recommended Stack
+## Recommended Stack Additions
 
-### Core Technologies
+### Zero New Runtime Dependencies
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Zod | ^4.3.6 (installed) | Shared client-server schema validation | Already in project. v4 has 14x faster string parsing, native JSON Schema via `.toJSONSchema()`, and metadata support for schema-driven form generation. Convex-helpers 0.1.114 ships with Zod v4 support. |
-| Plop.js | ^4.0.5 | CLI code generators | Lightweight handlebars-based micro-generator. No runtime dependency -- generates static files. Well-maintained (last publish ~Feb 2026). Only serious option for template-based scaffolding without framework lock-in. |
-| convex-helpers | ^0.1.114 (installed) | Zod validation wrappers for Convex mutations | Already installed and confirmed compatible with Zod v4. Provides `zCustomQuery`, `zCustomMutation`, `zodToConvex` for typed server-side validation. **Critical:** import from `"convex-helpers/server/zod4"` (not `"convex-helpers/server/zod"` which targets v3). |
+The CalmDo feature assembly system requires **no new npm packages**. The existing stack covers every need. What changes is how we use the existing tools -- specifically Plop.js gets extended with custom actions, Zod v4 schemas define config shape, and Convex stores runtime config.
 
-### Supporting Libraries
+This is deliberate. The lesson from 7+ CalmDo attempts (LESSONS.md): "Process > Stack." Adding libraries is the easy trap. The hard work is config design and generator templates.
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| @tanstack/react-form | ^1.28.4 (installed) | Form handling with Zod validation | Already integrated. Connect shared Zod schemas to form validators for single-source-of-truth validation. Verify adapter compatibility with Zod v4 before wiring. |
-| handlebars | (bundled with plop) | Template engine for generators | Used internally by Plop. No separate install needed. Write `.hbs` templates in `plop-templates/`. |
+### Build-Time: Config-Driven Code Generation
 
-### Development Tools
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Plop.js | ^4.0.5 (installed) | Orchestrate multi-file code generation from feature config | Already proven in project. Extend with `setActionType` custom actions for config-aware generation. No replacement needed. |
+| Handlebars | (bundled with Plop) | Template engine for generated code | Supports conditionals (`{{#if}}`) and helpers for feature-flag-driven template variants. Already in use. |
+| Zod v4 | ^4.3.6 (installed) | Config file schema validation | Validate `calmdo.config.ts` at generation time. Discriminated unions model feature relationships. Already installed. |
+| TypeScript | ^5.9.3 (installed) | Config file format (`calmdo.config.ts`) | Config as `.ts` file gives autocompletion, type checking, and import support. No YAML/JSON parser needed. |
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| plop (CLI) | Run generators via `npx plop` | Add `"generate": "plop"` script to package.json. Uses `plopfile.mjs` (ESM) at project root. |
-| git merge (branches) | Plugin installation mechanism | Plain `git merge plugin/branch-name --no-ff`. No submodules, no subtree. Simplest approach for a starter kit where plugins are branches of the same repo. |
+### Runtime: Dynamic Configuration in Convex
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Convex | ^1.32.0 (installed) | Runtime config storage (statuses, priorities, field shapes) | Config lives in `settings` table. Queries subscribe to changes reactively -- UI updates instantly when admin changes status options. |
+| convex-helpers | ^0.1.114 (installed) | Zod validation for config mutations | `zCustomMutation` validates config updates server-side. Zod v4 support confirmed (PR #840 merged). |
+
+### Feature Selection Wizard
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| @tanstack/react-form | ^1.28.4 (installed) | Wizard form state management | Multi-step form with conditional fields based on feature selection. Already integrated in project. |
+| shadcn/ui | (installed) | Wizard UI components | Stepper/card layout for feature selection. No separate wizard library needed -- compose from existing Button, Card, Select, Switch components. |
+| Zod v4 | ^4.3.6 (installed) | Wizard form validation | Discriminated unions validate feature combinations (e.g., "subtasks requires tasks"). |
+
+---
+
+## How to Extend Plop.js (NOT Replace)
+
+### Why Extend, Not Replace
+
+Plop.js is the right tool. The existing 4 generators (feature, route, convex-function, form) scaffold individual files. CalmDo needs a **meta-generator** that reads a config file and orchestrates multiple file generations with conditional logic. Plop supports this through:
+
+1. **`setActionType`** -- Custom action functions that run arbitrary Node.js code
+2. **Conditional actions** -- Actions array can be a function receiving answers, returning filtered action list
+3. **Dynamic templates** -- Handlebars `{{#if}}` blocks inside `.hbs` templates
+
+### What Would Justify ts-morph?
+
+ts-morph (v27.0.2, well-maintained) is the standard for AST-based TypeScript code manipulation. Consider it ONLY if:
+- You need to **modify existing files** (e.g., append to `schema.ts` table definitions)
+- Template strings become unmaintainable (deeply nested conditional generation)
+- You need to **analyze existing code** before generating (e.g., check what tables already exist)
+
+**Recommendation:** Start without ts-morph. Use Plop custom actions + Handlebars conditionals. Add ts-morph only when you hit the "modify existing files" use case (likely when wiring generated tables into `convex/schema.ts`). If/when needed: `npm install -D ts-morph@^27.0.2`.
+
+**Confidence:** HIGH -- Plop's `setActionType` API verified. ts-morph version verified via npm registry (27.0.2, last published ~Oct 2025).
+
+---
+
+## Config File Design
+
+### Build-Time Config: `calmdo.config.ts`
+
+A TypeScript file at project root, validated by a Zod schema. This is the single source of truth for what features to generate.
+
+```typescript
+// calmdo.config.ts -- example shape
+import type { CalmDoConfig } from "./src/shared/schemas/calmdo-config";
+
+export default {
+  features: {
+    tasks: {
+      enabled: true,
+      statuses: ["todo", "in_progress", "done"],
+      priorities: { type: "boolean" }, // isHighPriority: true/false
+      visibility: ["private", "shared"],
+    },
+    projects: {
+      enabled: true,
+      statuses: ["active", "on_hold", "completed", "archived"],
+      relationship: "parent", // tasks belong to projects
+    },
+    subtasks: {
+      enabled: true,
+      requires: ["tasks"],
+      promotion: true, // can promote to full task
+    },
+    workLogs: {
+      enabled: true,
+      requires: ["tasks"],
+      timeTracking: true, // optional time field
+    },
+    activityLogs: {
+      enabled: true,
+      requires: ["tasks"],
+      // auto-generated, no additional config
+    },
+  },
+} satisfies CalmDoConfig;
+```
+
+**Why TypeScript, not YAML/JSON:**
+- Autocompletion in editor (the config Zod schema provides the types)
+- `satisfies` keyword catches config errors at write time
+- Can import constants (`STATUS_OPTIONS`, etc.) for DRY configs
+- No parser dependency -- Node.js imports `.ts` files via the existing TS toolchain
+
+**Why not a database for build-time config:**
+- Config drives code generation. Code generation happens at build time, not runtime.
+- Different clients get different codebases ("personal software" model from PRODUCT.md).
+- Config changes = regenerate code = commit = deploy. This is deliberate.
+
+### Runtime Config: Convex `settings` Table
+
+For things that change without redeployment -- status labels, priority levels, custom field options.
+
+```typescript
+// convex/schema.ts addition
+settings: defineTable({
+  scope: v.union(v.literal("global"), v.literal("project")),
+  scopeId: v.optional(v.id("projects")), // null for global
+  key: v.string(), // e.g., "task.statuses", "task.priorities"
+  value: v.any(), // validated by application code via Zod
+  updatedAt: v.number(),
+  updatedBy: v.id("users"),
+}).index("by_scope_key", ["scope", "scopeId", "key"]),
+```
+
+**Why a `settings` table, not hardcoded enums:**
+- PRODUCT.md says "Configurable -- Statuses, tags, and workflows should be configurable per org or per project"
+- Convex reactive queries mean UI updates instantly when settings change
+- `v.any()` for value is intentional -- Zod validates at the mutation layer, Convex stores the validated result
+
+**Why not a dedicated table per config type:**
+- Proliferates tables for simple key-value pairs
+- Single `settings` table with typed keys is the standard pattern for application configuration
+
+**Confidence:** MEDIUM -- Pattern is sound but exact schema shape will evolve during implementation. The `v.any()` approach needs careful Zod validation to prevent garbage data.
+
+---
+
+## Feature Selection Wizard (No New Libraries)
+
+### Approach: TanStack Form + shadcn/ui Composition
+
+Build the wizard from existing components. No dedicated wizard library.
+
+**Step structure:**
+1. Core features (checkboxes: tasks, projects, subtasks)
+2. Feature relationships (select: parent-child vs. optional association)
+3. Field configuration (status options, priority type, visibility modes)
+4. Review and generate
+
+**State management:** TanStack Form with Zod schema validation per step. Each step's schema is a slice of the full `CalmDoConfig` Zod schema.
+
+**Why not a wizard library (react-hook-form-wizard, react-step-wizard, etc.):**
+- TanStack Form already handles multi-step via controlled state
+- Wizard libraries add opinions about step transitions that conflict with conditional feature logic
+- The "wizard" is really a structured form with 3-4 pages, not a complex multi-branch flow
+- shadcn/ui components (Card, Button, Tabs) provide the visual stepper
+
+**Confidence:** HIGH -- TanStack Form multi-step patterns are well-documented. shadcn/ui has stepper patterns in their blocks library.
+
+---
+
+## LLM-Powered Generator (Deferred)
+
+The milestone mentions "LLM-powered generator for complex wiring between intertwined features." This is explicitly deferred from stack research because:
+
+1. It depends on understanding the exact wiring complexity AFTER building the first manual generators
+2. LLM API choice (Claude API, OpenAI, local model) is a product decision, not a stack decision
+3. The integration point is clear: LLM generates the config file content, Plop.js consumes it
+
+**When to revisit:** After the first 2-3 feature generators are built manually and the wiring patterns are understood. The LLM's job is to produce a valid `calmdo.config.ts` -- the rest of the pipeline is deterministic.
+
+---
+
+## Alternatives Considered
+
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Config format | TypeScript (`.ts`) | YAML | No autocompletion, requires parser, loses type safety |
+| Config format | TypeScript (`.ts`) | JSON | No comments, no imports, no `satisfies` type checking |
+| Config format | TypeScript (`.ts`) | JSON Schema | Overly complex for a config file; Zod already generates JSON Schema if needed via `.toJSONSchema()` |
+| Code generation | Plop.js + custom actions | ts-morph | Overkill for initial templates. Add later only if file-modification (not file-creation) becomes a bottleneck. |
+| Code generation | Plop.js + custom actions | Nx generators | Project explicitly avoids monorepo tooling (PROJECT.md: "Out of Scope"). |
+| Code generation | Plop.js + custom actions | Custom Node scripts | Reinvents Plop's CLI, prompts, and template engine. |
+| Runtime config | Convex `settings` table | Environment variables | Not reactive, not per-project, not user-configurable |
+| Runtime config | Convex `settings` table | Config file on disk | Not reactive, requires redeployment, wrong for per-project settings |
+| Wizard UI | TanStack Form + shadcn | react-step-wizard | Adds a dependency for something 20 lines of state management solves |
+| Wizard UI | TanStack Form + shadcn | Formik | Already using TanStack Form. Two form libraries = confusion. |
+
+---
+
+## What NOT to Add
+
+| Avoid | Why | The Temptation |
+|-------|-----|----------------|
+| ts-morph (for now) | Template-based generation is sufficient for creating new files. ts-morph shines at modifying existing files. | "We need AST manipulation for proper code generation" -- no, Handlebars conditionals handle feature flags fine. |
+| JSON Schema / AJV | Zod v4 already validates configs. Adding JSON Schema adds a parallel validation system. | "Industry standard for config validation" -- Zod IS the standard in this stack. |
+| Yeoman | Heavyweight, outdated. Plop is its spiritual successor with 1/10th the complexity. | "We need a more powerful generator framework" -- Plop's custom actions are powerful enough. |
+| react-json-schema-form | Over-engineered for a 4-step wizard. The form structure is known at build time. | "Config-driven forms!" -- the wizard IS the config form, it doesn't need to be generated from config. |
+| Prisma / Drizzle | Convex IS the database. Adding an ORM layer is architecturally wrong. | "We need schema migrations" -- Convex handles schema changes natively. |
+| Feature flag service (LaunchDarkly, etc.) | Build-time feature assembly is not runtime feature flags. Different problem. | "Feature toggles!" -- PRODUCT.md mentions feature toggles, but those are simple booleans in the settings table, not a SaaS feature flag platform. |
+| Turborepo / Nx | One codebase per client ("personal software"). Not a monorepo. Not a shared package ecosystem. | "We're generating multiple projects" -- each is standalone, not sharing code at build time. |
+
+---
+
+## Integration Points with Existing Stack
+
+### Plop.js Extension Plan
+
+```
+plopfile.js (existing, 4 generators)
+  |
+  +-- gen:feature        (existing -- scaffold empty feature)
+  +-- gen:route          (existing -- scaffold route file)
+  +-- gen:convex-function (existing -- scaffold Convex function)
+  +-- gen:form           (existing -- scaffold Zod schema + form)
+  |
+  +-- gen:calmdo         (NEW -- meta-generator)
+  |     Reads calmdo.config.ts
+  |     Validates with Zod
+  |     Runs conditional Plop actions based on enabled features
+  |     Generates: schema entries, queries, mutations, components,
+  |                hooks, routes, tests, i18n files
+  |
+  +-- gen:calmdo-feature (NEW -- single CalmDo feature)
+        Like gen:feature but CalmDo-aware
+        Includes audit fields, auth guards, activity logging
+```
+
+### Zod Schema Hierarchy
+
+```
+src/shared/schemas/
+  calmdo-config.ts      (NEW -- validates calmdo.config.ts)
+  task.ts               (NEW -- task create/update schemas)
+  project.ts            (NEW -- project create/update schemas)
+  subtask.ts            (NEW -- subtask schemas)
+  work-log.ts           (NEW -- work log schemas)
+  settings.ts           (NEW -- runtime settings schemas)
+  billing.ts            (existing)
+  username.ts           (existing)
+```
+
+### Convex Schema Extension
+
+```
+convex/schema.ts        (existing -- add new table definitions)
+  tasks                 (NEW)
+  projects              (NEW)
+  subtasks              (NEW)
+  taskLinks             (NEW)
+  workLogs              (NEW)
+  activityLogs          (NEW)
+  settings              (NEW -- runtime config)
+```
+
+### Template Structure
+
+```
+templates/                    (existing directory)
+  feature/                    (existing templates)
+  route/                      (existing templates)
+  convex-function/            (existing templates)
+  form/                       (existing templates)
+  calmdo/                     (NEW)
+    schema-table.ts.hbs       -- Convex table definition
+    queries.ts.hbs            -- Queries with auth + scoping
+    mutations.ts.hbs          -- Mutations with Zod + audit fields
+    page.tsx.hbs              -- List/detail page component
+    form.tsx.hbs              -- Create/edit form with Zod
+    hook.ts.hbs               -- Data hook with TanStack Query
+    route.tsx.hbs             -- Route with auth guard
+    test.tsx.hbs              -- Integration test template
+    i18n.json.hbs             -- Translation namespace
+```
+
+---
 
 ## Installation
 
 ```bash
-# New dependency (only one)
-npm install -D plop
+# No new packages required.
+# All capabilities come from extending existing tools.
 
-# Already installed -- no changes needed
-# zod@^4.3.6
-# convex-helpers@^0.1.114
-# @tanstack/react-form@^1.28.4
+# IF/WHEN ts-morph becomes necessary (for schema.ts modification):
+# npm install -D ts-morph@^27.0.2
 ```
 
-## Architecture Tooling Decisions
+---
 
-### Feature Folders: Convention Only, No Library
+## Version Compatibility (New Concerns)
 
-Feature-folder architecture is a **file organization convention**, not a library. Follow the bulletproof-react pattern adapted for Convex:
+| Integration | Status | Notes |
+|-------------|--------|-------|
+| Plop.js custom actions + TypeScript config import | MEDIUM confidence | Plop runs in Node.js. Importing `.ts` config requires Node's `--experimental-strip-types` (Node 22+) or pre-compilation via `tsx`. Verify Node version or use `tsx` to load config. |
+| Zod v4 discriminated unions for config | HIGH confidence | Zod v4 improved discriminated union support -- unions compose, O(1) discriminator lookup. Perfect for feature relationship modeling. |
+| convex-helpers Zod v4 (`zod4` import) | HIGH confidence | PR #840 merged. Import from `convex-helpers/server/zod4`. |
+| Convex `v.any()` for settings value | MEDIUM confidence | Works but bypasses Convex's type system. Must validate with Zod in mutations before storing. Test that `v.any()` round-trips complex objects correctly. |
+| TanStack Form multi-step wizard | HIGH confidence | Well-documented pattern. Use `useForm` with step-specific `onSubmit`, accumulate state across steps. |
 
+### Node.js Config Loading Strategy
+
+The `calmdo.config.ts` file needs to be importable by the Plop custom action (a Node.js script). Options:
+
+1. **tsx** (recommended) -- `npx tsx calmdo.config.ts` or use `tsx` as loader. Already common in the ecosystem, zero-config TypeScript execution.
+2. **Node 22+ `--experimental-strip-types`** -- Native, no dependency, but requires Node 22+.
+3. **Compile to .js first** -- Extra build step, stale output risk.
+
+**Recommendation:** Use `tsx` as a dev dependency for config loading. It is the standard tool for running TypeScript in Node.js without compilation.
+
+```bash
+npm install -D tsx
 ```
-src/features/{name}/
-  components/     # React components scoped to feature
-  hooks/          # Custom hooks scoped to feature
-  types.ts        # TypeScript types
-  index.ts        # Public API barrel export
 
-convex/{name}/
-  queries.ts      # Convex queries for this domain
-  mutations.ts    # Convex mutations for this domain
-  actions.ts      # Convex actions (if needed)
+This is the ONE new dev dependency. It enables `import("./calmdo.config.ts")` inside Plop custom actions.
 
-src/shared/
-  schemas/        # Zod schemas (shared with backend via ~/ alias)
-  errors/         # Error constants, namespaced by domain
-  types/          # Cross-feature TypeScript types
-  config/         # Site config, nav config
-```
+**Confidence:** HIGH -- tsx is the standard TypeScript runner (13M+ weekly npm downloads).
 
-Each feature's `index.ts` is the public API boundary. Other features import only from the barrel, never from internal paths.
-
-**Note on Convex paths:** Convex domain folders go directly under `convex/` (e.g., `convex/user/`, not `convex/features/user/`) because Convex generates API paths from file paths. `convex/user/queries.ts` creates `api.user.queries.X` which is clean and readable.
-
-**Note on barrel exports in Convex:** Do NOT create `convex/user/index.ts` barrels. Convex would generate `api.user.index.X` paths. Import directly from the specific file.
-
-**Confidence:** HIGH -- bulletproof-react is the de facto standard. Convex path behavior verified against codebase.
-
-### Git-Based Plugins: Branch Merge Strategy
-
-Use **git branches** in the same repository, installed via `git merge`. Not submodules (too complex for end users), not subtree (overkill for same-repo plugins), not npm packages (wrong granularity for full-stack feature slices).
-
-Plugin workflow:
-1. Plugin lives on `plugin/feature-name` branch
-2. User runs `git merge plugin/feature-name --no-ff`
-3. Plugin adds files to `src/features/`, `convex/`, i18n namespaces, nav entries
-4. Merge conflicts are minimized by making shared files data-driven (arrays/objects, not procedural code)
-
-**Confidence:** HIGH -- this is the fullproduct.dev pattern the project explicitly follows.
-
-### Shared Zod Schemas: `src/shared/schemas/` with `~/` Alias
-
-Zod v4 schemas live in `src/shared/schemas/` and are imported by both:
-- Frontend: `@tanstack/react-form` validators (import via `@/shared/schemas/user`)
-- Backend: `convex-helpers` zod wrappers (import via `~/src/shared/schemas/user`)
-
-The `~/` path alias is already configured in `convex/tsconfig.json` (`"~/*": ["../*"]`) and is actively used in the codebase (e.g., `~/errors`). Convex's bundler resolves these paths at deploy time.
-
-**Requirements for shared schemas:**
-1. Schema files must be pure TypeScript -- no React, no DOM, no browser-only APIs
-2. Add schema directory to convex tsconfig `include`: `"../src/shared/schemas/**/*"`
-3. Use `"convex-helpers/server/zod4"` import (not `/zod`) for Zod v4 compatibility
-
-**Confidence:** HIGH -- `~/` alias verified in `convex/tsconfig.json` and actively used in `convex/email/`, `convex/init.ts`, etc.
-
-### Plop.js Generators: ESM Plopfile
-
-Plop v4 supports ESM plopfiles natively. Since the project has `"type": "module"` in package.json, use `plopfile.mjs`.
-
-**Note:** Plop does NOT support native TypeScript plopfiles (no `.ts` without a compile step). Use `.mjs` with JSDoc annotations if type safety is needed.
-
-Generators to build:
-- `plop feature` -- scaffold `src/features/{name}/` + `convex/{name}/`
-- `plop route` -- scaffold a TanStack Router route file importing from a feature
-- `plop convex-function` -- scaffold a typed Convex query/mutation/action with Zod validation
-- `plop form` -- scaffold a form component with shared Zod schema + TanStack Form
-
-Templates live in `plop-templates/` at project root.
-
-**Confidence:** HIGH -- Plop v4 ESM support verified via official docs.
-
-## Alternatives Considered
-
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Plop.js | Hygen | If you need YAML front-matter templates and dislike Handlebars. But Plop's adoption is much wider and Hygen is less maintained. |
-| Plop.js | Turbo generators | If already using Turborepo. This project explicitly avoids monorepo tooling. |
-| Plop.js | Custom Node scripts | Never. Reinventing what Plop already solves. |
-| git merge (branches) | git subtree | If plugins come from external repos. Here plugins are same-repo branches. |
-| git merge (branches) | git submodules | Never for a starter kit. Submodules add friction for every user. |
-| git merge (branches) | npm packages | If plugins are runtime-only (no file generation). Full-stack feature slices need file-level integration. |
-| Direct Zod imports | tRPC | If you had a REST/GraphQL API. Convex has its own RPC layer; tRPC is redundant. |
-| Convention (barrel exports) | @nx/enforce-module-boundaries | If using Nx. This project avoids monorepo tooling. |
-
-## What NOT to Use
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Yeoman | Heavyweight, outdated generator framework. Massive boilerplate for simple scaffolding. | Plop.js |
-| tRPC | Redundant with Convex's built-in typed RPC. Adds unnecessary abstraction layer. | Direct Convex API + Zod validation |
-| git submodules | Terrible DX for starter kit users. Requires init, update, recursive clone. Users will abandon the project. | git merge branches |
-| Zod v3 (`zod@3.x`) | v4 is stable, 14x faster, already installed. No reason to downgrade. | Zod v4 (`zod@^4.3.6`) |
-| @zod/mini | Too limited for server-side validation (no transforms, no refinements). Only useful for tiny client bundles. | Full `zod` package |
-| zodvex (third-party) | Unnecessary now that convex-helpers natively supports Zod v4. Adds a dependency for something already built-in. | convex-helpers Zod wrappers |
-| Nx / Turborepo | Project constraint: single package, no monorepo tooling. These tools solve problems this project doesn't have. | Folder conventions + barrel exports |
-| eslint-plugin-import (for boundaries) | Heavy, slow, frequent false positives. Convention + code review is sufficient for a starter kit. | Naming conventions + barrel exports |
-| `convex-helpers/server/zod` | Targets Zod v3. This project uses Zod v4. Will cause runtime errors about missing `._def` property. | `convex-helpers/server/zod4` |
-
-## Version Compatibility
-
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| convex-helpers@0.1.114 | zod@4.3.6 | Verified: npm tree shows direct resolution. Import from `convex-helpers/server/zod4` for v4 support. |
-| plop@4.0.5 | Node 18+ / ESM projects | Works with `"type": "module"`. Use `plopfile.mjs` or `plopfile.js`. |
-| @tanstack/react-form@1.28.4 | zod@4.3.6 | TanStack Form has a Zod adapter. Verify the adapter works with Zod v4 before full integration (MEDIUM confidence). |
-| @tanstack/router-plugin@1.166.3 | zod@3.25.76 (internal) | Router plugin bundles its own Zod v3 internally. Does NOT conflict with project's Zod v4 -- npm resolves both. |
-| zod@4.3.6 | TypeScript 5.9+ | Zod v4 requires TS 5.0+. Project uses 5.9.3, fully compatible. |
+---
 
 ## Sources
 
-- [convex-helpers Zod v4 issue #558](https://github.com/get-convex/convex-helpers/issues/558) -- confirmed resolved, Zod v4 supported
-- [Zod v4 release notes](https://zod.dev/v4) -- performance benchmarks, API changes, migration guide
-- [Plop.js official documentation](https://plopjs.com/documentation/) -- ESM support, TypeScript limitations
-- [Plop.js npm](https://www.npmjs.com/package/plop) -- v4.0.5 latest
-- [bulletproof-react project structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md) -- feature folder conventions
-- [Robin Wieruch React Folder Structure 2025](https://www.robinwieruch.de/react-folder-structure/) -- progressive folder organization guide
-- [Convex Zod validation article](https://stack.convex.dev/typescript-zod-function-validation) -- zCustomQuery/zCustomMutation patterns
-- [Convex project configuration](https://docs.convex.dev/production/project-configuration) -- convex.json options, folder configuration
-- npm dependency tree verification (local) -- confirmed convex-helpers@0.1.114 resolves zod@4.3.6
-- `convex/tsconfig.json` analysis (local) -- `~/` alias configuration verified
+- [Plop.js documentation -- setActionType API](https://plopjs.com/documentation/) -- custom action functions for programmatic generation
+- [Plop.js GitHub -- issue #103](https://github.com/plopjs/plop/issues/103) -- calling other actions from custom actions
+- [ts-morph npm](https://www.npmjs.com/package/ts-morph) -- v27.0.2, TypeScript compiler API wrapper
+- [ts-morph documentation](https://ts-morph.com/) -- AST manipulation capabilities
+- [convex-helpers Zod v4 issue #558](https://github.com/get-convex/convex-helpers/issues/558) -- confirmed resolved, PR #840 merged
+- [Zod v4 release notes -- discriminated unions](https://zod.dev/v4) -- composable unions, O(1) lookup
+- [Zod v4 API -- defining schemas](https://zod.dev/api) -- discriminatedUnion, transform, pipe
+- [Convex best practices](https://docs.convex.dev/understanding/best-practices/) -- schema design, index strategy
+- [Convex data types](https://docs.convex.dev/database/types) -- v.any() behavior
+- [shadcn/ui multi-step form patterns](https://github.com/shadcn-ui/ui/discussions/1869) -- stepper composition from existing components
+- [TypeScript as config format (Reflect blog)](https://reflect.run/articles/typescript-the-perfect-file-format/) -- rationale for .ts over YAML/JSON
 
 ---
-*Stack research for: Architecture modernization of feather-starter-convex*
-*Researched: 2026-03-09*
+*Stack research for: CalmDo configurable feature assembly system*
+*Researched: 2026-03-10*

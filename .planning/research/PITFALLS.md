@@ -1,258 +1,283 @@
 # Domain Pitfalls
 
-**Domain:** Codebase architecture modernization (React + Convex SaaS starter kit)
-**Researched:** 2026-03-09
+**Domain:** Config-driven composable feature system (task management on Convex)
+**Researched:** 2026-03-10
+
+---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, broken deployments, or cascading failures.
-
-### Pitfall 1: Convex API Path Breakage Is Not Incremental
-
-**What goes wrong:** Moving `convex/app.ts` to `convex/users/queries.ts` changes every generated API reference from `api.app.getCurrentUser` to `api.users.queries.getCurrentUser`. Convex auto-generates `_generated/api.d.ts` based on file paths -- there is no aliasing, no re-export trick, no backwards-compatible shim. Every `useQuery(convexQuery(api.app.X))` call in the frontend and every `internal.stripe.X` call in the backend breaks simultaneously.
-
-**Why it happens:** Convex's code generation walks the `convex/` directory tree and derives the API namespace directly from the file path. This is a fundamental design constraint, not something you can work around with barrel exports or path aliases.
-
-**Consequences:** If you move files without updating all consumers in the same commit, `npx convex dev` will regenerate `api.d.ts`, TypeScript will emit errors on every stale reference, and the app will not compile. Partial migrations leave the codebase in an un-buildable state.
-
-**Warning signs:**
-- Planning to "move a few files first, then update references later"
-- Treating the convex restructure as separate from the frontend update
-- Forgetting that `internal.*` references within `convex/` itself also break (e.g., `internal.stripe.PREAUTH_createStripeCustomer` in `convex/app.ts`)
-
-**Prevention:**
-1. Do the entire `convex/` restructure in a single atomic commit -- move files AND update all references together
-2. Build a reference map BEFORE moving: grep for `api.app.`, `api.stripe.`, `internal.stripe.`, `internal.init.` across the entire codebase (currently ~20 `api.app.*` references in frontend, ~30 `internal.*` references in backend)
-3. After moving, run `npx convex dev` to regenerate `_generated/api.d.ts`, then run `npm run typecheck` to catch any missed references
-4. The test suite is your safety net -- `npm run test` must pass after the restructure
-
-**Detection:** `npm run typecheck` will immediately surface every broken reference. Do not suppress TypeScript errors during this phase.
-
-**Phase mapping:** This must be the FIRST phase. Everything else (feature folders, shared schemas, plugins) depends on the new API path structure being stable.
+Mistakes that cause rewrites, broken inter-feature wiring, or config systems that become harder to change than the code they were meant to replace.
 
 ---
 
-### Pitfall 2: Convex schema.ts Cannot Be Split Across Feature Folders
+### Pitfall 1: The Config System Becomes Harder to Change Than Hardcoded Code
 
-**What goes wrong:** The natural instinct in a feature-folder restructure is to define each feature's tables in its own folder (e.g., `convex/billing/schema.ts`, `convex/users/schema.ts`). Convex requires a single `convex/schema.ts` at the root with a single `defineSchema()` call. There is no schema composition API.
+**What goes wrong:** Teams build a config-driven system to "make things configurable" but the config schema itself becomes rigid, deeply coupled, and impossible to evolve. Adding a new feature block (e.g., "Comments") requires modifying the config parser, the code generator, the runtime resolver, the validation layer, and the test infrastructure. The config system that was supposed to eliminate boilerplate becomes the boilerplate.
 
-**Why it happens:** Convex's schema definition is monolithic by design -- `defineSchema()` produces the complete schema that gets deployed. Unlike Prisma or Drizzle, there is no `schema.d/` directory or `extend` mechanism.
+**Why it happens:** Config-driven systems have an inversion problem: flexibility in the output requires rigidity in the machinery. Every new "dimension" of configuration (feature presence, feature relationships, field shapes, status options) multiplies the complexity of the assembly layer. Teams underestimate this because each dimension seems simple in isolation.
 
-**Consequences:** Attempting to split the schema will either fail at deploy time or force you to build a fragile custom merge script. Plugin branches that each define their own tables will ALL conflict on `schema.ts`.
-
-**Warning signs:**
-- Planning feature folders that include "their own schema"
-- Plugin branches that add tables without a merge strategy for `schema.ts`
-- Assuming `defineSchema` supports spreading from multiple files
+**Consequences:** The config system ossifies faster than the features it configures. Adding a new feature block takes longer with the config system than it would have taken to write the code directly. The team starts working around the config system instead of through it.
 
 **Prevention:**
-1. Accept `convex/schema.ts` as a shared, cross-cutting file -- it does NOT belong to any feature
-2. Extract validators and constants (like `currencyValidator`, `PLANS`, `INTERVALS`) into separate files (e.g., `convex/validators.ts`) that features can import without touching `schema.ts`
-3. For plugins: design `schema.ts` with clearly delimited sections using comments (`// === Billing Tables ===`). Use additive-only changes to minimize merge conflicts
-4. Consider a `convex/tables/` directory with one file per domain that exports `defineTable()` calls, then compose them in the single `schema.ts`. This gives the illusion of separation without fighting the framework
+1. Start with EXACTLY the features listed in the milestone (Tasks, Projects, Subtasks, Work Logs, Activity Logs) hardcoded as vertical slices. Do NOT build the config system first.
+2. Build the second client deployment by copying and modifying the codebase manually. Let the pain of manual duplication reveal which parts ACTUALLY need configuration.
+3. Only then extract config-driven patterns from the concrete implementations. Extract, don't predict.
+4. Limit configuration dimensions ruthlessly: status options and priority levels are worth configuring. Feature presence and relationships are worth configuring. Field shapes and validation rules are probably NOT worth configuring (they change too rarely to justify the machinery).
 
-**Detection:** If `convex/schema.ts` appears in more than one plugin branch's diff, you will get merge conflicts.
+**Detection:** If the config schema has more lines than a single feature's implementation, the abstraction is premature. If adding a new feature to the config takes more than a day, the config system has failed its purpose.
 
-**Phase mapping:** Address in the convex restructure phase. The validator extraction should happen before or alongside file moves.
+**Phase mapping:** This is a sequencing pitfall. The first phases must build concrete features as vertical slices. Config extraction happens AFTER multiple features exist and duplication patterns are visible. Reference: LESSONS.md Lesson 1 -- "Plans with embedded code don't work" applies here as "Config before features doesn't work."
 
 ---
 
-### Pitfall 3: vitest Coverage Config Has Hardcoded File Paths
+### Pitfall 2: Feature Interdependency Creates a Dependency Graph That Prevents Independent Delivery
 
-**What goes wrong:** The current `vitest.config.ts` has 25+ explicit file paths in `coverage.include` and `coverage.exclude` (e.g., `"convex/app.ts"`, `"src/routes/_app/_auth/dashboard/_layout.index.tsx"`). Moving files without updating every path in this config will silently drop files from coverage -- tests may still pass but the 100% coverage threshold will fail, or worse, coverage will appear to pass because uncovered files are no longer in the include list.
+**What goes wrong:** The domain model (DOMAIN.md) shows deep relationships: Tasks belong to Projects, Subtasks belong to Tasks, Work Logs belong to Tasks, Activity Logs reference both Tasks and Projects, Task Links connect Tasks to Tasks, and Subtask promotion creates new Tasks with Task Links. Modeling these as "composable blocks" that can be independently toggled creates a combinatorial explosion of valid/invalid states.
 
-**Why it happens:** The coverage config uses exact file paths, not glob patterns. When files move, the config still points at the old locations.
+**Why it happens:** The config says "Tasks + Projects = optional relationship" but the code has `task.projectId: v.optional(v.id("projects"))`, meaning every query, mutation, and UI component that touches tasks must handle the "project exists" and "project doesn't exist" branches. When you add Subtasks (which reference Tasks) and Activity Logs (which reference both Tasks and Projects), the branching compounds. Each feature's code must be aware of every other feature's presence/absence.
 
 **Consequences:**
-- Coverage threshold fails (100% statements/branches/functions/lines) -- CI breaks
-- OR: moved files silently fall out of coverage scope, giving false confidence
-- Developers waste time debugging "why is coverage failing" when the answer is just stale paths
-
-**Warning signs:**
-- Moving source files without simultaneously updating `vitest.config.ts`
-- Coverage passing with fewer files than expected (file count decreased)
-- New feature folders not appearing in coverage reports
+- Testing surface explodes: N features with optional relationships = 2^N valid configurations, each needing test coverage
+- Runtime bugs in rare configurations: "Tasks without Projects" works, "Tasks with Projects but without Activity Logs" breaks because the task mutation assumes Activity Logs exist
+- Cascading deletes become configuration-dependent: deleting a Project deletes Tasks (per DOMAIN.md), but only if Tasks are configured as project-scoped
 
 **Prevention:**
-1. Replace explicit file paths with glob patterns BEFORE restructuring: `"src/features/**/**.{ts,tsx}"` instead of listing individual files
-2. If explicit paths are kept, create a checklist: every file move requires updating the corresponding `vitest.config.ts` entry
-3. After restructuring, verify coverage file count matches expectations (count files in include vs. what coverage reports)
-4. Consider setting `coverage.all: true` with proper excludes instead of whitelisting includes
+1. Define a strict dependency DAG, not a free-form feature toggle system. Activity Logs REQUIRE Tasks. Work Logs REQUIRE Tasks. Subtasks REQUIRE Tasks. Task Links REQUIRE Tasks. Projects are truly optional (Tasks work standalone as Quick Tasks).
+2. Only the Projects-Tasks relationship is genuinely optional. Everything else is a hard dependency. Making hard dependencies "configurable" creates complexity without value.
+3. For the one optional relationship (Projects-Tasks), use a single boolean config (`hasProjects: true`) and implement it as a conditional import, not a runtime branch in every component.
+4. Test the two valid configurations: "with Projects" and "without Projects." Do NOT test arbitrary feature combinations.
 
-**Detection:** Run `npm run test -- --coverage` after each structural change. Compare the list of files in the coverage report against expected files.
+**Detection:** If you're writing `if (config.hasFeature('workLogs'))` inside a task mutation, the dependency model is wrong. Work Logs should be a module that hooks into Tasks, not a conditional inside Tasks.
 
-**Phase mapping:** Convert coverage config to globs in the FIRST phase, before any file moves. This is a prerequisite, not an afterthought.
+**Phase mapping:** Must be resolved in the FIRST design phase. The dependency DAG determines the vertical slice order: Tasks first, then features that depend on Tasks (Subtasks, Work Logs, Activity Logs, Task Links), then the optional Projects layer.
 
 ---
 
-### Pitfall 4: TanStack Router Route Files Cannot Move to Feature Folders
+### Pitfall 3: Convex schema.ts Monolith Blocks Composable Schema Generation
 
-**What goes wrong:** Developers try to move route files from `src/routes/_app/_auth/dashboard/` into `src/features/dashboard/routes/` to achieve "true" feature folders. TanStack Router's file-based routing requires route files in `src/routes/` with its specific naming convention (`_layout.tsx`, `_layout.settings.tsx`). Moving them breaks route tree generation entirely.
+**What goes wrong:** Convex requires a single `convex/schema.ts` file with a single `defineSchema()` call. The v2.0 vision of "config file generates schema" means the code generator must produce a complete, valid `schema.ts` that includes BOTH the existing starter kit tables (users, plans, subscriptions, authTables) AND the new CalmDo tables (tasks, projects, subtasks, etc.). If the generator overwrites `schema.ts`, it destroys the existing tables. If it tries to merge, it must parse and understand the existing schema.
 
-**Why it happens:** TanStack Router's `TanStackRouterVite()` plugin scans a configured `routesDirectory` (defaults to `src/routes`) and generates `routeTree.gen.ts`. It derives route hierarchy from the file system structure. Files outside this directory are invisible to the router.
+**Why it happens:** Convex's schema is monolithic by design. There is no `schema.d/` directory, no `extend()` API, no partial schema files. The existing `schema.ts` already has complex logic (zodToConvex conversions, exported validators, type aliases). A code generator cannot simply append tables -- it must integrate with the existing file structure.
 
-**Consequences:** Moving route files causes `routeTree.gen.ts` to lose routes. The app will compile but pages will 404 at runtime. No TypeScript error warns you -- it is a silent failure until you navigate to the missing route.
-
-**Warning signs:**
-- Planning to put route files in `src/features/*/routes/`
-- Assuming TanStack Router supports multiple route directories
-- Conflating "route file" (must stay in `src/routes/`) with "route component" (can live anywhere)
+**Consequences:**
+- Generator overwrites existing schema: users, plans, subscriptions tables disappear, auth breaks
+- Generator produces invalid schema: Convex deploy fails, no partial deploys possible
+- Manual merge required after every generation: defeats the purpose of code generation
+- Schema validation prevents deploying if data doesn't match: changing a field type requires a migration, not just a config change
 
 **Prevention:**
-1. Route FILES stay in `src/routes/` -- this is non-negotiable with file-based routing
-2. Make route files THIN: they import and re-export components from `src/features/*/components/`
-3. Use TanStack Router's `-` prefix convention for colocated non-route files (e.g., `src/routes/_app/_auth/dashboard/-ui.navigation.tsx` -- this already exists in the codebase)
-4. The feature folder pattern for routes is: route file in `src/routes/` that imports from `src/features/dashboard/components/DashboardPage.tsx`
+1. Use the "compose in schema.ts" pattern already established in the codebase: the existing `schema.ts` spreads `...authTables`. New domain tables should be defined in separate files (e.g., `convex/tables/tasks.ts`) that export `defineTable()` calls, then imported and spread into the single `defineSchema()`.
+2. The generator NEVER touches `schema.ts` directly. It generates table definition files (`convex/tables/tasks.ts`), and `schema.ts` imports them. Adding a new feature = adding a new import + spread, not rewriting the file.
+3. For runtime config (status options, priority levels): store these in a Convex `featureConfig` table, NOT in the schema. Schema defines the structure; runtime config defines the values.
+4. Use `v.union()` for status enums in the schema but load the actual valid values from the config table at runtime. This means the schema allows all possible statuses across all clients, but each client's config restricts which are valid.
 
-**Detection:** After any route restructure, run the dev server and navigate to every route. Check `routeTree.gen.ts` to verify all routes are present.
+**Detection:** If the code generator has a "parse existing schema.ts" step, the approach is wrong. The generator should only produce new files, never modify existing ones.
 
-**Phase mapping:** Feature folder phase. Route files stay put; the extracted components move to `src/features/`.
+**Phase mapping:** Schema composition pattern must be established in the first vertical slice (Tasks). Every subsequent feature follows the same pattern. This is a prerequisite, not a separate phase.
 
 ---
 
-### Pitfall 5: Navigation Component Hardcodes Route Imports -- Plugin Nightmare
+### Pitfall 4: Build-Time and Runtime Config Blur Into an Unmaintainable Middle Ground
 
-**What goes wrong:** The current `-ui.navigation.tsx` hardcodes imports from specific route files (`Route as DashboardRoute`, `Route as SettingsRoute`, `Route as BillingSettingsRoute`). Each navigation tab is a handwritten `<Link>` with hardcoded route references. When a plugin branch adds a new nav item (e.g., "Admin"), it must modify this same file -- guaranteed merge conflict with every other plugin branch.
+**What goes wrong:** The milestone describes both build-time assembly (config -> code generation) and runtime config (status options, priority levels stored in Convex DB). Teams inevitably blur the boundary: status options start as runtime config, then someone needs "custom fields" which requires schema changes (build-time), then someone wants to add a status option that triggers a new workflow (build-time logic from runtime data). The system becomes a hybrid that has the complexity of both approaches and the benefits of neither.
 
-**Why it happens:** Navigation was built for a fixed set of routes. The plugin model assumes features can be added/removed independently, but the nav component is monolithic.
+**Why it happens:** The line between "what the system looks like" (build-time) and "how the system behaves" (runtime) is philosophically clear but practically blurry. A "status option" seems like runtime data until it needs a color, an icon, a transition rule, and a side effect.
 
-**Consequences:** Every plugin branch that adds navigation entries will conflict on the same file. Merge resolution becomes manual and error-prone. With 3+ plugin branches, this becomes the primary source of merge pain.
-
-**Warning signs:**
-- Navigation component with `import { Route } from` at the top
-- Hardcoded JSX for each nav item instead of data-driven rendering
-- Multiple plugin branches touching the same component
+**Consequences:**
+- Runtime config changes require code deployments (e.g., adding a status that needs a new email notification)
+- Build-time config changes require database migrations (e.g., the config references a table that doesn't exist yet)
+- Configuration drift between what the code expects and what the database contains
+- "Works on my machine" because developer's runtime config differs from production
 
 **Prevention:**
-1. Convert navigation to data-driven: a nav config array (e.g., `navItems: Array<{ label: string, path: string, icon: Component }>`) that the component iterates over
-2. Each plugin/feature registers its nav items by appending to the array, not by editing JSX
-3. Use a registry pattern: `src/shared/nav-registry.ts` exports a mutable array, features push to it at module load time
-4. Alternative: use a static config file (`nav.config.ts`) that is additive-only -- plugins append lines rather than editing existing ones
+1. Hard rule: Build-time = which features exist and how they connect. Runtime = values within those features (status labels, priority levels, display preferences).
+2. Build-time config produces TypeScript files. Runtime config lives in a Convex table.
+3. Runtime config NEVER changes code structure. If a config option would require a code change to support, it's build-time config.
+4. Examples:
+   - Build-time: "This client has Projects" (adds project schema, routes, components)
+   - Runtime: "Active projects are displayed in green" (stored in DB, read at render)
+   - Build-time: "Tasks have a 'blocked' status" (adds workflow logic for blocked state)
+   - Runtime: "The statuses are called Todo, Doing, Done" (labels stored in DB)
+5. Validate runtime config against build-time expectations: if the code was generated without the "blocked" status workflow, the runtime config should not allow adding "blocked" as a status. Use a Zod schema generated at build-time to validate runtime config.
 
-**Detection:** If `git diff` for a plugin branch shows changes to the navigation component's JSX structure (not just imports), the approach is wrong.
+**Detection:** If a runtime config change requires running the code generator, or if a build-time generation requires querying the database, the boundary has been violated.
 
-**Phase mapping:** Must be addressed in the plugin-friendly shared files phase, BEFORE creating any plugin branches. If plugins are created first, every plugin will need rebasing after the nav refactor.
+**Phase mapping:** The boundary must be defined in the design phase and enforced from the first vertical slice. Every feature should have a clear split: "these are the build-time decisions" and "these are the runtime values."
+
+---
+
+### Pitfall 5: LLM-Powered Code Assembly Produces Plausible But Wrong Inter-Feature Wiring
+
+**What goes wrong:** The milestone includes "LLM-powered generator for complex inter-feature wiring." LLMs are excellent at generating code that looks correct -- proper imports, reasonable function signatures, plausible business logic. But inter-feature wiring is precisely where correctness is hardest to verify: Does the task mutation correctly create an activity log? Does deleting a project cascade to its tasks? Does subtask promotion create the right task link? The LLM will generate code that passes syntax checks and even unit tests (because the LLM writes tests matching its implementation -- LESSONS.md Lesson 3) but silently breaks the domain invariants.
+
+**Why it happens:** LLMs pattern-match from training data. Inter-feature wiring in a custom config-driven system has NO training data -- the patterns are specific to this project. The LLM will generate code that looks like generic CRUD wiring but misses the CalmDo-specific rules (e.g., "subtask promotion sets subtask.status to 'promoted' AND creates a task link AND creates an activity log" -- three operations that must happen atomically).
+
+**Consequences:**
+- Partial operations: LLM generates the task creation part of subtask promotion but forgets the task link creation
+- Wrong references: LLM creates activity logs pointing to the wrong entity (projectId instead of taskId)
+- Missing atomicity: LLM generates three separate mutations instead of one atomic mutation
+- Tests that verify the bugs: LLM-generated tests assert the wrong behavior as correct (proven failure mode from LESSONS.md)
+
+**Prevention:**
+1. The LLM generates from TEMPLATES, not from scratch. Each feature block has a Plop.js template that the LLM fills in. The template enforces the structure (e.g., "every mutation MUST call createActivityLog()"). The LLM only fills in the feature-specific details.
+2. LLM NEVER generates tests. Tests are derived from behavioral specs (EARS acceptance criteria from the proven workflow in LESSONS.md). A separate spec-to-test step produces tests BEFORE the LLM generates implementation.
+3. Inter-feature wiring is codified in the templates, not generated by the LLM. The template for "feature that belongs to another feature" includes the cascade delete pattern, the activity log pattern, and the reference validation pattern. The LLM's job is to parameterize the template, not invent the wiring.
+4. Every LLM-generated file gets three-layer verification (LESSONS.md Lesson 2): tests pass, integration check (components actually connected), manual verification (feature actually works).
+5. Provide the LLM with DOMAIN.md as context, including the specific entity relationships and cascade rules. Constrain generation to one feature at a time, not cross-feature wiring.
+
+**Detection:** If the LLM is generating Convex mutation code without a template, it's generating bugs. If the LLM generates both implementation and tests, the tests are unreliable (proven).
+
+**Phase mapping:** LLM-powered generation is a LATE phase. First, build 2-3 features manually to create the templates. Then use the LLM to parameterize those templates for additional features. Never start with LLM generation.
 
 ---
 
 ## Moderate Pitfalls
 
-### Pitfall 6: Zod v4 Import Path for convex-helpers
+---
 
-**What goes wrong:** Using `import { zCustomQuery } from "convex-helpers/server/zod"` with Zod v4 installed. The base `/zod` endpoint exports the Zod v3 implementation. With Zod v4 (which this project uses -- `"zod": "^4.3.6"`), you must import from `"convex-helpers/server/zod4"`.
+### Pitfall 6: Convex Schema Validation Blocks Iterative Feature Development
 
-**Why it happens:** convex-helpers maintains separate entry points for Zod v3 and v4 compatibility. The generic `/zod` path defaults to v3 for backwards compatibility.
+**What goes wrong:** Convex enforces schema validation on deploy: all existing documents must match the new schema. When iterating on a feature (e.g., changing task status from 3 options to 5 options), the deploy will fail if existing tasks in the database have statuses not in the new enum. This blocks the rapid iteration cycle that config-driven development promises.
+
+**Why it happens:** Convex validates ALL documents against the schema on every `npx convex dev` push. Unlike PostgreSQL where you can add an enum value, Convex requires the schema to be a superset of existing data. Removing a status option from the enum requires migrating all documents with that status first.
 
 **Prevention:**
-1. Always use `import { ... } from "convex-helpers/server/zod4"` in this project
-2. Add an ESLint rule or code review checkpoint to catch `convex-helpers/server/zod` imports (without the `4` suffix)
-3. Verify convex-helpers version supports Zod v4 -- the project has `"convex-helpers": "^0.1.114"`, which should include Zod v4 support (added in late 2025)
+1. For status-like fields, use `v.string()` in the schema instead of `v.union(v.literal(...))`. Validate the string against allowed values in the mutation logic, not the schema. This lets the schema remain stable while runtime config controls valid values.
+2. If strict schema validation is desired, always use `v.union()` that includes ALL possible values across all clients. Use runtime config to restrict which values are valid for each client.
+3. For field additions: new fields must be `v.optional()` to avoid breaking existing documents. DOMAIN.md's audit fields are correct here -- `createdBy: v.optional(v.id("users"))` for bootstrap cases.
+4. Use the [Convex migrations component](https://www.convex.dev/components/migrations) for data changes before schema changes.
 
-**Detection:** Runtime errors about `_def` not existing on Zod schemas, or TypeScript errors about incompatible Zod types.
+**Detection:** `npx convex dev` fails with "document does not match schema" after a config change. This is the migration problem surfacing.
 
-**Phase mapping:** Shared Zod schemas phase. Verify compatibility before building any shared validation.
+**Phase mapping:** Decide the schema validation strategy (strict enum vs. string with runtime validation) in the first vertical slice. This decision affects every subsequent feature.
 
 ---
 
-### Pitfall 7: Circular Dependencies Between Feature Folders
+### Pitfall 7: Cascade Deletes Across Feature Boundaries Create Hidden Data Loss
 
-**What goes wrong:** Feature A imports from Feature B, and Feature B imports from Feature A. Example: `features/billing/` needs the `User` type from `features/users/`, and `features/users/` needs `Subscription` type from `features/billing/`. With the current `types.ts`, the `User` type already includes `subscription` data -- this cross-cutting type will resist clean feature boundaries.
+**What goes wrong:** DOMAIN.md specifies "Deleting a project deletes its tasks and work logs." In a composable system, cascade deletes cross feature boundaries: deleting a Project (feature A) must delete Tasks (feature B) which must delete Subtasks (feature C), Work Logs (feature D), Task Links (feature E), and Activity Logs (feature F). If any feature is misconfigured or its cascade logic is missing, orphaned records accumulate.
 
-**Why it happens:** In a flat structure, everything can import from everything. Feature folders impose boundaries, but real domain models have relationships that cross those boundaries.
+**Why it happens:** Each feature is developed as a "composable block" with its own mutations. The cascade delete logic must reach INTO other features' tables. When features are developed as independent vertical slices, the cascade paths are not connected until integration.
+
+**Consequences:**
+- Orphaned subtasks with deleted parent tasks
+- Activity logs referencing deleted entities (null reference errors in UI)
+- Work logs for deleted tasks consuming storage indefinitely
+- Task links pointing to non-existent tasks (broken UI)
 
 **Prevention:**
-1. Create `src/shared/types/` for cross-cutting types (like `User` with subscription data)
-2. Rule: features can import from `shared/`, but never from other features
-3. If two features need to communicate, the shared type or interface goes in `shared/`
-4. For Convex specifically: the `User` type (currently in root `types.ts`) depends on both `Doc<"users">` and `Doc<"subscriptions">` -- it belongs in `shared/`, not in either feature
+1. Implement cascade deletes as a CENTRALIZED concern, not distributed across features. A single `deleteProject` mutation handles the entire cascade chain, not separate `deleteTasks`, `deleteSubtasks`, etc.
+2. Order of deletion matters: delete leaves first (Activity Logs, Work Logs, Task Links, Subtasks), then Tasks, then Project. Convex mutations are transactional within a single mutation call.
+3. Write integration tests that verify the cascade: create a Project with Tasks, Subtasks, Work Logs, and Activity Logs, then delete the Project and verify ALL related records are gone.
+4. For the composable config system: cascade rules are PART OF the feature relationship config, not the individual feature config. When "Tasks belong to Projects" is configured, the cascade "delete Project -> delete Tasks" is automatically included.
 
-**Detection:** TypeScript will catch circular imports, but the real warning sign is needing to import from `../other-feature/` -- that import should go through `shared/`.
+**Detection:** Query for orphaned records regularly: Subtasks where `taskId` references a non-existent task. Convex doesn't enforce referential integrity -- you must do it yourself.
 
-**Phase mapping:** Feature folder phase. Define the `shared/` boundary before creating feature folders.
+**Phase mapping:** Cascade logic must be part of the FIRST feature that introduces a parent-child relationship (Projects-Tasks). Don't defer it to a "cleanup" phase.
 
 ---
 
-### Pitfall 8: i18n Single-File Translation Blocks Plugin Composition
+### Pitfall 8: Activity Log Explosion From Config-Driven Features
 
-**What goes wrong:** Currently, all translations live in a single `public/locales/en/translation.json`. When plugins add their own translation keys, every plugin branch modifies the same JSON file. JSON does not support comments, so there are no section markers. Merge conflicts on JSON are especially painful because a missing comma or bracket breaks the entire file.
+**What goes wrong:** DOMAIN.md lists 13 tracked actions for Activity Logs. In a config-driven system where features can be added, each new feature adds its own activity log events. With 6+ features, the activity logs table grows faster than all other tables combined. Queries on activity logs (the task detail timeline view) become slow because they scan a massive table.
 
-**Why it happens:** i18next defaults to a single namespace per language. The project has not set up namespace-based loading.
+**Why it happens:** Activity logs are append-only and never deleted (audit trail). Each task mutation creates 1-3 activity log entries. A project with 50 tasks, each with 10 status changes, generates 500+ activity log entries for that project alone. Add work logs, subtask operations, and assignments, and the numbers multiply.
 
 **Prevention:**
-1. Switch to namespace-based i18n: each feature/plugin gets its own namespace file (e.g., `public/locales/en/billing.json`, `public/locales/en/admin.json`)
-2. Configure i18next to load multiple namespaces: `i18n.init({ ns: ['common', 'billing', 'admin'], defaultNs: 'common' })`
-3. Use namespaced keys in components: `t('billing:upgradeButton')` instead of `t('upgradeButton')`
-4. The base `translation.json` becomes `common.json` for shared strings
+1. Index activity logs by `taskId` AND `projectId` (already in the schema design). But also add a compound index `by_task_createdAt` for efficient timeline queries with sorting.
+2. Consider pagination for the task detail timeline from day one. Do not load all activity logs for a task -- use cursor-based pagination.
+3. For the project-level activity view: use the `by_project` index with time-range filtering, not a full scan.
+4. Do NOT store activity log details as `v.any()` -- define specific detail shapes per action type. This enables efficient querying and prevents schema-less data from accumulating.
 
-**Detection:** If a plugin branch adds keys to `translation.json`, the approach is wrong.
+**Detection:** Activity logs table row count exceeding 10x the tasks table. Timeline queries taking >500ms.
 
-**Phase mapping:** Plugin-friendly shared files phase. Must be done before any plugin branches add translations.
+**Phase mapping:** Activity Logs should be built in the same slice as Tasks (they're tightly coupled). The pagination and indexing strategy must be designed upfront, not retrofitted.
 
 ---
 
-### Pitfall 9: errors.ts as a Merge Conflict Magnet
+### Pitfall 9: Wizard/Generator UX Promises More Flexibility Than the System Delivers
 
-**What goes wrong:** Similar to navigation and i18n, the `errors.ts` file is a single flat object. Every plugin that introduces new error types must add entries to this file. With 3+ plugins, merge conflicts are certain.
+**What goes wrong:** The milestone includes a "structured wizard for feature selection." The wizard presents options like checkboxes: "Tasks [x] Projects [x] Subtasks [ ] Work Logs [x]." Users select a combination, the system generates code. But the system can only handle the combinations that were designed and tested. Users inevitably select a combination that was never tested (e.g., "Work Logs without Tasks") and get a broken generated codebase.
 
-**Why it happens:** Error constants are defined as a single `ERRORS` object in one file. No namespace separation.
+**Why it happens:** A wizard UI implies arbitrary combination. The underlying system supports specific, tested configurations. The gap between UI promise and system capability creates broken deployments.
 
 **Prevention:**
-1. Group errors by domain: `ERRORS.AUTH.*`, `ERRORS.STRIPE.*`, `ERRORS.ONBOARDING.*`
-2. Use a registry pattern: each feature exports its own error constants, a central file merges them
-3. Or: split into `errors/auth.ts`, `errors/stripe.ts`, etc., with a barrel `errors/index.ts` that re-exports. New plugins add new files rather than editing existing ones
-4. Prefer additive-only patterns: plugins create new error files, the index re-exports with spread
+1. Make the wizard enforce the dependency DAG: selecting Work Logs auto-selects Tasks. Deselecting Tasks grays out Work Logs, Subtasks, Activity Logs, and Task Links. The wizard visualizes the dependency tree, not a flat checklist.
+2. Only present TESTED configurations. If "Tasks without Projects" has not been integration-tested, the wizard should not offer it.
+3. Show a preview of what will be generated BEFORE generating. Let the user see the file list, the routes, the schema tables. "You will get: 4 tables, 8 mutations, 12 queries, 3 routes."
+4. Version the wizard's offerings: v1 offers "Full Suite" or "Tasks Only." v2 adds "Tasks + Projects." Don't ship a fully flexible wizard before the underlying combinations are tested.
 
-**Detection:** Multiple plugin branches modifying the same `ERRORS` object.
+**Detection:** If the wizard offers more combinations than the test suite covers, untested combinations will be deployed.
 
-**Phase mapping:** Plugin-friendly shared files phase, alongside nav and i18n.
+**Phase mapping:** The wizard is a LATE phase, after all features are built and the valid combinations are known. Do not design the wizard before the features exist.
 
 ---
 
-### Pitfall 10: Test File Relocation Breaks environmentMatchGlobs
+### Pitfall 10: Separate Codebase Per Client Creates Maintenance Nightmare Without Upgrade Path
 
-**What goes wrong:** The current `vitest.config.ts` uses `environmentMatchGlobs: [["convex/**", "edge-runtime"]]` to run Convex backend tests in edge-runtime instead of jsdom. If backend tests are moved (e.g., from `convex/app.test.ts` to `convex/users/queries.test.ts`), the glob still matches. But if they are moved OUTSIDE `convex/` (e.g., to `src/features/users/api/__tests__/`), they will run in jsdom instead of edge-runtime, causing cryptic failures.
+**What goes wrong:** The milestone states "Separate codebase per client." Without an upgrade mechanism, each client codebase diverges immediately. Bug fixes must be applied to N codebases. Security patches must be deployed N times. After 6 months with 5 clients, you have 5 different codebases with 5 different bugs, and upgrading any of them risks breaking client-specific customizations.
 
-**Why it happens:** Convex backend tests require edge-runtime because Convex functions use APIs not available in jsdom. The glob pattern ties this to the file path.
+**Why it happens:** Forking is easy. Merging upstream changes into a fork with customizations is one of the hardest problems in software. Git merge works for additive changes but breaks when the upstream restructures code that the fork modified.
 
 **Prevention:**
-1. Keep Convex backend tests inside the `convex/` directory -- they should move WITH their source files within `convex/`
-2. If tests must live outside `convex/`, update `environmentMatchGlobs` to include the new paths
-3. Never move backend tests to `src/` without updating the environment configuration
+1. Define a clear boundary between "generated code" (feature implementations, routes, components) and "customizable code" (config files, theme files, content). Upstream changes only touch generated code. Client customizations only touch customizable code. The two NEVER overlap.
+2. Use the existing git-based plugin pattern: client customizations are plugin branches, not forks. When the upstream template changes, plugin branches rebase.
+3. Version the generated code: each generated file includes a comment `// Generated by CalmDo v2.1 -- do not edit`. If a client edits a generated file, they've broken the upgrade path and they know it.
+4. Keep client count LOW initially. The per-client codebase model works for 2-3 clients. Beyond that, you need a true multi-tenant architecture (which is out of scope for v2.0).
 
-**Detection:** Backend tests failing with errors about missing `Convex` globals or `EdgeRuntime` not being defined.
+**Detection:** If a bug fix requires manually patching more than 2 codebases, the model is not scaling.
 
-**Phase mapping:** Convex restructure phase. Tests move alongside their source files within `convex/`.
+**Phase mapping:** The per-client deployment model is the LAST phase. Build the features first, extract the config system, then create the first client deployment. Do not design the multi-client workflow until you have a working single-client system.
 
 ---
 
 ## Minor Pitfalls
 
-### Pitfall 11: Path Alias Updates in Multiple tsconfig Files
+---
 
-**What goes wrong:** The project has three tsconfig files (`tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`) plus `convex/tsconfig.json`, plus path aliases in `vite.config.ts` AND `vitest.config.ts`. Adding or changing a path alias (e.g., adding `@features/*`) requires updating it in ALL relevant configs. Missing one causes "module not found" errors that vary by context (build vs. dev vs. test).
+### Pitfall 11: Convex's Lack of Referential Integrity Creates Silent Data Corruption
+
+**What goes wrong:** Convex does not enforce foreign key constraints. A task can reference a `projectId` that was deleted. A subtask can reference a `taskId` that doesn't exist. Unlike SQL databases, no error is thrown when the referenced record is missing -- the ID just points to nothing.
 
 **Prevention:**
-1. Document which aliases exist and where they are defined
-2. When adding a new alias, update all configs in the same commit
-3. Current aliases: `~` (project root), `@` (src/), `@cvx` (convex/) -- defined in both vite.config.ts and vitest.config.ts
+1. Every mutation that creates a reference must verify the target exists: `const project = await ctx.db.get(args.projectId); if (!project) throw new Error("Project not found");`
+2. Every cascade delete must be exhaustive (Pitfall 7).
+3. Consider a periodic "integrity check" query that scans for orphaned references and reports them.
 
-**Detection:** "Cannot find module" errors that only appear in specific contexts (tests pass but build fails, or vice versa).
+**Detection:** UI showing "Unknown Project" or null values where a project name should appear.
 
-**Phase mapping:** Feature folder phase, when new aliases might be introduced.
+**Phase mapping:** Build reference validation into the mutation helpers from the first vertical slice. This is a pattern, not a feature.
 
 ---
 
-### Pitfall 12: Plop Generator Templates Hardcode Old Paths
+### Pitfall 12: Position/Sort Order Fields Break Under Concurrent Edits
 
-**What goes wrong:** If CLI generators (Plop.js) are created before the restructure is complete, the templates will embed the old file structure. When the structure changes, generators produce files in wrong locations or with wrong import paths.
+**What goes wrong:** DOMAIN.md specifies `position: number` on Subtasks for drag-and-drop ordering. Two users reordering subtasks simultaneously can create duplicate positions or gaps. Convex's optimistic updates make this worse -- the UI shows one order, the server resolves to another.
 
 **Prevention:**
-1. Create Plop generators AFTER the restructure is finalized, not during or before
-2. Generators should be the LAST phase -- they codify the final structure
+1. Use fractional indexing (e.g., position 1.5 between 1 and 2) instead of integer positions to avoid rewriting all positions on every reorder.
+2. Accept eventual consistency for ordering: show optimistic order, resolve conflicts server-side with a deterministic rule (e.g., last-write-wins with timestamp).
+3. Keep position reordering as a single mutation that sets all positions atomically, not one mutation per item.
 
-**Detection:** Generated files placed in unexpected locations or with broken imports.
+**Detection:** Subtasks appearing in different orders for different users, or duplicated positions in the database.
 
-**Phase mapping:** CLI generators phase. This must be the final phase.
+**Phase mapping:** Address when building Subtasks. This is a UX concern, not a blocking architectural issue.
+
+---
+
+### Pitfall 13: Zod Schema Duplication Between Client Validation and Convex Schema
+
+**What goes wrong:** The existing codebase uses `zodToConvex()` from convex-helpers to bridge Zod schemas to Convex validators. With many more tables (8+ CalmDo tables vs. 3 existing tables), the risk of Zod schemas diverging from Convex validators increases. A field added to the Zod schema but not to the Convex validator (or vice versa) creates silent validation gaps.
+
+**Prevention:**
+1. Follow the established pattern: define the Zod schema in `src/shared/schemas/`, convert to Convex validators in `schema.ts` using `zodToConvex()`.
+2. Use the Zod schema as the source of truth. Never define a Convex validator directly that has a corresponding Zod schema.
+3. For CalmDo entities, create a `src/shared/schemas/tasks.ts`, `src/shared/schemas/projects.ts`, etc., following the existing `billing.ts` pattern.
+
+**Detection:** Form validation passes but Convex mutation rejects the data (or vice versa).
+
+**Phase mapping:** Establish the Zod-first pattern in the first vertical slice (Tasks). Every subsequent feature follows the same pattern.
 
 ---
 
@@ -260,30 +285,36 @@ Mistakes that cause rewrites, broken deployments, or cascading failures.
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |---|---|---|
-| Convex backend restructure | API path breakage (Pitfall 1), schema splitting attempt (Pitfall 2) | Atomic commit, keep schema.ts at root, grep all references first |
-| Frontend feature folders | Route files moved out of src/routes/ (Pitfall 4), circular deps (Pitfall 7) | Thin route files, shared/ for cross-cutting types |
-| Coverage maintenance | Hardcoded paths in vitest config (Pitfall 3), environment globs (Pitfall 10) | Convert to globs FIRST, keep backend tests in convex/ |
-| Plugin-friendly shared files | Nav conflicts (Pitfall 5), i18n conflicts (Pitfall 8), errors conflicts (Pitfall 9) | Data-driven nav, namespaced i18n, domain-grouped errors -- all before plugin branches |
-| Shared Zod schemas | Wrong convex-helpers import path (Pitfall 6) | Use `convex-helpers/server/zod4`, verify version compatibility |
-| CLI generators | Templates embed old structure (Pitfall 12) | Create generators last, after structure is stable |
+| First vertical slice (Tasks) | Premature config system (Pitfall 1), schema validation strategy (Pitfall 6) | Build hardcoded Tasks first. Decide string vs. enum for statuses. |
+| Projects + Task relationship | Cascade deletes (Pitfall 7), referential integrity (Pitfall 11) | Centralized cascade mutation. Reference validation in helpers. |
+| Subtasks | Position ordering (Pitfall 12), dependency wiring (Pitfall 2) | Fractional indexing. Subtask is a hard dependency on Tasks, not optional. |
+| Activity Logs | Table explosion (Pitfall 8), typed details (Pitfall 8) | Pagination from day one. Typed detail shapes per action. |
+| Config extraction | Premature abstraction (Pitfall 1), boundary blur (Pitfall 4) | Extract from working code, don't predict. Hard build/runtime boundary. |
+| Schema generation | Monolith schema.ts (Pitfall 3), Zod duplication (Pitfall 13) | Table files imported into schema.ts. Zod as source of truth. |
+| LLM generator | Wrong wiring (Pitfall 5), test unreliability (Pitfall 5) | Templates constrain LLM. Tests from specs, not from LLM. |
+| Feature wizard | Over-promising flexibility (Pitfall 9), untested combos (Pitfall 9) | Enforce dependency DAG in UI. Only tested configurations. |
+| Per-client deployment | Maintenance nightmare (Pitfall 10), config drift (Pitfall 4) | Generated vs. customizable boundary. Plugin branches over forks. |
 
-## Recommended Phase Order (Based on Pitfalls)
+## Key Lesson From Previous Attempts
 
-1. **Prerequisites** -- Convert vitest coverage to globs, extract validators from schema.ts
-2. **Convex restructure** -- Move backend files + update ALL api/internal references atomically
-3. **Frontend feature folders** -- Extract components from routes, establish shared/ boundary
-4. **Plugin-friendly shared files** -- Data-driven nav, namespaced i18n, grouped errors
-5. **Plugin branches** -- Only after shared files are merge-friendly
-6. **Shared Zod schemas** -- After convex restructure settles (new paths stable)
-7. **CLI generators** -- Last, codifying the final structure
+From LESSONS.md, the meta-pattern across 7+ attempts: **process failures are more dangerous than technical failures.** Every critical pitfall above has a process dimension:
+
+- Pitfall 1 (premature config) = building the abstraction before the concrete (same mistake as "plans with embedded code")
+- Pitfall 2 (dependency explosion) = not defining constraints before building (same mistake as "horizontal phases")
+- Pitfall 5 (LLM wiring) = trusting AI-generated tests (proven failure mode)
+- The proven workflow (explore -> spec -> plan -> derive tests -> execute -> verify) applies to each vertical slice
+
+The technical pitfalls (Convex schema monolith, cascade deletes, referential integrity) are solvable with known patterns. The process pitfalls (premature abstraction, blurred boundaries, LLM over-trust) are the ones that caused rewrites in every previous attempt.
 
 ## Sources
 
-- [Convex Best Practices](https://docs.convex.dev/understanding/best-practices) -- File organization, helper patterns
-- [Convex API Generation Internals](https://stack.convex.dev/code-spelunking-uncovering-convex-s-api-generation-secrets) -- How folder structure maps to API paths
-- [convex-helpers Zod v4 Issue #558](https://github.com/get-convex/convex-helpers/issues/558) -- Zod v4 compatibility status and import paths
-- [TanStack Router Colocation Discussion #3046](https://github.com/TanStack/router/discussions/3046) -- routeFileIgnorePrefix/Pattern for non-route files
-- [TanStack Router Routing Concepts](https://tanstack.com/router/latest/docs/framework/react/routing/routing-concepts) -- File-based routing constraints
-- [Vitest Coverage Config](https://vitest.dev/config/coverage) -- Include/exclude path configuration
-- [Convex Feature Proposal: Escaped Files #102](https://github.com/get-convex/convex-backend/issues/102) -- Convex file organization limitations
-- Codebase analysis: `convex/_generated/api.d.ts`, `vitest.config.ts`, `-ui.navigation.tsx`, `errors.ts`, `src/i18n.ts`
+- [Convex Schema Documentation](https://docs.convex.dev/database/schemas) -- Schema validation, v.any(), optional fields, single-file requirement
+- [Convex Migrations](https://www.convex.dev/components/migrations) -- Migration framework for schema evolution
+- [Convex Lightweight Migrations](https://stack.convex.dev/lightweight-zero-downtime-migrations) -- Zero-downtime data migration patterns
+- [Runtime Config vs Build-Time Config](https://rgndunes.substack.com/p/runtime-config-vs-build-time-config) -- Boundary definition patterns
+- [Configuration Drift](https://spacelift.io/blog/what-is-configuration-drift) -- How config diverges from intended state
+- [LLM Code Generation Security](https://www.endorlabs.com/learn/the-most-common-security-vulnerabilities-in-ai-generated-code) -- Vulnerability patterns in generated code
+- [LLM Failure Modes](https://medium.com/@adnanmasood/a-field-guide-to-llm-failure-modes-5ffaeeb08e80) -- Classification of LLM generation failures
+- [Composable CX Failure](https://www.cmswire.com/customer-experience/composable-cx-is-failing-for-one-simple-reason/) -- Why composable systems fail in practice
+- [Circular Dependencies in Modular Systems](https://bit.dev/reference/dependencies/avoid-cyclic-dependencies/) -- Dependency management patterns
+- Project artifacts: `_calmdo/LESSONS.md`, `_calmdo/DOMAIN.md`, `_reference/superpowers/2026-01-28-phase1-design.md`, `convex/schema.ts`

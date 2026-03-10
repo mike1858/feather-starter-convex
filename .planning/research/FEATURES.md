@@ -1,178 +1,286 @@
-# Feature Research
+# Feature Landscape
 
-**Domain:** SaaS starter kit architecture (React + Convex)
-**Researched:** 2026-03-09
-**Confidence:** HIGH
+**Domain:** Configurable task management system (CalmDo Core) built as composable feature blocks on a React + Convex SaaS starter kit
+**Researched:** 2026-03-10
+**Overall confidence:** MEDIUM-HIGH
 
-## Feature Landscape
+---
 
-### Table Stakes (Users Expect These)
+## Table Stakes
 
-Features developers assume exist in a well-structured starter kit. Missing these means the kit feels amateur or unfinished.
+Features users expect from any task management system. Missing any of these means the product feels incomplete or amateur.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Feature-folder organization (frontend) | Bulletproof-react, create-t3-app, and every serious React project uses this pattern. Flat `src/ui/` with 15 files and 250-line route files signals a toy project. | MEDIUM | Move components, hooks, and types into `src/features/{auth,billing,settings,onboarding,dashboard}`. Each feature exports through `index.ts` barrel file. |
-| Feature-folder organization (backend) | Same principle for `convex/`. The existing `convex/email/` and `convex/otp/` already prove the pattern works; `app.ts` at 183 lines is the anti-pattern that needs splitting. | MEDIUM | Split `app.ts` into `convex/users/`, `convex/billing/`, etc. This breaks all `api.*` import paths -- one-time migration cost. |
-| Thin route files | Route files should be ~20-30 lines: imports from feature folder, passes props, renders. Settings route at 232 lines and billing at 256 lines are red flags. | MEDIUM | Routes become `import { SettingsPage } from '@/features/settings'` + loader/component wiring. Logic lives in feature folders. |
-| Shared code layer (`src/shared/`) | Bulletproof-react's unidirectional architecture: `shared -> features -> app`. Shared UI, hooks, utils, and types need a clear home separate from features. | LOW | Move current `src/ui/`, `src/utils/`, `src/types/` into `src/shared/`. Enforce: features import from shared, never from other features. |
-| Co-located tests | Standard practice since 2023+. Tests next to source files (`feature/component.test.tsx` beside `feature/component.tsx`) instead of a separate `tests/` tree. | LOW | Move test files from top-level into their feature folders. Test helpers stay in `src/shared/testing/`. |
-| Shared Zod schemas (client-server) | Single source of truth for validation. Username bug (UI says 32 max, Zod says 20) is exactly the problem shared schemas solve. Zod v4 already installed. | MEDIUM | `src/shared/schemas/` with schemas imported by both frontend forms and Convex mutations. Requires verifying convex-helpers Zod v4 compatibility. |
-| Path aliases (`@/`) | Every modern React starter uses `@/` or `~/` aliases. Makes imports readable and refactor-safe vs `../../../shared/ui/button`. | LOW | Ensure `@/features/*`, `@/shared/*` work everywhere via Vite + TSConfig. |
-| Architecture documentation | README, feature READMEs, PROVIDERS.md. Developers clone the repo and need to understand the structure in 5 minutes. ShipFast and create-t3-app both emphasize this. | LOW | One root architecture doc + per-feature README explaining the folder's purpose and public API. |
+| Feature | Why Expected | Complexity | Config Surface | Notes |
+|---------|--------------|------------|----------------|-------|
+| Task CRUD | Fundamental unit of work. Todoist has 30M+ users proving "just tasks" has massive value. | Low | Field shape: title, description, priority representation | Every task app starts here. Linear, Todoist, Asana all center on the task as atomic unit. |
+| Status workflow | Users need to track progress. Even a checkbox (todo/done) is a status workflow. | Low | **Key config point:** 2-state (checkbox) vs 3-state (todo/in_progress/done) vs N-state (custom). Build-time choice of shape. | Linear uses Backlog/Todo/In Progress/Done/Cancelled. Todoist uses a checkbox. Both are valid -- the shape depends on workflow complexity. |
+| Task list with sorting | Users need to see their tasks in meaningful order. Manual position-based sorting is expected in 2025+. | Low | Sort fields, default sort order | Drag-drop reordering is table stakes. Position field (integer) on tasks enables this. |
+| Basic filtering | Filter by status at minimum. Users with 10+ tasks need this immediately. | Low | Which fields are filterable (build-time), filter values (runtime) | Status filter is table stakes. Priority filter is near-table-stakes. Project filter only if projects are enabled. |
+| Search | Text search across task titles. Users with 50+ tasks cannot function without it. | Medium | Which fields are searchable | Convex has built-in search indexes. Use them. |
+| Private vs shared visibility | Personal tasks must stay private. This is a trust/safety requirement. | Low | Whether visibility exists at all (build-time) | Quick tasks are private by default. Auto-flip to shared on reassignment is a smart UX pattern from DOMAIN.md. |
+| Audit fields | createdAt, updatedAt, createdBy, updatedBy on every record. Not user-facing, but engineering table stakes for any serious system. | Low | None -- always present | Essential for ETL incremental loads and debugging. Already designed well in DOMAIN.md. |
 
-### Differentiators (Competitive Advantage)
+---
 
-Features that set feather-starter apart from generic SaaS boilerplates. These are where the kit competes.
+## Differentiators
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Git-based plugin system | FullProduct.dev's killer innovation: features live on git branches, installed via `git merge`. Developers review the diff as a PR, understand exactly what code changes, and can customize before merging. No runtime plugin abstraction, no dependency hell. No other React+Convex starter does this. | HIGH | Requires: (1) install script to automate `git remote add` + `git merge`, (2) plugin branches that merge cleanly into main, (3) shared files designed for merge (data-driven nav, namespaced i18n, error code ranges). |
-| Plugin-friendly shared files | The hidden prerequisite to git plugins. Navigation config must be data-driven (array of items, not JSX). i18n must be namespaced per feature. Error codes must use non-overlapping ranges. Without this, every plugin merge creates conflicts. | HIGH | Design `site.config.ts` nav as a data array, i18n as `{feature}.{key}` namespaces, errors as `{FEATURE}_{CODE}` ranges. This is architectural -- must be right before any plugins ship. |
-| CLI generators (Plop.js) | `npm run gen:feature auth` scaffolds the entire feature folder structure. `npm run gen:route dashboard/analytics` creates route + feature wiring. Eliminates the "where do I put this?" question. ShipFast gets praise for AI-friendly structure; generators go further by automating it. | MEDIUM | Plop.js over Hygen because Plop is programmatic (JS config), Hygen is file-based. Plop integrates better with existing build tooling. Generators: `feature`, `route`, `convex-function`, `form`. |
-| First-party plugin catalog | Three initial plugin branches: CI pipeline, command palette, admin panel. These serve as proof-of-concept AND useful features. Developers see the plugin system works by using it. | HIGH | Each plugin is a git branch with a README showing the diff. CI plugin is lowest risk (no UI changes). Command palette is medium. Admin panel is highest complexity. |
-| Zod validation in Convex mutations | Most Convex starters skip server-side validation or use ad-hoc checks. Shared Zod schemas in mutations close the validation gap. Type-safe from form to database. | MEDIUM | convex-helpers provides Zod integration, but Zod v4 compatibility needs verification. If incompatible, pin Zod v3 for server or use Convex validators with a Zod-to-Convex adapter. |
-| Feature-scoped barrel exports (`index.ts`) | Each feature folder exposes a public API via `index.ts`. Other features and routes can ONLY import from this barrel. Enforces encapsulation, makes features portable, and enables the plugin system. ESLint rules can enforce this boundary. | LOW | Add `eslint-plugin-boundaries` or custom ESLint rule: `no-restricted-imports` from feature internals. This is what makes features truly modular vs just "files in a folder." |
+Features that set CalmDo apart from generic task apps. Not expected by default, but valuable when present.
 
-### Anti-Features (Commonly Requested, Often Problematic)
+| Feature | Value Proposition | Complexity | Config Surface | Notes |
+|---------|-------------------|------------|----------------|-------|
+| Projects with status lifecycle | Group tasks by initiative. Status (active/on_hold/completed/archived) gives projects lifecycle semantics beyond just "folders." | Medium | Whether projects exist at all (build-time). Project status options (build-time shape). | The composable lego question: tasks can exist without projects. Projects are an optional overlay. This optionality IS the differentiator. |
+| Subtasks with promotion | Break work down AND escalate when a subtask outgrows its parent. Promotion-to-task is genuinely unusual in the market. | Medium-High | Whether subtasks exist (build-time). Whether promotion is enabled (build-time). | Linear has sub-issues. Todoist has sub-tasks. But "promote subtask to full task with spawned_from link" is rare. The promotion flow (new task + status change + link back) is the complex part. |
+| Work logs (journal, not timer) | Document what was done and what was learned, with optional time. Not a time tracker -- a work journal per task. | Medium | Whether work logs exist (build-time). Whether time field is shown (runtime toggle). | Key distinction: the body (what was learned) matters more than the minutes. Any user can log on any task, not just the assignee. This is uncommon. |
+| Activity logs (auto audit trail) | Know who changed what and when without anyone doing extra work. Zero-friction accountability. | Medium-High | Which actions generate logs (build-time). Activity log is always-on once enabled -- not user-created content. | Auto-generated from mutations. Cross-cutting concern woven into every mutation. The action list from DOMAIN.md (task.created, task.status_changed, etc.) is comprehensive. |
+| Configurable field shapes | Status as 3-state enum vs boolean checkbox. Priority as boolean (isHighPriority) vs enum (low/medium/high/urgent). The SAME feature adapts to different team preferences. | High | **Core differentiator.** Build-time config selects field shape. Runtime config selects values within that shape. | This is the "Frappe for Convex" DNA. Most task apps hardcode their field shapes. CalmDo lets the deployer choose. |
+| Quick tasks (standalone, projectless) | Tasks without a project for personal capture. GTD "inbox" pattern. Zero-friction entry point. | Low | Whether quick tasks exist independently of projects (build-time) | Todoist's entire product is essentially "quick tasks." This is the simplest possible starting configuration. |
+| Composable feature blocks | Each feature is a self-contained unit that can be included or excluded. The system works with just tasks, or with tasks + projects + subtasks + work logs. | Very High | The config system itself -- which features exist. | This is not a feature users see directly. It is the architectural property that makes CalmDo a platform rather than a product. |
 
-Features that seem good but create problems for this specific project.
+---
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Backend abstraction layer | "Support Supabase/Firebase too" | Convex is fundamentally un-abstractable (reactive queries, server functions, file storage are tightly coupled). Abstraction would gut Convex's advantages and create a leaky abstraction nobody trusts. | Stay Convex-only. The feature-folder architecture IS the abstraction -- if someone wants to swap backends, they replace feature internals, not an abstraction layer. |
-| Monorepo with Turborepo/Nx | "Separate packages for shared code" | Single-package with folders is simpler for Convex (which needs direct access to schema/functions). Monorepo adds tooling overhead (workspace resolution, build orchestration) without proportional benefit for a starter kit. | Use `src/shared/` and `convex/` as logical boundaries within one package. Path aliases provide the same import ergonomics as separate packages. |
-| Runtime plugin registry | "Plugins register at runtime like WordPress" | Runtime plugins need a stable API contract, versioning strategy, and sandbox. This is a framework, not a starter kit. Git merge plugins are reviewable, customizable, and zero-runtime-cost. | Git-based plugins. The diff IS the documentation. No runtime overhead, no API versioning. |
-| Universal (web + mobile) support | "Add React Native/Expo" | Doubles the surface area, requires platform-specific UI, and fundamentally changes the architecture. FullProduct.dev does this but it IS the product. For a web SaaS starter, it's scope creep. | Stay web-only. Feature-folder architecture would support a future mobile layer, but don't build for it now. |
-| "Everything is a plugin" maximalism | "Make auth, billing, dashboard all plugins" | Core features that every user needs should not be optional. Making auth a plugin means the base kit is broken without it. Plugins are for OPTIONAL features (command palette, admin panel, analytics). | Core features stay in `main`. Only truly optional features become plugins. Rule of thumb: if removing it breaks the app, it's not a plugin. |
-| Auto-generated CRUD for all models | "Generate full CRUD from schema" | Convex functions are intentionally hand-written with business logic. Auto-CRUD encourages thin-server thinking that misses Convex's strengths (optimistic updates, reactive queries, server-side logic). | Generators scaffold the boilerplate structure, but business logic is always hand-written. Generator creates the file, developer fills in the logic. |
-| npm-packaged plugins | "Publish plugins to npm" | Full-stack feature slices span frontend, backend, schemas, i18n, and config. npm packages cannot modify files across these boundaries. A plugin that adds a nav item, an i18n namespace, a Convex function, AND a route cannot be an npm package. | Git branches that add files to the right locations. The merge IS the install. |
+## Anti-Features
+
+Features to explicitly NOT build in v2.0. Each has a concrete reason for exclusion.
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| Multi-org / organization switching | Adds massive query complexity, permission checks, and UI chrome to every screen. v2.0 is scoped to a single user's data. | User-scoped data with no org layer. Schema CAN be multi-org-ready (orgId fields) without UI support. Already decided in PROJECT.md. |
+| Task links (spawned_from/blocked_by) | Explicitly excluded from v2.0 scope. blocked_by creates dependency graph complexity (cycle detection, cascading status changes). spawned_from only matters during subtask promotion. | Subtask promotion can use a simple `promotedToTaskId` on the subtask record. No separate taskLinks table needed for v2.0. |
+| Kanban board | Drag-and-drop between status columns is a significant frontend investment (DnD library, optimistic position updates, multi-column state sync). Delivers visual appeal but not functional capability over a list view. | List view with inline status change (click/dropdown). Kanban is explicitly Phase 2 in ROADMAP.md. |
+| Real-time collaboration (co-editing) | Convex gives reactive queries for free, but simultaneous editing of the same task by multiple users requires conflict resolution, presence indicators, and operational transforms. | Convex subscriptions handle "see updates when someone else changes something." That is sufficient. Last-write-wins for field updates. |
+| Comments / mentions / questions | Phase 2 collaboration features per ROADMAP.md. Each is a separate entity with its own complexity (threading, @-mention resolution, notification triggers). | Activity log provides a read-only audit trail of changes. Comments are the gateway to collaboration -- build them when collaboration is the goal. |
+| Recurring tasks | Smart recurring tasks (from PRODUCT.md) require complex timeline logic, gap handling, and instance management. Even "simple" recurring tasks need cron-like scheduling in Convex. | Simple one-off tasks only. Recurring is listed under "Future Ideas" in ROADMAP.md. |
+| GTD tags / context labels | Optional complexity that adds cognitive overhead. "Hidden if unused" requires conditional UI logic in every view. The tag taxonomy design is a product design problem, not an engineering one. | Defer to after core is stable. GTD tags are explicitly "Future Ideas" in ROADMAP.md. |
+| Push notifications | PRODUCT.md explicitly says "no push notifications -- deep work friendly." | Activity feed on app open ("What's New" pattern) is a future Phase 3 feature. |
+| Live time tracking (start/stop timers) | Timers add significant state management (running timer across page navigations, pause/resume, background tab behavior). | Work logs with manual `timeMinutes` field. Users enter time after the fact. |
+| Config system / assembler (build-time code generation from config) | Premature abstraction is the number one risk. Building the config-to-code pipeline before having 3+ concrete feature implementations means designing abstractions without evidence. | Build features first with hardcoded shapes. Extract config patterns AFTER features prove the structure. The config system is v3.0 scope per VISION.md phases. |
+
+---
 
 ## Feature Dependencies
 
+The critical architectural insight: features form a dependency DAG where Tasks is the root and everything else is an optional overlay.
+
 ```
-Feature-folder organization (frontend)
-    +-- requires --> Shared code layer (src/shared/)
-    +-- requires --> Path aliases (@/)
-    +-- enables --> Co-located tests
-    +-- enables --> Feature-scoped barrel exports
+FOUNDATIONAL (always present):
+  Tasks ──────────────────── the atomic unit, cannot be disabled
 
-Feature-folder organization (backend)
-    +-- enables --> Zod validation in Convex mutations
-    (note: breaks all api.* paths, must update frontend in lockstep)
+OPTIONAL OVERLAYS (each independently toggleable at build time):
+  Tasks + Projects ────────── tasks gain nullable projectId
+  Tasks + Subtasks ────────── tasks gain child subtask records
+  Tasks + Work Logs ───────── tasks gain child work log records
+  Tasks + Activity Logs ───── mutations emit audit events (cross-cutting concern)
+  Tasks + Filters ─────────── UI layer, reads existing fields on tasks
+  Tasks + Search ──────────── requires Convex search index on tasks table
 
-Shared Zod schemas
-    +-- requires --> Feature-folder organization (both frontend + backend)
-    +-- enables --> Zod validation in Convex mutations
+INTER-OVERLAY DEPENDENCIES:
+  Subtask Promotion → Tasks ── promoted subtask creates a new task (always safe, tasks always exist)
+  Activity Logs + Projects ─── project events need projectId context in log entries
+  Filters + Projects ──────── "filter by project" dropdown requires projects to exist
+  Subtasks + Projects ─────── promoted subtask inherits parent's projectId (if projects enabled)
 
-Plugin-friendly shared files
-    +-- requires --> Feature-folder organization (frontend)
-    +-- requires --> Thin route files
-    +-- enables --> Git-based plugin system
-
-Git-based plugin system
-    +-- requires --> Plugin-friendly shared files
-    +-- requires --> Feature-scoped barrel exports
-    +-- requires --> Architecture documentation
-    +-- enables --> First-party plugin catalog
-
-CLI generators
-    +-- requires --> Feature-folder organization (established conventions)
-    +-- independent of --> Plugin system (generators work without plugins)
-
-Thin route files
-    +-- requires --> Feature-folder organization (frontend)
+INDEPENDENCE GUARANTEES (no dependency between these pairs):
+  Work Logs  ←/→  Subtasks ──── work logs attach to tasks, subtasks are children of tasks, no interaction
+  Work Logs  ←/→  Projects ──── work logs reference taskId, not projectId
+  Search     ←/→  any overlay ── searches task/project titles regardless of other features
+  Filters    ←/→  Search ────── independent UI mechanisms, different interaction patterns
 ```
 
-### Dependency Notes
+### Dependency Validation Rules
 
-- **Feature folders require shared layer:** You need `src/shared/` to exist before features can import from it. Build the container before filling it.
-- **Backend restructure breaks API paths:** Reorganizing `convex/` changes every `api.app.getUser` to `api.users.get`. All frontend calls must update simultaneously. This is a big-bang migration, not incremental.
-- **Plugin-friendly files require feature folders:** You cannot design merge-friendly navigation config until you know how features are structured. The data-driven nav array reflects the feature list.
-- **Git plugins require documentation:** A plugin branch without a README showing what it adds is useless. Documentation is a prerequisite, not an afterthought.
-- **CLI generators are independent:** Generators can be built any time after feature folder conventions are established. They don't block or depend on the plugin system.
+Inspired by WordPress 6.5's plugin dependency system (`Requires Plugins` header):
 
-## MVP Definition
+1. **Activation order:** A feature overlay cannot be enabled unless its dependencies are enabled
+2. **Deactivation protection:** A foundation feature cannot be removed if overlays depend on it
+3. **Circular dependency prevention:** The DAG above has no cycles by construction (Tasks is always root)
+4. **Validation timing:** Build-time, not runtime -- config file is validated before code generation
 
-### Launch With (v1 -- the restructure itself)
+For v2.0, since all features will be built (not selectively enabled), these rules are documentation of the architectural constraints. They become enforcement rules when the config system is built in v3.0.
 
-Minimum viable architecture modernization. This is what makes the codebase "feature-folder organized."
+---
 
-- [ ] Shared code layer (`src/shared/`) -- foundation everything else builds on
-- [ ] Feature-folder organization (frontend) -- the core deliverable
-- [ ] Feature-folder organization (backend) -- with lockstep API path migration
-- [ ] Thin route files -- routes become glue, features hold logic
-- [ ] Co-located tests -- tests move with their features
-- [ ] Path aliases -- clean imports across the new structure
-- [ ] Shared Zod schemas -- fix the validation gap (username bug is the poster child)
+## Build-Time vs Runtime Configuration
 
-### Add After Validation (v1.x -- plugin infrastructure)
+This is the most architecturally significant decision. Based on research into Frappe's DocType system, WordPress plugin dependencies, and Bullet Train's scaffolding, the right split is:
 
-Features to add once the feature-folder structure is proven stable.
+### Build-Time Config (generates different code / schema)
 
-- [ ] Plugin-friendly shared files -- refactor nav/i18n/errors for clean merges
-- [ ] Feature-scoped barrel exports with ESLint enforcement -- formalize boundaries
-- [ ] CLI generators (Plop.js) -- automate the now-established patterns
-- [ ] Architecture documentation -- document the conventions generators enforce
+| Config | Options | Effect on Generated Code |
+|--------|---------|--------------------------|
+| `features.projects` | `true / false` | Whether `projects` table exists in schema, project CRUD functions, ProjectList/ProjectForm components, project-related routes |
+| `features.subtasks` | `true / false` | Whether `subtasks` table exists, subtask components inside TaskDetail |
+| `features.workLogs` | `true / false` | Whether `workLogs` table exists, work log section in TaskDetail |
+| `features.activityLogs` | `true / false` | Whether activity log emission code is woven into all mutations |
+| `fields.task.status` | `"checkbox" / "three-state" / "custom"` | Shape of status field: boolean vs 3-value enum vs configurable enum. Changes schema type, UI widget, and filter options. |
+| `fields.task.priority` | `"boolean" / "enum" / "none"` | Shape of priority: isHighPriority boolean, 4-level enum, or no priority field at all |
+| `fields.project.status` | `"simple" / "full"` | 2-state (active/archived) vs 4-state (active/on_hold/completed/archived) |
 
-### Future Consideration (v2+ -- plugin ecosystem)
+### Runtime Config (same code, different behavior via settings)
 
-Features to defer until the architecture is battle-tested.
+| Config | Options | Effect |
+|--------|---------|--------|
+| `status.values` | `["todo", "in_progress", "done"]` | Actual status labels within the chosen build-time shape |
+| `priority.values` | `["low", "medium", "high", "urgent"]` | Priority labels if enum shape was chosen |
+| `workLogs.showTime` | `true / false` | Whether timeMinutes field is visible in the work log form |
+| `filters.defaults` | `{ status: "todo" }` | Default filter state when user opens task list |
+| `taskList.pageSize` | `25 / 50 / 100` | Number of tasks per page |
 
-- [ ] Git-based plugin system (install script, CI) -- needs stable base to merge into
-- [ ] First plugin: CI pipeline -- lowest risk proof of concept
-- [ ] First plugin: command palette -- medium complexity, high developer value
-- [ ] First plugin: admin panel -- highest complexity, needs stable feature boundaries
+### Why This Split Matters
 
-## Feature Prioritization Matrix
+**Frappe's lesson:** "Everything is a DocType" works because the Frappe runtime interprets schema definitions dynamically. CalmDo cannot do this -- Convex requires `schema.ts` at compile time, and Convex functions are pre-deployed. The build-time/runtime boundary must be explicit and is dictated by Convex's architecture.
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Shared code layer (`src/shared/`) | HIGH | LOW | P1 |
-| Feature-folder organization (frontend) | HIGH | MEDIUM | P1 |
-| Feature-folder organization (backend) | HIGH | MEDIUM | P1 |
-| Thin route files | HIGH | MEDIUM | P1 |
-| Co-located tests | MEDIUM | LOW | P1 |
-| Shared Zod schemas | HIGH | MEDIUM | P1 |
-| Path aliases | MEDIUM | LOW | P1 |
-| Zod in Convex mutations | MEDIUM | MEDIUM | P1 |
-| Plugin-friendly shared files | HIGH | HIGH | P2 |
-| Feature-scoped barrel exports + ESLint | MEDIUM | LOW | P2 |
-| CLI generators (Plop.js) | MEDIUM | MEDIUM | P2 |
-| Architecture documentation | MEDIUM | LOW | P2 |
-| Git-based plugin system | HIGH | HIGH | P3 |
-| First-party plugin catalog | HIGH | HIGH | P3 |
+**WordPress 6.5 lesson:** `Requires Plugins` header enforces: dependent can only install after dependency is installed, dependent can only activate after dependency is active, dependency cannot be deactivated while dependents are active. CalmDo's feature config should enforce the same DAG rules at build-time validation.
 
-**Priority key:**
-- P1: Must have for launch (the restructure itself)
-- P2: Should have, add when possible (plugin infrastructure)
-- P3: Nice to have, future consideration (plugin ecosystem)
+**Bullet Train lesson:** Super Scaffolding generates ~30 files per entity. The generated code IS the feature -- not a runtime interpretation of config. This is the right model for CalmDo: build-time config drives Plop.js generators that emit schema, functions, components, and tests for each enabled feature block.
 
-## Competitor Feature Analysis
+### v2.0 Practical Implication
 
-| Feature | create-t3-app | FullProduct.dev | ShipFast | Bulletproof-react | Our Approach |
-|---------|---------------|-----------------|----------|-------------------|--------------|
-| Feature folders | No (type-based default) | Yes (core philosophy) | No (flat, "AI-friendly") | Yes (gold standard docs) | Yes -- follow Bulletproof-react conventions |
-| Plugin system | No | Git-based (branch merge) | No | No | Git-based, inspired by FullProduct.dev |
-| CLI generators | `create-t3-app` itself | Not documented | No | No | Plop.js for features, routes, functions |
-| Shared validation | tRPC + Zod (different stack) | Zod schemas in feature folders | Not documented | Not opinionated | Zod v4 shared schemas, client + Convex server |
-| Test co-location | Not opinionated | Not documented | Not documented | Recommended | Tests live in feature folders |
-| Barrel exports | Not enforced | Uses them | Not documented | Enforced (public API per feature) | Enforced with ESLint boundaries |
-| Architecture docs | Excellent (create.t3.gg) | Good (fullproduct.dev/docs) | Minimal | Excellent (GitHub docs) | Feature READMEs + PROVIDERS.md |
-| Backend organization | Next.js API routes | Feature-colocated resolvers | Next.js API routes | Not backend-focused | Feature-organized Convex functions |
+For v2.0, the config file does NOT exist yet. Instead, each feature is built as a self-contained feature folder with:
+- Clear imports only from `@/shared/` or its own internals
+- Nullable foreign keys for cross-feature relationships (e.g., `projectId` on tasks is `v.optional()`)
+- No runtime feature-flag checks ("is projects enabled?") -- all features are present
+- Code structured so that a feature folder could be deleted and only import errors would result (fixable by removing those imports)
+
+The config system is a v3.0 extraction, not a v2.0 implementation.
+
+---
+
+## Patterns from Real Composable Systems
+
+### Pattern 1: Frappe's "Everything Is a DocType"
+**Confidence:** HIGH (verified via Frappe blog and official docs)
+
+Frappe treats every entity as a DocType with uniform CRUD, permissions, workflows, and audit trail. Composability comes from a unified interface (`frappe.get_doc()`, `frappe.db.sql()`) that works identically for any DocType. Modules group related DocTypes but do not create hard runtime boundaries -- any DocType can reference any other.
+
+Key insight: Frappe achieves composability through a **minimal API surface** (5-10 core functions) rather than through fine-grained dependency injection. The framework handles "all repetitive tasks inside the Document class."
+
+**CalmDo application:** Each feature block should expose a uniform mutation pattern. Tasks, projects, subtasks, work logs all follow the same CRUD + audit + validation structure. The uniformity of the pattern IS the composability -- not a plugin API or dependency injection framework.
+
+### Pattern 2: WordPress Plugin Dependencies (6.5+)
+**Confidence:** HIGH (verified via Make WordPress Core announcement, March 2024)
+
+WordPress added native plugin dependency management in 6.5. The mechanism is simple: a `Requires Plugins` header in the plugin file lists comma-separated slugs. The system enforces: cannot install without dependencies present, cannot activate without dependencies active, cannot deactivate if dependents rely on you. Circular dependency detection is built in.
+
+**CalmDo application:** The feature config (when built in v3.0) should validate the dependency DAG at build time. For v2.0, the dependency relationships are documented (above) and enforced by import structure -- if you delete the projects feature folder, the subtask promotion code that references projectId will fail to compile.
+
+### Pattern 3: Linear's Minimal Building Blocks
+**Confidence:** HIGH (verified via Linear features page, multiple reviews)
+
+Linear centers on three concepts: Issues, Projects, Cycles. Everything else (labels, milestones, views) layers on top. The UI stays fast because the data model is simple. Linear performs 3.7x faster than JIRA and 2.3x faster than Asana -- simplicity IS the feature.
+
+Best practice from Linear: "keep labels and statuses minimal and meaningful, revisit workflow simplicity every quarter."
+
+**CalmDo application:** Tasks as the only mandatory entity. Projects, subtasks, work logs are all optional layers. This mirrors Linear's "Issues are the atomic unit" but adds the configurability dimension Linear does not have.
+
+### Pattern 4: Todoist's "Tasks Are Enough"
+**Confidence:** HIGH (well-documented, 30M+ users)
+
+Todoist proves a task app can succeed with just tasks, labels, and natural language input. No projects required in the free tier. No time tracking. No subtasks in the free tier. The simplest configuration is the most popular one. Todoist's NLP task capture ("Send invoices every Friday at 4pm") removes friction that keeps people from using task tools.
+
+**CalmDo application:** The minimal CalmDo config (just tasks, checkbox status, boolean priority) should produce something as simple as Todoist. Complexity is additive, never mandatory. If someone deploys CalmDo with only tasks enabled, it should feel complete, not broken.
+
+### Pattern 5: Scaffold-Based Feature Assembly
+**Confidence:** MEDIUM (observed across Bullet Train, Phoenix generators, Plop.js ecosystem, but no single authoritative reference architecture)
+
+The pattern: a config file describes desired features, a scaffolding tool generates code for each feature, generated code follows strict conventions and is fully editable. The generated code IS the feature -- not a runtime interpretation of config. Bullet Train generates ~30 files per entity. Phoenix `mix phx.gen` generates context, schema, controller, templates, and tests.
+
+**CalmDo application:** The existing Plop.js generators (route, feature, convex-function, form) are the right foundation. For v3.0, extend them to read from `calmdo.config.ts` and generate full feature folders. For v2.0, manually write the features following generator-friendly conventions (predictable file names, consistent patterns) so extraction to templates is straightforward later.
+
+---
+
+## MVP Recommendation
+
+### Tier 1: Build First (vertical slices 1-2)
+1. **Tasks with CRUD** -- the atomic unit, always present
+2. **Status workflow (3-state)** -- todo/in_progress/done as the default shape
+3. **Priority (boolean)** -- isHighPriority, simplest useful priority representation
+4. **Private/shared visibility** -- trust requirement for personal quick tasks
+5. **Task list with basic filtering** -- status filter, priority filter
+
+### Tier 2: Build Second (vertical slices 3-4)
+6. **Projects with status** -- first optional overlay, proves the composability pattern works
+7. **Project-task relationship** -- nullable projectId on tasks, "move to project" action
+8. **Project filter** -- extends existing filter UI with project dimension
+
+### Tier 3: Build Third (vertical slices 5-6)
+9. **Subtasks** -- second optional overlay, includes promotion-to-task flow
+10. **Work logs** -- third optional overlay, with optional timeMinutes field
+
+### Tier 4: Build Fourth (vertical slices 7-8)
+11. **Activity logs** -- cross-cutting concern woven retroactively into existing mutations
+12. **Search** -- Convex search index on task titles and project names
+
+### Defer: Not v2.0
+- Task links (spawned_from/blocked_by) -- excluded per milestone scope
+- Config system / assembler -- premature abstraction, v3.0 concern
+- Comments / mentions / questions -- Phase 2 collaboration per ROADMAP.md
+- Kanban board -- Phase 2 UI per ROADMAP.md
+- Recurring tasks, GTD tags, task recycling -- Future Ideas per ROADMAP.md
+
+### On the Config System Timing
+
+**Build features first. Extract config second.**
+
+The CalmDo roadmap has the right instinct: Phase 1 (CalmDo ROADMAP.md) builds concrete features. The platform vision (VISION.md Phases 3-5) extracts the model definition language and runtime renderer later. For v2.0, "configurable" means:
+
+1. **Code is STRUCTURED for future extraction** -- feature folders with clear boundaries, uniform patterns
+2. **Cross-feature references use nullable FKs** -- projectId is `v.optional(v.id("projects"))`, not required
+3. **Field shapes are isolated** -- status rendering is in one component, not scattered across 15 files
+4. **No runtime feature detection** -- all features are present in v2.0, no `if (config.projects.enabled)` checks
+
+The actual `calmdo.config.ts` file + Plop.js assembler pipeline is a v3.0 deliverable.
+
+---
+
+## Complexity Assessment Per Feature Block
+
+| Feature Block | Schema | Backend | Frontend | Tests | Total | Risk Factor |
+|---------------|--------|---------|----------|-------|-------|-------------|
+| Tasks (CRUD + status + priority + visibility) | Low | Low | Medium | Medium | **Medium** | Low -- well-understood pattern, 7+ prior attempts have stabilized the domain model |
+| Quick task visibility rules (auto-flip) | Low | Medium | Low | Medium | **Medium** | Medium -- the auto-flip from private to shared on reassignment needs careful state machine testing |
+| Projects (CRUD + status lifecycle) | Low | Low | Medium | Medium | **Medium** | Low -- same CRUD pattern as tasks, independent entity |
+| Task-project relationship (nullable FK) | Low | Medium | Medium | Medium | **Medium** | Medium -- "move task to project" action, nullable FK queries, filter interaction |
+| Subtasks (CRUD as children of tasks) | Low | Medium | Medium | Medium | **Medium** | Low -- straightforward parent-child, position ordering |
+| Subtask promotion to task | Medium | High | Medium | High | **High** | High -- atomic operation: create new task + update subtask status + set promotedToTaskId. Must be transactional. |
+| Work logs | Low | Low | Medium | Medium | **Medium** | Low -- simple child entity CRUD with optional time field |
+| Activity logs (auto-generated) | Medium | High | Low | High | **High** | Medium -- cross-cutting: must be woven into every existing mutation without breaking them. Logging failures must not block the primary operation. |
+| Filters (status, priority, project) | None | Low | Medium | Medium | **Medium** | Low -- UI-only concern reading existing indexed fields |
+| Search (Convex text search) | Low | Medium | Medium | Medium | **Medium** | Low -- Convex search indexes are well-documented, limited query flexibility is the only concern |
+
+---
 
 ## Sources
 
-- [Bulletproof React - Project Structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md) -- gold standard for React feature-folder architecture
-- [FullProduct.dev - Project Structure](https://fullproduct.dev/docs/project-structure) -- git-based plugin and feature-folder patterns
-- [FullProduct.dev - Universal App Router](https://github.com/FullProduct-dev/universal-app-router) -- `git merge with/green-stack` plugin pattern
-- [Create T3 App - Folder Structure](https://create.t3.gg/en/folder-structure-app) -- mainstream starter kit conventions
-- [ShipFast](https://shipfa.st/) -- SaaS boilerplate feature expectations and DX patterns
-- [Robin Wieruch - React Folder Structure in 5 Steps](https://www.robinwieruch.de/react-folder-structure/) -- progressive folder structure guide
-- [Plop.js vs Hygen vs Yeoman comparison](https://npm-compare.com/hygen,plop,yeoman-generator) -- scaffolding tool analysis
-- [SaaS Pegasus - Boilerplates Guide](https://www.saaspegasus.com/guides/saas-boilerplates-and-starter-kits/) -- SaaS starter kit landscape
-- PROJECT.md constraints and existing codebase analysis
+### Composable Architecture
+- [Composable Architecture 2025 - Alokai](https://alokai.com/blog/composable-architecture) -- market trends, 80% enterprise adoption
+- [Composable Architecture Guide - Trantor](https://www.trantorinc.com/blog/composable-architecture) -- implementation patterns, MACH framework
+
+### Frappe Framework
+- [Writing Composable Software - Frappe Blog](https://frappe.io/blog/engineering/writing-composable-software) -- unified interface philosophy, minimal API surface
+- [DocType System - DeepWiki](https://deepwiki.com/frappe/frappe/2.3-doctype-system-and-metadata-management) -- metadata management, custom fields, Meta processing
+- [Frappe Module System](https://docs.frappe.io/framework/v15/user/en/basics/doctypes/modules) -- module organization patterns
+
+### WordPress Plugin Dependencies
+- [Introducing Plugin Dependencies in WordPress 6.5 - Make WordPress Core](https://make.wordpress.org/core/2024/03/05/introducing-plugin-dependencies-in-wordpress-6-5/) -- dependency declaration, activation/deactivation rules, circular detection
+
+### Task Management Products
+- [Linear Features](https://linear.app/features) -- minimal building blocks (Issues/Projects/Cycles)
+- [Linear App Case Study - Eleken](https://www.eleken.co/blog-posts/linear-app-case-study) -- 3.7x faster than JIRA, simplicity as feature
+- [Asana vs Todoist - Zapier](https://zapier.com/blog/asana-vs-todoist/) -- feature comparison, different success patterns
+- [Linear App Review - Siit](https://www.siit.io/tools/trending/linear-app-review) -- 150K+ teams, keyboard-first design
+
+### Build-Time Configuration
+- [Feature Flags vs Configuration - PostHog](https://posthog.com/product-engineers/feature-flags-vs-configuration) -- when to use build-time vs runtime config
+- [Feature Flags vs Configuration - CMU](https://www.cs.cmu.edu/~ckaestne/featureflags/) -- academic analysis, compile-time vs runtime binding
+
+### Scaffolding and Code Generation
+- [Bullet Train Super Scaffolding](https://bullettrain.co/docs/super-scaffolding) -- ~30 files per entity, living templates
+- [Scaffold by hay-kot](https://hay-kot.github.io/scaffold/) -- in-project template scaffolding with feature guards
+
+### Schema Design
+- [Configuration Table Pattern - Medium](https://medium.com/@herihermawan/the-ultimate-multifunctional-database-table-design-configuration-table-pattern-4e7f1ee5ed79) -- flexible schema patterns for configurable systems
+- [Task Management Schema Design - Back4App](https://www.back4app.com/tutorials/how-to-design-a-database-schema-for-a-task-and-to-do-list-management-app) -- entity relationships for task apps
 
 ---
-*Feature research for: SaaS starter kit architecture (React + Convex)*
-*Researched: 2026-03-09*
+*Feature research for: CalmDo Core configurable task management system (v2.0)*
+*Researched: 2026-03-10*
