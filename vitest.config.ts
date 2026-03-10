@@ -53,6 +53,7 @@ export default defineConfig({
         "convex/http.ts",
         "convex/email/**",
         "convex/otp/**",
+        "convex/password/**",
         // Auth provider config (no logic to test)
         "convex/auth.ts",
         "convex/auth.config.ts",
