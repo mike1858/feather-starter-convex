@@ -3,11 +3,12 @@
 ## Milestones
 
 - ✅ **v1.0 Architecture Modernization** — Phase 1 (shipped 2026-03-09)
+- 📋 **v2.0 CalmDo Core** — Phases 2-6 (planned)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 Architecture Modernization (Phase 1) — SHIPPED 2026-03-09</summary>
+<summary>v1.0 Architecture Modernization (Phase 1) — SHIPPED 2026-03-09</summary>
 
 - [x] Phase 1: Architecture Modernization (9/9 plans) — completed 2026-03-09
 
@@ -15,8 +16,118 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 
 </details>
 
+### v2.0 CalmDo Core
+
+**Milestone Goal:** Build a task management system as vertical slices showcasing the starter template architecture — tasks, projects, subtasks, time logging, and audit trail.
+
+**Phase Numbering:**
+- Integer phases (2, 3, 4...): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 2: Auth & DX Infrastructure** - Password auth, dev mailbox, pre-commit hooks, and E2E test setup
+- [ ] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views
+- [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
+- [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
+- [ ] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities
+
+## Phase Details
+
+### Phase 2: Auth & DX Infrastructure
+**Goal**: Users can sign in with email/password and developers have automated quality gates and E2E testing
+**Depends on**: Phase 1 (existing codebase)
+**Requirements**: AUTH-01, AUTH-02, DX-01, DX-02, DX-03
+**Success Criteria** (what must be TRUE):
+  1. User can sign up and sign in with email and password (in addition to existing OTP and GitHub OAuth)
+  2. User can reset a forgotten password via an email link
+  3. Developer can view all emails sent during development at a dev-only route (no external email service needed)
+  4. Every git commit automatically enforces 100% test coverage via pre-commit hook
+  5. At least one Playwright E2E test covers a full user-facing flow (auth round-trip)
+**Plans**: 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Password auth backend + UI (sign up/sign in with email+password)
+- [ ] 02-02-PLAN.md — Lefthook pre-commit hooks (typecheck + test coverage)
+- [ ] 02-03-PLAN.md — Password reset flow + dev mailbox (reset form, email interception, dev route)
+- [ ] 02-04-PLAN.md — Playwright E2E tests (auth, onboarding, settings flows)
+
+### Phase 3: Tasks
+**Goal**: Users can create, manage, and organize tasks with visibility rules, assignment, and status workflow
+**Depends on**: Phase 2
+**Requirements**: TASK-01, TASK-02, TASK-03, TASK-04, TASK-05, TASK-06, TASK-07, TASK-08, TASK-09, TASK-10, VIEW-01, VIEW-02, VIEW-06
+**Success Criteria** (what must be TRUE):
+  1. User can create a quick task (no project, private by default), edit its title/description/priority, and delete it with confirmation
+  2. User can advance a task through todo, in_progress, done status workflow
+  3. User can assign a task to a team member; assigning to someone else auto-flips visibility to shared
+  4. User sees their assigned tasks in "My Tasks" view and unassigned shared tasks in "Team Pool" view
+  5. Sidebar navigation includes My Tasks, Team Pool, and Projects sections
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: TBD
+- [ ] 03-02: TBD
+- [ ] 03-03: TBD
+
+### Phase 4: Projects
+**Goal**: Users can organize tasks into projects with status lifecycle and filtered project views
+**Depends on**: Phase 3
+**Requirements**: PROJ-01, PROJ-02, PROJ-03, PROJ-04, PROJ-05, PROJ-06, PROJ-07, VIEW-03, VIEW-04
+**Success Criteria** (what must be TRUE):
+  1. User can create, edit, and delete a project (delete cascades to its tasks and work logs)
+  2. User can view a projects list filtered by status (active/on_hold/completed/archived) with task counts per project
+  3. User can assign a task to a project (optional — tasks work fine without a project)
+  4. User can view all tasks within a project filtered by status/assignee/priority, with a status summary bar
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+- [ ] 04-02: TBD
+
+### Phase 5: Subtasks & Work Logs
+**Goal**: Users can break tasks into subtasks (with promotion) and log work with optional time tracking
+**Depends on**: Phase 3
+**Requirements**: SUB-01, SUB-02, SUB-03, SUB-04, SUB-05, SUB-06, SUB-07, WLOG-01, WLOG-02, WLOG-03, WLOG-04
+**Success Criteria** (what must be TRUE):
+  1. User can add, edit, reorder, and delete subtasks within a task, and parent task shows completion count (e.g., "3/5 done")
+  2. User can promote a subtask to a full task (subtask marked as "promoted" with link to new task)
+  3. User can add a work log entry to any task (body text + optional time in minutes), and edit/delete their own entries
+  4. Task detail shows total time logged across all work log entries
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+- [ ] 05-02: TBD
+
+### Phase 6: Activity Logs & Search
+**Goal**: System provides an auto-generated audit trail and users can search/filter across all entities
+**Depends on**: Phase 3, Phase 4, Phase 5
+**Requirements**: ACTV-01, ACTV-02, ACTV-03, ACTV-04, SRCH-01, SRCH-02, SRCH-03, SRCH-04, SRCH-05, SRCH-06, VIEW-05
+**Success Criteria** (what must be TRUE):
+  1. System auto-logs events for tasks (created, status_changed, assigned, edited, deleted), projects (created, status_changed, edited), and subtasks (created, completed, promoted)
+  2. Task detail view shows the full task with subtasks, work logs, and a combined activity timeline grouped by date
+  3. User can filter tasks by status, priority, project, and assignee from filter controls
+  4. User can filter projects by status
+  5. User can text-search across task titles and project names from a search box in the header
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+- [ ] 06-02: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 2 -> 3 -> 4 -> 5 -> 6
+(Phases 4 and 5 both depend on 3 but not each other; Phase 6 depends on 3, 4, and 5)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Architecture Modernization | v1.0 | 9/9 | Complete | 2026-03-09 |
+| 2. Auth & DX Infrastructure | v2.0 | 0/4 | Not started | - |
+| 3. Tasks | v2.0 | 0/? | Not started | - |
+| 4. Projects | v2.0 | 0/? | Not started | - |
+| 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
+| 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |
+
+---
+*Roadmap created: 2026-03-10*
+*Last updated: 2026-03-10*
