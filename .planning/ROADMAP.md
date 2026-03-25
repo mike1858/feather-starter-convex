@@ -175,7 +175,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 4 -> 5 -> 6
 | 2. Auth & DX Infrastructure | v2.0 | 4/4 | Complete | 2026-03-10 |
 | 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
 | 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
-| 03.1 Verification Bug Fixes | v2.0 | 0/2 | Not started | - |
+| 03.1 Verification Bug Fixes | v2.0 | 0/2 | Planned    |  |
 | 4. Projects | v2.0 | 0/? | Not started | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |

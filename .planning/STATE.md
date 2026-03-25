@@ -2,15 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: completed
-last_updated: "2026-03-25T04:56:04.840Z"
-last_activity: 2026-03-25
+status: Ready to execute
+last_updated: "2026-03-25T06:25:41.847Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 3
-  total_plans: 8
+  total_plans: 10
   completed_plans: 8
-  percent: 75
 ---
 
 # Project State
@@ -20,16 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** v2.0 CalmDo Core -- Phase 4 (Projects)
+**Current focus:** Phase 03.1 — verification-bug-fixes
 
 ## Current Position
 
-Phase: 4 of 6 (Projects)
-Plan: 0 of ? complete
-Status: Phase 3 complete, ready for Phase 4
-Last activity: 2026-03-25 -- Completed Phase 03 (Tasks)
-
-Progress: [████████░░] 75% (v2.0)
+Phase: 03.1 (verification-bug-fixes) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -52,6 +46,7 @@ Progress: [████████░░] 75% (v2.0)
 | 02.1 | 02 | 5min | 3 | 0 |
 | 03 | 01 | 10min | 3 | 8 |
 | 03 | 02 | 21min | 3 | 18 |
+| Phase 03.1 P01 | 7min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -84,6 +79,9 @@ Recent:
 - [Phase 03]: Combined task commits due to pre-commit 100% coverage hook
 - [Phase 03]: Used v8 ignore pragmas for dnd-kit drag handlers and Radix Select (untestable in jsdom)
 - [Phase 03]: Excluded root errors.ts re-export barrel from coverage (pre-existing 0% issue)
+- [Phase 03.1]: availableProviders query is public (no auth guard) -- login page needs provider info pre-authentication
+- [Phase 03.1]: Resend skip uses early return when provider.apiKey is falsy (after dev mailbox store)
+- [Phase 03.1]: Dev mailbox moved from _auth to _app layout to bypass auth guard while keeping sidebar nav
 
 ### Pending Todos
 
