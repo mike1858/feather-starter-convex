@@ -15,7 +15,7 @@ import { Route as AppAuthRouteImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutRouteImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexRouteImport } from './routes/_app/login/_layout.index'
 import { Route as AppAuthOnboardingLayoutRouteImport } from './routes/_app/_auth/onboarding/_layout'
-import { Route as AppAuthDevMailboxRouteImport } from './routes/_app/_auth/dev/mailbox'
+import { Route as AppDevMailboxRouteImport } from './routes/_app/dev/mailbox'
 import { Route as AppAuthDashboardLayoutRouteImport } from './routes/_app/_auth/dashboard/_layout'
 import { Route as AppAuthDashboardLayoutIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.index'
 import { Route as AppAuthOnboardingLayoutUsernameRouteImport } from './routes/_app/_auth/onboarding/_layout.username'
@@ -52,10 +52,10 @@ const AppAuthOnboardingLayoutRoute = AppAuthOnboardingLayoutRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AppAuthRoute,
 } as any)
-const AppAuthDevMailboxRoute = AppAuthDevMailboxRouteImport.update({
+const AppDevMailboxRoute = AppDevMailboxRouteImport.update({
   id: '/dev/mailbox',
   path: '/dev/mailbox',
-  getParentRoute: () => AppAuthRoute,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAuthDashboardLayoutRoute = AppAuthDashboardLayoutRouteImport.update({
   id: '/dashboard/_layout',
@@ -103,7 +103,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AppLoginLayoutRouteWithChildren
   '/dashboard': typeof AppAuthDashboardLayoutRouteWithChildren
-  '/dev/mailbox': typeof AppAuthDevMailboxRoute
+  '/dev/mailbox': typeof AppDevMailboxRoute
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login/': typeof AppLoginLayoutIndexRoute
   '/dashboard/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
@@ -115,7 +115,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dev/mailbox': typeof AppAuthDevMailboxRoute
+  '/dev/mailbox': typeof AppDevMailboxRoute
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login': typeof AppLoginLayoutIndexRoute
   '/dashboard/tasks': typeof AppAuthDashboardLayoutTasksRoute
@@ -131,7 +131,7 @@ export interface FileRoutesById {
   '/_app/_auth': typeof AppAuthRouteWithChildren
   '/_app/login/_layout': typeof AppLoginLayoutRouteWithChildren
   '/_app/_auth/dashboard/_layout': typeof AppAuthDashboardLayoutRouteWithChildren
-  '/_app/_auth/dev/mailbox': typeof AppAuthDevMailboxRoute
+  '/_app/dev/mailbox': typeof AppDevMailboxRoute
   '/_app/_auth/onboarding/_layout': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/_app/login/_layout/': typeof AppLoginLayoutIndexRoute
   '/_app/_auth/dashboard/_layout/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
@@ -174,7 +174,7 @@ export interface FileRouteTypes {
     | '/_app/_auth'
     | '/_app/login/_layout'
     | '/_app/_auth/dashboard/_layout'
-    | '/_app/_auth/dev/mailbox'
+    | '/_app/dev/mailbox'
     | '/_app/_auth/onboarding/_layout'
     | '/_app/login/_layout/'
     | '/_app/_auth/dashboard/_layout/settings'
@@ -234,12 +234,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthOnboardingLayoutRouteImport
       parentRoute: typeof AppAuthRoute
     }
-    '/_app/_auth/dev/mailbox': {
-      id: '/_app/_auth/dev/mailbox'
+    '/_app/dev/mailbox': {
+      id: '/_app/dev/mailbox'
       path: '/dev/mailbox'
       fullPath: '/dev/mailbox'
-      preLoaderRoute: typeof AppAuthDevMailboxRouteImport
-      parentRoute: typeof AppAuthRoute
+      preLoaderRoute: typeof AppDevMailboxRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/_auth/dashboard/_layout': {
       id: '/_app/_auth/dashboard/_layout'
@@ -345,13 +345,11 @@ const AppAuthOnboardingLayoutRouteWithChildren =
 
 interface AppAuthRouteChildren {
   AppAuthDashboardLayoutRoute: typeof AppAuthDashboardLayoutRouteWithChildren
-  AppAuthDevMailboxRoute: typeof AppAuthDevMailboxRoute
   AppAuthOnboardingLayoutRoute: typeof AppAuthOnboardingLayoutRouteWithChildren
 }
 
 const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthDashboardLayoutRoute: AppAuthDashboardLayoutRouteWithChildren,
-  AppAuthDevMailboxRoute: AppAuthDevMailboxRoute,
   AppAuthOnboardingLayoutRoute: AppAuthOnboardingLayoutRouteWithChildren,
 }
 
@@ -372,11 +370,13 @@ const AppLoginLayoutRouteWithChildren = AppLoginLayoutRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAuthRoute: typeof AppAuthRouteWithChildren
+  AppDevMailboxRoute: typeof AppDevMailboxRoute
   AppLoginLayoutRoute: typeof AppLoginLayoutRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthRoute: AppAuthRouteWithChildren,
+  AppDevMailboxRoute: AppDevMailboxRoute,
   AppLoginLayoutRoute: AppLoginLayoutRouteWithChildren,
 }
 

@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as auth_queries from "../auth/queries.js";
 import type * as devEmails_mutations from "../devEmails/mutations.js";
 import type * as devEmails_queries from "../devEmails/queries.js";
 import type * as email_index from "../email/index.js";
@@ -35,6 +36,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "auth/queries": typeof auth_queries;
   "devEmails/mutations": typeof devEmails_mutations;
   "devEmails/queries": typeof devEmails_queries;
   "email/index": typeof email_index;

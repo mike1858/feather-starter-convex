@@ -5,7 +5,7 @@ import { api } from "@cvx/_generated/api";
 import { useState } from "react";
 import { Button } from "@/ui/button";
 
-export const Route = createFileRoute("/_app/_auth/dev/mailbox")({
+export const Route = createFileRoute("/_app/dev/mailbox")({
   component: DevMailbox,
 });
 
