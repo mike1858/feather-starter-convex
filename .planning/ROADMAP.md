@@ -27,6 +27,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 - [x] **Phase 2: Auth & DX Infrastructure** - Password auth, dev mailbox, pre-commit hooks, and E2E test setup (completed 2026-03-10)
 - [x] **Phase 02.1: Stripe Plugin Extraction** (INSERTED) - Extract billing/Stripe to optional plugin branch (completed 2026-03-10)
 - [x] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views (completed 2026-03-25)
+- [ ] **Phase 03.1: Verification Bug Fixes** (INSERTED) - Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish
 - [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
 - [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
 - [ ] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities
@@ -83,6 +84,39 @@ Plans:
 - [x] 03-01-PLAN.md — Task backend: Zod schemas, Convex table, all mutations and queries with tests
 - [x] 03-02-PLAN.md — Task frontend: components, routes, nav wiring, i18n, and frontend tests
 
+### Phase 03.1: Verification Bug Fixes (INSERTED)
+
+**Goal:** Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish
+**Depends on:** Phase 3
+**Source:** Phase 2+3 UAT (03-UAT.md + manual verification 2026-03-25)
+**Success Criteria** (what must be TRUE):
+  1. OTP and password reset flows work on local dev without Resend API key (dev mailbox captures emails, Resend skipped)
+  2. Dev mailbox is accessible without auth and renders inside dashboard layout
+  3. Unassigning a task makes it appear in Team Pool (auto-flip to shared)
+  4. Auth errors (duplicate account, deleted account) show user-friendly messages
+  5. Unconfigured auth providers (GitHub, OTP) are hidden from login page
+  6. Login form is centered on the page
+  7. Username lowercase hint shown on onboarding and settings; settings form re-syncs with server
+**Plans**: 2 plans
+
+Plans:
+- [ ] 03.1-01-PLAN.md — Backend + infrastructure fixes: task unassign visibility, JWT provisioning, Resend skip, dev mailbox route, provider availability query
+- [ ] 03.1-02-PLAN.md — Frontend/UI fixes: auth error messages, hide unconfigured providers, email persistence, centered login, username hints, settings re-sync
+
+**Issues:**
+- P1: Unassign task → limbo (visibility stays private) — `convex/tasks/mutations.ts`
+- P1: JWT keys not auto-provisioned for local backend — `package.json`
+- P1: Resend throws without API key, blocks OTP + password reset — `convex/otp/ResendOTP.ts`, `convex/password/ResendOTPPasswordReset.ts`
+- P2: Dev mailbox requires auth (can't read OTP to sign in) — route structure
+- P2: Dev mailbox captures no emails on local — `storeDevEmail` may fail silently
+- P2: Auth errors not surfaced in UI — `src/features/auth/components/PasswordForm.tsx`
+- P2: Unconfigured auth providers visible — login page
+- P3: Dev mailbox has no header/nav — outside dashboard layout
+- P3: Username lowercase, no hint — onboarding + settings
+- P3: Settings username form doesn't re-sync — `SettingsPage.tsx`
+- P3: Email not persisted across auth forms — login page state
+- P3: Login form not centered — login page layout
+
 ### Phase 4: Projects
 **Goal**: Users can organize tasks into projects with status lifecycle and filtered project views
 **Depends on**: Phase 3
@@ -132,7 +166,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 2 -> 02.1 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 4 -> 5 -> 6
 (Phases 4 and 5 both depend on 3 but not each other; Phase 6 depends on 3, 4, and 5)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -141,10 +175,11 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 4 -> 5 -> 6
 | 2. Auth & DX Infrastructure | v2.0 | 4/4 | Complete | 2026-03-10 |
 | 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
 | 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
+| 03.1 Verification Bug Fixes | v2.0 | 0/2 | Not started | - |
 | 4. Projects | v2.0 | 0/? | Not started | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-10*
-*Last updated: 2026-03-10*
+*Last updated: 2026-03-25*
