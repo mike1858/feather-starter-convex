@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** v2.0 CalmDo Core -- Phase 3 (Tasks)
+**Current focus:** v2.0 CalmDo Core -- Phase 4 (Projects)
 
 ## Current Position
 
-Phase: 3 of 6 (Tasks)
-Plan: 2 of 2 complete
-Status: Phase 02.1 complete, ready for Phase 3
-Last activity: 2026-03-25
+Phase: 4 of 6 (Projects)
+Plan: 0 of ? complete
+Status: Phase 3 complete, ready for Phase 4
+Last activity: 2026-03-25 -- Completed Phase 03 (Tasks)
 
 Progress: [████████░░] 75% (v2.0)
 
@@ -50,8 +50,8 @@ Progress: [████████░░] 75% (v2.0)
 |-------|------|----------|-------|-------|
 | 02.1 | 01 | 10min | 2 | 48 |
 | 02.1 | 02 | 5min | 3 | 0 |
-| Phase 03 P01 | 10min | 3 tasks | 8 files |
-| Phase Phase 03 P02 P21min | 21min | 3 tasks | 18 files |
+| 03 | 01 | 10min | 3 | 8 |
+| 03 | 02 | 21min | 3 | 18 |
 
 ## Accumulated Context
 
