@@ -67,7 +67,7 @@ describe("PasswordResetForm", () => {
 
     // Should transition to verify step
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
       expect(
         screen.getByPlaceholderText("New Password"),
       ).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
     });
 
     expect(screen.getByPlaceholderText("New Password")).toBeInTheDocument();
@@ -114,13 +114,13 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
     });
 
     // Reset mock to track only the verify step calls
     mockSignIn.mockClear();
 
-    await user.type(screen.getByPlaceholderText("Reset Code"), "short");
+    await user.type(screen.getByPlaceholderText("8-digit reset code"), "short");
     await user.type(
       screen.getByPlaceholderText("New Password"),
       "newpassword123",
@@ -130,7 +130,7 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code").className).toContain(
+      expect(screen.getByPlaceholderText("8-digit reset code").className).toContain(
         "border-destructive",
       );
     });
@@ -151,13 +151,13 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
     });
 
     mockSignIn.mockClear();
 
     await user.type(
-      screen.getByPlaceholderText("Reset Code"),
+      screen.getByPlaceholderText("8-digit reset code"),
       "12345678",
     );
     await user.type(screen.getByPlaceholderText("New Password"), "short");
@@ -187,13 +187,13 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
     });
 
     mockSignIn.mockClear();
 
     await user.type(
-      screen.getByPlaceholderText("Reset Code"),
+      screen.getByPlaceholderText("8-digit reset code"),
       "12345678",
     );
     await user.type(
@@ -243,7 +243,7 @@ describe("PasswordResetForm", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Reset Code")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
     });
 
     await user.click(

@@ -192,6 +192,18 @@ function VerifyResetStep({
         <p className="text-center text-base font-normal text-primary/60">
           We sent a code to {email}. Enter it below with your new password.
         </p>
+        {/* v8 ignore start -- dev-only link, not rendered in production */
+        import.meta.env.DEV && (
+          <a
+            href="/dev/mailbox"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-center text-sm text-blue-500 hover:underline"
+          >
+            Open Dev Mailbox to get the code
+          </a>
+        )
+        /* v8 ignore stop */}
       </div>
 
       <form
@@ -215,11 +227,13 @@ function VerifyResetStep({
             }}
             children={(field) => (
               <Input
-                placeholder="Reset Code"
+                placeholder="8-digit reset code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                className={`bg-transparent ${
+                className={`bg-transparent font-mono text-lg tracking-widest ${
                   /* v8 ignore start -- branch depends on TanStack Form re-render timing */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
