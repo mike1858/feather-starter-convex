@@ -28,6 +28,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 - [x] **Phase 02.1: Stripe Plugin Extraction** (INSERTED) - Extract billing/Stripe to optional plugin branch (completed 2026-03-10)
 - [x] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views (completed 2026-03-25)
 - [x] **Phase 03.1: Verification Bug Fixes** (INSERTED) - Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish (completed 2026-03-25)
+- [ ] **Phase 03.2: CRUD Generator Upgrade** (INSERTED) - Upgrade Plop.js generators to produce fully working CRUD features; generator output is a runnable feature that agents then customize
 - [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
 - [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
 - [ ] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities
@@ -83,6 +84,21 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Task backend: Zod schemas, Convex table, all mutations and queries with tests
 - [x] 03-02-PLAN.md — Task frontend: components, routes, nav wiring, i18n, and frontend tests
+
+### Phase 03.2: CRUD Generator Upgrade (INSERTED)
+
+**Goal:** Upgrade Plop.js generators to produce fully working CRUD features (like Phoenix gen.live / Rails scaffolds) — the generator output should be a runnable feature that an agent then customizes for domain-specific logic
+**Requirements**: GEN-01, GEN-02, GEN-03, GEN-04, GEN-05
+**Depends on:** Phase 3
+**Success Criteria** (what must be TRUE):
+  1. Running the generator with a feature name produces a fully working CRUD (list page, detail page, form, backend mutations+queries, tests) that passes all tests at 100% coverage
+  2. Generated code follows all existing conventions (feature folders, Zod schemas, zodToConvex, auth guards, i18n, nav wiring, error constants)
+  3. Phase 4 (Projects) can be started by running the generator and then customizing the output
+  4. The tasks feature (Phase 3) structure is consistent with what the generator would produce
+**Plans:** TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 03.2 to break down)
 
 ### Phase 03.1: Verification Bug Fixes (INSERTED)
 
@@ -166,8 +182,8 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 4 -> 5 -> 6
-(Phases 4 and 5 both depend on 3 but not each other; Phase 6 depends on 3, 4, and 5)
+Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6
+(Phase 03.2 upgrades generators before Phase 4 uses them; Phases 4 and 5 both depend on 3 but not each other; Phase 6 depends on 3, 4, and 5)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -176,6 +192,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 4 -> 5 -> 6
 | 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
 | 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
 | 03.1 Verification Bug Fixes | v2.0 | 2/2 | Complete    | 2026-03-25 |
+| 03.2 CRUD Generator Upgrade | v2.0 | 0/? | Not started | - |
 | 4. Projects | v2.0 | 0/2 | Planned | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |

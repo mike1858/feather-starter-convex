@@ -96,6 +96,7 @@ Recent:
 - Phase 02.1 inserted after Phase 2: Stripe Plugin Extraction (URGENT) -- Stripe blocks team in India from running the starter; extract as optional plugin
 - Plan 02.1-01 completed: core is billing-free, all tests pass at 100%
 - Plan 02.1-02 completed: plugin/billing branch created, 3 existing plugins rebased onto billing-free main
+- Phase 03.2 inserted after Phase 3: CRUD Generator Upgrade (URGENT) -- Generators produce TODO stubs, not working CRUD; upgrade to Phoenix gen.live / Rails scaffold level before building more features
 
 ### Blockers/Concerns
 
