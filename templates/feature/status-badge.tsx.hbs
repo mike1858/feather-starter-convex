@@ -1,0 +1,95 @@
+// @generated-start imports
+import { useConvexMutation } from "@convex-dev/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "~/convex/_generated/api";
+import { useTranslation } from "react-i18next";
+import type { Id } from "~/convex/_generated/dataModel";
+// @generated-end imports
+// @custom-start imports
+// @custom-end imports
+
+{{#each fields}}
+{{#if transitions}}
+/**
+ * Color palette for {{@key}} badge (8-slot round-robin by YAML values order).
+ */
+const {{upperSnakeCase @key}}_COLORS: Record<string, { dot: string; text: string }> = {
+  {{#each values}}
+  "{{this}}": { dot: "{{enumBadgeClasses ../this this}}" },
+  {{/each}}
+};
+
+/**
+ * Valid transitions for {{@key}}.
+ */
+const {{upperSnakeCase @key}}_TRANSITIONS: Record<string, string | null> = {
+  {{#each transitions}}
+  "{{@key}}": "{{this}}",
+  {{/each}}
+};
+
+/**
+ * Labels for {{@key}} values.
+ */
+const {{upperSnakeCase @key}}_LABELS: Record<string, string> = {
+  {{#each values}}
+  "{{this}}": "{{sentenceCase this}}",
+  {{/each}}
+};
+{{/if}}
+{{/each}}
+
+{{#each fields}}
+{{#if transitions}}
+interface {{pascalCase ../name}}StatusBadgeProps {
+  status: string;
+  itemId: Id<"{{../name}}">;
+}
+
+export function {{pascalCase ../name}}StatusBadge({
+  status,
+  itemId,
+}: {{pascalCase ../name}}StatusBadgeProps) {
+  const { t } = useTranslation("{{../name}}");
+
+  const { mutateAsync: updateStatus } = useMutation({
+    mutationFn: useConvexMutation(api.{{../name}}.mutations.updateStatus),
+  });
+
+  const colors = {{upperSnakeCase @key}}_COLORS[status] || { dot: "bg-gray-400", text: "text-gray-600" };
+  const nextStatus = {{upperSnakeCase @key}}_TRANSITIONS[status] ?? null;
+  const currentLabel = {{upperSnakeCase @key}}_LABELS[status] || status;
+  const nextLabel = nextStatus ? {{upperSnakeCase @key}}_LABELS[nextStatus] : null;
+  const isTerminal = nextStatus === null;
+
+  const handleClick = async () => {
+    if (isTerminal || !nextStatus) return;
+    await updateStatus({ {{camelCase ../name}}Id: itemId, {{@key}}: nextStatus });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      disabled={isTerminal}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors duration-150 hover:bg-primary/5 disabled:cursor-default disabled:opacity-60 ${colors.text}`}
+      title={nextLabel ? `Mark as ${nextLabel}` : currentLabel}
+    >
+      <span
+        className={`h-2 w-2 rounded-full ${colors.dot}`}
+        aria-hidden="true"
+      />
+      {currentLabel}
+    </button>
+  );
+}
+{{/if}}
+{{/each}}
