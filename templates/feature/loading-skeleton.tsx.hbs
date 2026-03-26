@@ -1,0 +1,123 @@
+{{!-- @generated-start loading-skeleton --}}
+
+interface {{pascalCase name}}LoadingSkeletonProps {
+  variant: "list" | "card" | "table";
+}
+
+export function {{pascalCase name}}LoadingSkeleton({ variant }: {{pascalCase name}}LoadingSkeletonProps) {
+  if (variant === "list") {
+    return (
+      <div className="flex flex-col gap-2">
+        {{#ifEq views.list.density "compact"}}
+        {/* Compact density skeleton */}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2 rounded-lg px-4 py-2"
+          >
+            <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
+            <div className="h-3.5 flex-1 max-w-[60%] rounded bg-muted animate-pulse" />
+            <div className="h-3.5 w-16 rounded bg-muted animate-pulse" />
+          </div>
+        ))}
+        {{else}}
+        {/* Comfortable density skeleton */}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-4 rounded-lg px-4 py-4"
+          >
+            <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
+            <div className="h-4 flex-1 max-w-[60%] rounded bg-muted animate-pulse" />
+            <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+            <div className="h-4 w-8 rounded bg-muted animate-pulse" />
+          </div>
+        ))}
+        {{/ifEq}}
+      </div>
+    );
+  }
+
+  if (variant === "card") {
+    {{!-- Card skeleton varies by image style --}}
+    {{#ifEq views.card.imageStyle "cover"}}
+    return (
+      <div className="{{#ifEq views.card.size 'compact'}}grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4{{else}}{{#ifEq views.card.size 'large'}}grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2{{else}}grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3{{/ifEq}}{{/ifEq}}">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-lg border border-border overflow-hidden">
+            <div className="aspect-video w-full bg-muted animate-pulse" />
+            <div className="p-6">
+              <div className="h-4 w-3/4 rounded bg-muted mb-4 animate-pulse" />
+              <div className="h-3 w-full rounded bg-muted mb-1 animate-pulse" />
+              <div className="h-3 w-2/3 rounded bg-muted mb-4 animate-pulse" />
+              <div className="flex justify-between">
+                <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+    {{else}}
+    {{#ifEq views.card.imageStyle "overlay"}}
+    return (
+      <div className="{{#ifEq views.card.size 'compact'}}grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4{{else}}{{#ifEq views.card.size 'large'}}grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2{{else}}grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3{{/ifEq}}{{/ifEq}}">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-lg aspect-[3/2] bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+    {{else}}
+    {/* none / thumbnail image style skeleton */}
+    return (
+      <div className="{{#ifEq views.card.size 'compact'}}grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4{{else}}{{#ifEq views.card.size 'large'}}grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2{{else}}grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3{{/ifEq}}{{/ifEq}}">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-lg border border-border p-6">
+            <div className="h-4 w-3/4 rounded bg-muted mb-4 animate-pulse" />
+            <div className="h-3 w-full rounded bg-muted mb-1 animate-pulse" />
+            <div className="h-3 w-2/3 rounded bg-muted mb-4 animate-pulse" />
+            <div className="flex justify-between">
+              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+    {{/ifEq}}
+    {{/ifEq}}
+  }
+
+  if (variant === "table") {
+    return (
+      <div className="rounded-lg border border-border bg-card shadow-card overflow-hidden">
+        {/* Skeleton header */}
+        <div className="bg-surface-secondary px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="h-3 w-[30%] rounded bg-muted animate-pulse" />
+            <div className="h-3 w-[15%] rounded bg-muted animate-pulse" />
+            <div className="h-3 w-[15%] rounded bg-muted animate-pulse" />
+            <div className="h-3 w-[10%] rounded bg-muted animate-pulse" />
+          </div>
+        </div>
+
+        {/* Skeleton rows */}
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-4 px-6 py-4 border-b border-border last:border-b-0"
+          >
+            <div className="h-4 w-[30%] rounded bg-muted animate-pulse" />
+            <div className="h-4 w-[15%] rounded bg-muted animate-pulse" />
+            <div className="h-4 w-[15%] rounded bg-muted animate-pulse" />
+            <div className="h-4 w-[10%] rounded bg-muted animate-pulse" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+}
+{{!-- @generated-end loading-skeleton --}}
