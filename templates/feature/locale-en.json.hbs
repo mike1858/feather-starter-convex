@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "{{name}}": "{{labelPlural}}"{{#each views.filteredViews}},
+    "{{name}}": "{{label}}"{{/each}}
+  },
+  "page": {
+    "title": "{{labelPlural}}",
+    "description": "Manage your {{lowerCase labelPlural}}."
+  },
+  "form": {
+    "addInline": "Add {{lowerCase label}}...",
+    "submit": "Add",
+    "create": "Create {{label}}",
+    "save": "Save Changes",
+    "edit": "Edit",
+    "discard": "Discard",
+    "discardChanges": "Discard Changes",
+    "close": "Close"
+  },
+  "empty": {
+    "title": "No {{lowerCase labelPlural}} yet",
+    "description": "Create your first {{lowerCase label}} to get started.",
+    "cta": "Create {{label}}",
+    "noResults": "No results",
+    "noResultsDescription": "No {{lowerCase labelPlural}} match the current filter. Try adjusting your filters."
+  },
+  "error": {
+    "notFound": "{{label}} not found.",
+    "invalidTransition": "Invalid status transition.",
+    "authRequired": "Sign in required.",
+    "loadFailedTitle": "Something went wrong",
+    "loadFailedDescription": "We couldn't load your {{lowerCase labelPlural}}. Please try again.",
+    "retry": "Retry"
+  },
+  "delete": {
+    "confirm": "Delete?"
+  },
+  "table": {
+    "showing": "Showing \{{start}}-\{{end}} of \{{total}}",
+    "rowsPerPage": "Rows per page"
+  },
+  "filter": {
+    "all": "All"
+  },
+  "search": {
+    "placeholder": "Search {{lowerCase labelPlural}}..."
+  },
+  "detail": {
+    "editing": "Editing \{{recordTitle}}",
+    "notSet": "Not set"
+  },
+  "priority": {
+    "high": "High Priority",
+    "normal": "Normal"
+  }{{#each fields}}{{#ifEq type "enum"}},
+  "{{@key}}": {
+    {{#each values}}
+    "{{this}}": "{{sentenceCase this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  }{{/ifEq}}{{/each}}
+}

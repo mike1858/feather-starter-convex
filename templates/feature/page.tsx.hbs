@@ -1,0 +1,117 @@
+// @generated-start imports
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { convexQuery } from "@convex-dev/react-query";
+import { api } from "~/convex/_generated/api";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { {{pascalCase name}}TitleBar } from "./{{pascalCase name}}TitleBar";
+{{#if operations.create}}
+import { {{pascalCase name}}Form } from "./{{pascalCase name}}Form";
+{{/if}}
+{{#ifEq views.default.enabledViews.length 1}}
+{{#each views.default.enabledViews}}
+import { {{pascalCase ../name}}{{pascalCase this}}View } from "./{{pascalCase ../name}}{{pascalCase this}}View";
+{{/each}}
+{{else}}
+import { {{pascalCase name}}ViewSwitcher } from "./{{pascalCase name}}ViewSwitcher";
+{{#each views.default.enabledViews}}
+import { {{pascalCase ../name}}{{pascalCase this}}View } from "./{{pascalCase ../name}}{{pascalCase this}}View";
+{{/each}}
+{{/ifEq}}
+{{#if views.filteredViews}}
+import { {{pascalCase name}}FilterBar } from "./{{pascalCase name}}FilterBar";
+{{/if}}
+import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+// @generated-end imports
+// @custom-start imports
+// @custom-end imports
+
+export function {{pascalCase name}}Page() {
+  const { t } = useTranslation("{{name}}");
+  const { data: items = [] } = useSuspenseQuery(
+    convexQuery(api.{{name}}.queries.list, {}),
+  );
+
+  // @generated-start state
+  const [activeView, setActiveView] = useState<string>(
+    () => localStorage.getItem("{{name}}-view-preference") || "{{views.default.defaultView}}"
+  );
+  {{#if views.filteredViews}}
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  {{/if}}
+  // @generated-end state
+  // @custom-start state
+  // @custom-end state
+
+  {{#if views.filteredViews}}
+  const filteredItems = activeFilter === "all"
+    ? items
+    : items.filter((item: any) => {
+        {{#each views.filteredViews}}
+        if (activeFilter === "{{name}}") {
+          {{#each filters}}
+          if (item.{{@key}} !== {{json this}}) return false;
+          {{/each}}
+          return true;
+        }
+        {{/each}}
+        return true;
+      });
+  {{else}}
+  const filteredItems = items;
+  {{/if}}
+
+  // @generated-start render
+  const renderActiveView = () => {
+    if (filteredItems.length === 0) {
+      return (
+        <{{pascalCase name}}EmptyState
+          variant={{{#if views.filteredViews}}activeFilter !== "all" ? "noMatches" : "noData"{{else}}"noData"{{/if}}}
+        />
+      );
+    }
+
+    {{#ifEq views.default.enabledViews.length 1}}
+    {{#each views.default.enabledViews}}
+    return <{{pascalCase ../name}}{{pascalCase this}}View items={filteredItems} />;
+    {{/each}}
+    {{else}}
+    switch (activeView) {
+      {{#each views.default.enabledViews}}
+      case "{{this}}":
+        return <{{pascalCase ../name}}{{pascalCase this}}View items={filteredItems} />;
+      {{/each}}
+      default:
+        return <{{pascalCase ../name}}{{pascalCase views.default.defaultView}}View items={filteredItems} />;
+    }
+    {{/ifEq}}
+  };
+  // @generated-end render
+
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-5xl">
+      <{{pascalCase name}}TitleBar
+        {{#unless (ifEq views.default.enabledViews.length 1)}}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        {{/unless}}
+        count={filteredItems.length}
+      />
+
+      {{#if operations.create}}
+      <{{pascalCase name}}Form mode="inline" />
+      {{/if}}
+
+      {{#if views.filteredViews}}
+      <{{pascalCase name}}FilterBar
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+      />
+      {{/if}}
+
+      {/* @custom-start content */}
+      {renderActiveView()}
+      {/* @custom-end content */}
+    </div>
+  );
+}

@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "{{name}}": "{{labelPlural}}"{{#each views.filteredViews}},
+    "{{name}}": "{{label}}"{{/each}}
+  },
+  "page": {
+    "title": "{{labelPlural}}",
+    "description": "Administra tus {{lowerCase labelPlural}}."
+  },
+  "form": {
+    "addInline": "Agregar {{lowerCase label}}...",
+    "submit": "Agregar",
+    "create": "Crear {{label}}",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay {{lowerCase labelPlural}}",
+    "description": "Crea tu primer {{lowerCase label}} para comenzar.",
+    "cta": "Crear {{label}}",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay {{lowerCase labelPlural}} que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "{{label}} no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus {{lowerCase labelPlural}}. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando \{{start}}-\{{end}} de \{{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar {{lowerCase labelPlural}}..."
+  },
+  "detail": {
+    "editing": "Editando \{{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  }{{#each fields}}{{#ifEq type "enum"}},
+  "{{@key}}": {
+    {{#each values}}
+    "{{this}}": "{{sentenceCase this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  }{{/ifEq}}{{/each}}
+}

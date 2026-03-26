@@ -1,0 +1,98 @@
+// @generated-start imports
+import { useTranslation } from "react-i18next";
+{{#unless (ifEq views.default.enabledViews.length 1)}}
+import { {{pascalCase name}}ViewSwitcher } from "./{{pascalCase name}}ViewSwitcher";
+{{/unless}}
+{{#if behaviors.search}}
+import { useState, useCallback } from "react";
+import { Search } from "lucide-react";
+{{/if}}
+import { Button } from "@/ui/button";
+// @generated-end imports
+// @custom-start imports
+// @custom-end imports
+
+interface {{pascalCase name}}TitleBarProps {
+  {{#unless (ifEq views.default.enabledViews.length 1)}}
+  activeView: string;
+  onViewChange: (view: string) => void;
+  {{/unless}}
+  count?: number;
+  {{#if behaviors.search}}
+  onSearch?: (query: string) => void;
+  {{/if}}
+}
+
+export function {{pascalCase name}}TitleBar({
+  {{#unless (ifEq views.default.enabledViews.length 1)}}
+  activeView,
+  onViewChange,
+  {{/unless}}
+  count,
+  {{#if behaviors.search}}
+  onSearch,
+  {{/if}}
+}: {{pascalCase name}}TitleBarProps) {
+  const { t } = useTranslation("{{name}}");
+
+  {{#if behaviors.search}}
+  // @generated-start search
+  const [searchQuery, setSearchQuery] = useState("");
+  const handleSearch = useCallback(
+    (() => {
+      let timer: ReturnType<typeof setTimeout>;
+      return (value: string) => {
+        setSearchQuery(value);
+        clearTimeout(timer);
+        timer = setTimeout(() => onSearch?.(value), 300);
+      };
+    })(),
+    [onSearch],
+  );
+  // @generated-end search
+  {{/if}}
+
+  return (
+    <div className="flex items-center justify-between gap-4 mb-6">
+      {/* Left: heading + description */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-semibold tracking-tight text-primary">
+          {t("page.title")}
+        </h1>
+        <p className="text-sm text-primary/60">
+          {t("page.description")}
+        </p>
+      </div>
+
+      {/* Right: search, view switcher, CTA */}
+      <div className="flex items-center gap-2">
+        {{#if behaviors.search}}
+        {/* Search input */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary/40" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder={t("search.placeholder")}
+            className="w-64 h-8 text-xs pl-8 pr-4 rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        {{/if}}
+
+        {{#unless (ifEq views.default.enabledViews.length 1)}}
+        <{{pascalCase name}}ViewSwitcher
+          activeView={activeView}
+          onViewChange={onViewChange}
+        />
+        {{/unless}}
+
+        {{#if operations.create}}
+        <Button size="sm">
+          {t("form.create")}
+        </Button>
+        {{/if}}
+      </div>
+    </div>
+  );
+}
