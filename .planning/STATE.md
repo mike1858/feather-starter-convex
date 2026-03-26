@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Ready to plan
-last_updated: "2026-03-25T06:42:18.021Z"
+status: Executing Phase 03.2
+last_updated: "2026-03-26T14:26:30Z"
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 18
+  completed_plans: 11
 ---
 
 # Project State
@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 03.1 — verification-bug-fixes
+**Current focus:** Phase 03.2 — crud-generator-upgrade
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
+Phase: 03.2 (crud-generator-upgrade) — EXECUTING
+Plan: 2 of 6
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Plan: Not started
 | 03 | 01 | 10min | 3 | 8 |
 | 03 | 02 | 21min | 3 | 18 |
 | Phase 03.1 P01 | 7min | 2 tasks | 10 files |
+| 03.2 | 01 | 9min | 3 | 11 |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent:
 - [Phase 03.1]: availableProviders query is public (no auth guard) -- login page needs provider info pre-authentication
 - [Phase 03.1]: Resend skip uses early return when provider.apiKey is falsy (after dev mailbox store)
 - [Phase 03.1]: Dev mailbox moved from _auth to _app layout to bypass auth guard while keeping sidebar nav
+- [Phase 03.2]: Generator utils as plain ESM .js with JSDoc types from types.ts (Plop imports directly, no compilation)
+- [Phase 03.2]: deepmerge array strategy: feature YAML arrays replace defaults entirely (no merge)
 
 ### Pending Todos
 
@@ -97,6 +100,7 @@ Recent:
 - Plan 02.1-01 completed: core is billing-free, all tests pass at 100%
 - Plan 02.1-02 completed: plugin/billing branch created, 3 existing plugins rebased onto billing-free main
 - Phase 03.2 inserted after Phase 3: CRUD Generator Upgrade (URGENT) -- Generators produce TODO stubs, not working CRUD; upgrade to Phoenix gen.live / Rails scaffold level before building more features
+- Plan 03.2-01 completed: generator infrastructure foundation (YAML resolver, marked regions, Handlebars helpers, CSS tokens)
 
 ### Blockers/Concerns
 

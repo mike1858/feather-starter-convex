@@ -20,7 +20,10 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     exclude: ["e2e/**", "node_modules/**", ".worktrees/**"],
-    environmentMatchGlobs: [["convex/**", "edge-runtime"]],
+    environmentMatchGlobs: [
+      ["convex/**", "edge-runtime"],
+      ["generators/**", "node"],
+    ],
     server: {
       deps: {
         inline: [
