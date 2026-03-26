@@ -95,11 +95,11 @@ Plans:
   2. Generated code follows all existing conventions (feature folders, Zod schemas, zodToConvex, auth guards, i18n, nav wiring, error constants)
   3. Phase 4 (Projects) can be started by running the generator and then customizing the output
   4. The tasks feature (Phase 3) structure is consistent with what the generator would produce
-**Plans:** 6 plans
+**Plans:** 2/6 plans executed
 
 Plans:
-- [ ] 03.2-01-PLAN.md — Generator infrastructure: YAML resolver, marked regions parser, Handlebars helpers, design system CSS tokens (Inter font, shadows, transitions)
-- [ ] 03.2-02-PLAN.md — Backend templates: Zod schema, CRUD mutations, queries, and backend test templates
+- [x] 03.2-01-PLAN.md — Generator infrastructure: YAML resolver, marked regions parser, Handlebars helpers, design system CSS tokens (Inter font, shadows, transitions)
+- [x] 03.2-02-PLAN.md — Backend templates: Zod schema, CRUD mutations, queries, and backend test templates
 - [ ] 03.2-03-PLAN.md — Core frontend templates: Page, TitleBar, Item, Form, StatusBadge, ViewSwitcher, EmptyState, FilterBar, barrel export, frontend test, i18n locales
 - [ ] 03.2-04-PLAN.md — View + detail templates: ListView, CardView (4 image styles), TableView (sorting, grouping, pagination), DetailPage (3 display modes), LoadingSkeleton
 - [ ] 03.2-05-PLAN.md — Plopfile rewrite + auto-wiring: modular plopfile, custom Plop actions, all generator definitions (gen:feature, gen:schema, gen:backend, gen:frontend)
@@ -197,7 +197,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6
 | 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
 | 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
 | 03.1 Verification Bug Fixes | v2.0 | 2/2 | Complete    | 2026-03-25 |
-| 03.2 CRUD Generator Upgrade | v2.0 | 0/6 | Not started | - |
+| 03.2 CRUD Generator Upgrade | v2.0 | 2/6 | In Progress|  |
 | 4. Projects | v2.0 | 0/2 | Planned | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |

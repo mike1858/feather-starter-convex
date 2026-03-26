@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to execute
-last_updated: "2026-03-26T14:28:41.687Z"
+last_updated: "2026-03-26T14:39:59.054Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 10
+  completed_plans: 12
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 03.2 (crud-generator-upgrade) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Plan: 2 of 6
 | 03 | 02 | 21min | 3 | 18 |
 | Phase 03.1 P01 | 7min | 2 tasks | 10 files |
 | Phase 03.2 P01 | 9min | 3 tasks | 11 files |
+| Phase 03.2 P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent:
 - [Phase 03.1]: Dev mailbox moved from _auth to _app layout to bypass auth guard while keeping sidebar nav
 - [Phase 03.2]: Generator utils as plain ESM .js with JSDoc types from types.ts (Plop imports directly, no compilation)
 - [Phase 03.2]: deepmerge array strategy: feature YAML arrays replace defaults entirely (no merge)
+- [Phase 03.2]: Schema template builds Zod types inline (not via zodType helper) for precise control over exports and max-length constants
+- [Phase 03.2]: Enum fields with transitions excluded from createInput; dedicated updateStatus mutation generated instead
 
 ### Pending Todos
 
