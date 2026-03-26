@@ -1,0 +1,505 @@
+{{!-- @generated-start card-view --}}
+import { useRef, useEffect, useCallback, useState } from "react";
+import { Pencil, Trash2, ImageIcon, LayoutGrid } from "lucide-react";
+import { Button } from "@/ui/button";
+import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+
+interface {{pascalCase name}}CardViewProps {
+  items: Array<Record<string, unknown>>;
+  isLoading: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  onCardClick?: (item: Record<string, unknown>) => void;
+  onEdit?: (item: Record<string, unknown>) => void;
+  onDelete?: (item: Record<string, unknown>) => void;
+}
+
+{{!-- Size mode grid class mapping --}}
+{{#ifEq views.card.size "compact"}}
+const GRID_CLASSES = "grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+const SIZE_PADDING = "p-4";
+const TITLE_CLASSES = "text-xs font-semibold";
+{{else}}
+{{#ifEq views.card.size "large"}}
+const GRID_CLASSES = "grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2";
+const SIZE_PADDING = "p-6";
+const TITLE_CLASSES = "text-base font-semibold";
+{{else}}
+const GRID_CLASSES = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+const SIZE_PADDING = "p-6";
+const TITLE_CLASSES = "text-sm font-semibold";
+{{/ifEq}}
+{{/ifEq}}
+
+export function {{pascalCase name}}CardView({
+  items,
+  isLoading,
+  onLoadMore,
+  hasMore,
+  onCardClick,
+  onEdit,
+  onDelete,
+}: {{pascalCase name}}CardViewProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  {{#ifEq views.card.orientation "horizontal"}}
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(true);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowLeftFade(el.scrollLeft > 0);
+    setShowRightFade(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  }, []);
+  {{/ifEq}}
+
+  // Infinite scroll via IntersectionObserver
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && onLoadMore && !isLoading) {
+        onLoadMore();
+      }
+    },
+    [hasMore, onLoadMore, isLoading],
+  );
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0,
+    });
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
+  // Loading skeleton
+  if (isLoading && items.length === 0) {
+    return (
+      <div className={GRID_CLASSES}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          {{#ifEq views.card.imageStyle "cover"}}
+          <div key={i} className="rounded-lg border border-border overflow-hidden">
+            <div className="aspect-video w-full bg-muted animate-pulse" />
+            <div className="p-6">
+              <div className="h-4 w-3/4 rounded bg-muted mb-4 animate-pulse" />
+              <div className="h-3 w-full rounded bg-muted mb-1 animate-pulse" />
+              <div className="h-3 w-2/3 rounded bg-muted mb-4 animate-pulse" />
+              <div className="flex justify-between">
+                <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+              </div>
+            </div>
+          </div>
+          {{else}}
+          {{#ifEq views.card.imageStyle "overlay"}}
+          <div key={i} className="rounded-lg aspect-[3/2] bg-muted animate-pulse" />
+          {{else}}
+          <div key={i} className="rounded-lg border border-border p-6">
+            <div className="h-4 w-3/4 rounded bg-muted mb-4 animate-pulse" />
+            <div className="h-3 w-full rounded bg-muted mb-1 animate-pulse" />
+            <div className="h-3 w-2/3 rounded bg-muted mb-4 animate-pulse" />
+            <div className="flex justify-between">
+              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+            </div>
+          </div>
+          {{/ifEq}}
+          {{/ifEq}}
+        ))}
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!isLoading && items.length === 0) {
+    return <{{pascalCase name}}EmptyState variant="noData" icon={LayoutGrid} />;
+  }
+
+  const renderCard = (item: Record<string, unknown>) => {
+    const handleCardClick = () => onCardClick?.(item);
+    const handleEdit = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onEdit?.(item);
+    };
+    const handleDelete = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.(item);
+    };
+
+    return (
+      <div
+        key={item._id as string}
+        className="group relative"
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleCardClick();
+        }}
+      >
+        {{#ifEq views.card.imageStyle "none"}}
+        {/* @custom-start card-content */}
+        {/* @custom-end card-content */}
+        <div
+          className={`rounded-lg border border-border bg-card ${SIZE_PADDING} shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200 ease-out cursor-pointer`}
+        >
+          <div className="flex flex-col gap-4">
+            {/* Top row: title + status */}
+            <div className="flex items-start justify-between">
+              <span className={`${TITLE_CLASSES} text-primary line-clamp-2`}>
+                {item.{{#each fields}}{{#if @first}}{{@key}}{{/if}}{{/each}} as string}
+              </span>
+              {{#each fields}}
+              {{#ifEq this.type "enum"}}
+              {{#if @first}}{{else}}
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <span className="h-1.5 w-1.5 rounded-full" />
+                <span>{item.{{@key}} as string}</span>
+              </span>
+              {{/if}}
+              {{/ifEq}}
+              {{/each}}
+            </div>
+
+            {/* Body: description + metadata */}
+            <div className="flex flex-col gap-1.5">
+              {{#each fields}}
+              {{#showOnView this "card"}}
+              {{#ifEq this.type "text"}}
+              {item.{{@key}} && (
+                <p className="text-xs text-primary/60 line-clamp-2">
+                  {item.{{@key}} as string}
+                </p>
+              )}
+              {{/ifEq}}
+              {{/showOnView}}
+              {{/each}}
+            </div>
+
+            {/* Footer: timestamp + actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/50">
+              <span className="text-xs text-muted-foreground">
+                {item._creationTime
+                  ? new Date(item._creationTime as number).toLocaleDateString()
+                  : ""}
+              </span>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={handleEdit}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/ifEq}}
+
+        {{#ifEq views.card.imageStyle "thumbnail"}}
+        {/* @custom-start card-content */}
+        {/* @custom-end card-content */}
+        <div
+          className={`rounded-lg border border-border bg-card ${SIZE_PADDING} shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200 ease-out cursor-pointer`}
+        >
+          <div className="flex items-start gap-4">
+            {/* Thumbnail image */}
+            {item.image ? (
+              <img
+                src={item.image as string}
+                alt=""
+                className="h-20 w-20 rounded-md object-cover bg-muted shrink-0"
+              />
+            ) : (
+              <div className="h-20 w-20 rounded-md bg-muted shrink-0 flex items-center justify-center">
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+              </div>
+            )}
+
+            {/* Text section */}
+            <div className="flex-1 flex flex-col gap-2 min-w-0">
+              <span className={`${TITLE_CLASSES} text-primary line-clamp-2`}>
+                {item.{{#each fields}}{{#if @first}}{{@key}}{{/if}}{{/each}} as string}
+              </span>
+              {{#each fields}}
+              {{#showOnView this "card"}}
+              {{#ifEq this.type "text"}}
+              {item.{{@key}} && (
+                <p className="text-xs text-primary/60 line-clamp-2">
+                  {item.{{@key}} as string}
+                </p>
+              )}
+              {{/ifEq}}
+              {{/showOnView}}
+              {{/each}}
+              {{#each fields}}
+              {{#ifEq this.type "enum"}}
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <span className="h-1.5 w-1.5 rounded-full" />
+                <span>{item.{{@key}} as string}</span>
+              </span>
+              {{/ifEq}}
+              {{/each}}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-2 mt-3 border-t border-border/50">
+            <span className="text-xs text-muted-foreground">
+              {item._creationTime
+                ? new Date(item._creationTime as number).toLocaleDateString()
+                : ""}
+            </span>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleEdit}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        {{/ifEq}}
+
+        {{#ifEq views.card.imageStyle "cover"}}
+        {/* @custom-start card-content */}
+        {/* @custom-end card-content */}
+        <div
+          className="rounded-lg border border-border bg-card overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200 ease-out cursor-pointer"
+        >
+          {/* Cover image */}
+          {item.image ? (
+            <img
+              src={item.image as string}
+              alt=""
+              className="aspect-video w-full object-cover bg-muted"
+            />
+          ) : (
+            <div className="aspect-video w-full bg-muted flex items-center justify-center">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+
+          {/* Content below image */}
+          <div className={`${SIZE_PADDING}`}>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <span className={`${TITLE_CLASSES} text-primary line-clamp-2`}>
+                  {item.{{#each fields}}{{#if @first}}{{@key}}{{/if}}{{/each}} as string}
+                </span>
+                {{#each fields}}
+                {{#ifEq this.type "enum"}}
+                {{#if @first}}{{else}}
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <span className="h-1.5 w-1.5 rounded-full" />
+                  <span>{item.{{@key}} as string}</span>
+                </span>
+                {{/if}}
+                {{/ifEq}}
+                {{/each}}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                {{#each fields}}
+                {{#showOnView this "card"}}
+                {{#ifEq this.type "text"}}
+                {item.{{@key}} && (
+                  <p className="text-xs text-primary/60 line-clamp-2">
+                    {item.{{@key}} as string}
+                  </p>
+                )}
+                {{/ifEq}}
+                {{/showOnView}}
+                {{/each}}
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <span className="text-xs text-muted-foreground">
+                  {item._creationTime
+                    ? new Date(item._creationTime as number).toLocaleDateString()
+                    : ""}
+                </span>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={handleEdit}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-destructive"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/ifEq}}
+
+        {{#ifEq views.card.imageStyle "overlay"}}
+        {/* @custom-start card-content */}
+        {/* @custom-end card-content */}
+        <div
+          className="rounded-lg overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200 ease-out cursor-pointer {{#ifEq views.card.size 'compact'}}aspect-[4/3]{{else}}aspect-[3/2]{{/ifEq}} relative"
+        >
+          {/* Background image */}
+          {item.image ? (
+            <img
+              src={item.image as string}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover bg-muted"
+            />
+          ) : (
+            <div className="absolute inset-0 w-full h-full bg-muted" />
+          )}
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+          {/* Content overlay */}
+          <div className={`relative z-10 flex flex-col justify-end h-full ${SIZE_PADDING}`}>
+            <span className={`${TITLE_CLASSES} text-white line-clamp-2`}>
+              {item.{{#each fields}}{{#if @first}}{{@key}}{{/if}}{{/each}} as string}
+            </span>
+            {{#each fields}}
+            {{#showOnView this "card"}}
+            {{#ifEq this.type "text"}}
+            {item.{{@key}} && (
+              <p className="text-xs text-white/80 line-clamp-2 mt-1">
+                {item.{{@key}} as string}
+              </p>
+            )}
+            {{/ifEq}}
+            {{/showOnView}}
+            {{/each}}
+            {{#each fields}}
+            {{#ifEq this.type "enum"}}
+            <span className="inline-flex items-center gap-1.5 text-xs text-white/90 mt-1">
+              <span className="h-1.5 w-1.5 rounded-full" />
+              <span>{item.{{@key}} as string}</span>
+            </span>
+            {{/ifEq}}
+            {{/each}}
+
+            <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/20">
+              <span className="text-xs text-white/60">
+                {item._creationTime
+                  ? new Date(item._creationTime as number).toLocaleDateString()
+                  : ""}
+              </span>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-white hover:bg-white/20"
+                  onClick={handleEdit}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-white hover:bg-white/20"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/ifEq}}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {{#ifEq views.card.orientation "horizontal"}}
+      <div className="relative">
+        {/* Left fade indicator */}
+        {showLeftFade && (
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+        )}
+
+        {/* Scrollable card row */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto gap-4 snap-x snap-mandatory pb-2 scrollbar-hide"
+          onScroll={handleScroll}
+        >
+          {items.map((item) => (
+            <div
+              key={item._id as string}
+              className="snap-start min-w-[280px] max-w-[320px] shrink-0"
+            >
+              {renderCard(item)}
+            </div>
+          ))}
+        </div>
+
+        {/* Right fade indicator */}
+        {showRightFade && (
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+        )}
+      </div>
+      {{else}}
+      <div className={GRID_CLASSES}>
+        {items.map((item) => renderCard(item))}
+      </div>
+      {{/ifEq}}
+
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} className="h-px" />
+
+      {/* Loading more indicator */}
+      {isLoading && hasMore && (
+        <div className={GRID_CLASSES + " mt-4"}>
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-border p-6">
+              <div className="h-4 w-3/4 rounded bg-muted mb-4 animate-pulse" />
+              <div className="h-3 w-full rounded bg-muted mb-1 animate-pulse" />
+              <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+{{!-- @generated-end card-view --}}

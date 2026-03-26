@@ -1,0 +1,173 @@
+{{!-- @generated-start list-view --}}
+import { useRef, useEffect, useCallback } from "react";
+{{#if behaviors.orderable}}
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sorticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+{{/if}}
+import { {{pascalCase name}}Item } from "./{{pascalCase name}}Item";
+import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+
+interface {{pascalCase name}}ListViewProps {
+  items: Array<Record<string, unknown>>;
+  isLoading: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  {{#if behaviors.orderable}}
+  onReorder?: (itemId: string, newPosition: number) => void;
+  {{/if}}
+}
+
+export function {{pascalCase name}}ListView({
+  items,
+  isLoading,
+  onLoadMore,
+  hasMore,
+  {{#if behaviors.orderable}}
+  onReorder,
+  {{/if}}
+}: {{pascalCase name}}ListViewProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  {{#if behaviors.orderable}}
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !onReorder) return;
+
+    const activeIdx = items.findIndex((item) => item._id === active.id);
+    const overIdx = items.findIndex((item) => item._id === over.id);
+    if (activeIdx === -1 || overIdx === -1) return;
+
+    const sorted = [...items].sort(
+      (a, b) => (a.position as number) - (b.position as number),
+    );
+    let newPosition: number;
+    if (overIdx === 0 && activeIdx > overIdx) {
+      newPosition = (sorted[0].position as number) - 1000;
+    } else if (overIdx === sorted.length - 1 && activeIdx < overIdx) {
+      newPosition = (sorted[sorted.length - 1].position as number) + 1000;
+    } else {
+      const targetIdx = activeIdx < overIdx ? overIdx : overIdx;
+      const before =
+        (sorted[targetIdx - 1]?.position as number) ??
+        (sorted[targetIdx].position as number) - 1000;
+      const after =
+        (sorted[targetIdx + 1]?.position as number) ??
+        (sorted[targetIdx].position as number) + 1000;
+      newPosition = (before + after) / 2;
+    }
+
+    onReorder(active.id as string, newPosition);
+  };
+  {{/if}}
+
+  // Infinite scroll via IntersectionObserver
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && onLoadMore && !isLoading) {
+        onLoadMore();
+      }
+    },
+    [hasMore, onLoadMore, isLoading],
+  );
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0,
+    });
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
+  // Loading skeleton
+  if (isLoading && items.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!isLoading && items.length === 0) {
+    return <{{pascalCase name}}EmptyState variant="noData" />;
+  }
+
+  const listContent = (
+    <div className="flex flex-col gap-2">
+      {items.map((item) => (
+        <div
+          key={item._id as string}
+          className="{{#ifEq views.list.density 'compact'}}py-2 gap-2{{else}}py-4 gap-4{{/ifEq}}"
+        >
+          <{{pascalCase name}}Item
+            item={item}
+            density="{{#if views.list.density}}{{views.list.density}}{{else}}comfortable{{/if}}"
+            {{#if behaviors.orderable}}
+            draggable
+            {{/if}}
+          />
+        </div>
+      ))}
+
+      {/* Infinite scroll sentinel */}
+      <div ref={sentinelRef} className="h-px" />
+
+      {/* Loading more indicator */}
+      {isLoading && hasMore && (
+        <div className="flex flex-col gap-2">
+          <div className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}" />
+          <div className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}" />
+        </div>
+      )}
+    </div>
+  );
+
+  {{#if behaviors.orderable}}
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={items.map((item) => item._id as string)}
+        strategy={verticalListSortingStrategy}
+      >
+        {listContent}
+      </SortableContext>
+    </DndContext>
+  );
+  {{else}}
+  return listContent;
+  {{/if}}
+}
+{{!-- @generated-end list-view --}}
