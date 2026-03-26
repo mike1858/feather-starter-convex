@@ -1,0 +1,65 @@
+// @generated-start schema
+import { z } from "zod";
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+
+export const {{upperSnakeCase @key}}_VALUES = [{{#each this.values}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}] as const;
+export const {{camelCase @key}} = z.enum({{upperSnakeCase @key}}_VALUES);
+export type {{pascalCase @key}} = z.infer<typeof {{camelCase @key}}>;
+{{/ifEq}}
+{{#ifEq this.type "string"}}
+{{#if this.max}}
+
+export const {{upperSnakeCase @key}}_MAX_LENGTH = {{this.max}};
+{{/if}}
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+{{#if this.max}}
+
+export const {{upperSnakeCase @key}}_MAX_LENGTH = {{this.max}};
+{{/if}}
+{{/ifEq}}
+{{/each}}
+
+export const create{{pascalCase name}}Input = z.object({
+{{#each fields}}
+{{#ifEq this.type "string"}}
+  {{@key}}: z.string(){{#if this.max}}.max({{upperSnakeCase @key}}_MAX_LENGTH){{/if}}{{#if this.required}}.min(1).trim(){{/if}}{{#unless this.required}}.optional(){{/unless}},
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+  {{@key}}: z.string(){{#if this.max}}.max({{upperSnakeCase @key}}_MAX_LENGTH){{/if}}{{#unless this.required}}.optional(){{/unless}},
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+  {{@key}}: z.boolean().default({{#if this.default}}{{this.default}}{{else}}false{{/if}}),
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+  {{@key}}: z.number(){{#unless this.required}}.optional(){{/unless}},
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+{{#unless this.transitions}}
+  {{@key}}: {{camelCase @key}}{{#unless this.required}}.optional(){{/unless}},
+{{/unless}}
+{{/ifEq}}
+{{/each}}
+});
+
+export const update{{pascalCase name}}Input = z.object({
+{{#each fields}}
+{{#ifEq this.type "string"}}
+  {{@key}}: z.string(){{#if this.max}}.max({{upperSnakeCase @key}}_MAX_LENGTH){{/if}}.optional(),
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+  {{@key}}: z.string(){{#if this.max}}.max({{upperSnakeCase @key}}_MAX_LENGTH){{/if}}.optional(),
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+  {{@key}}: z.boolean().optional(),
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+  {{@key}}: z.number().optional(),
+{{/ifEq}}
+{{/each}}
+});
+// @generated-end schema
+
+// @custom-start validators
+// @custom-end validators

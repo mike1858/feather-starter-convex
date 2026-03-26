@@ -1,25 +1,255 @@
+// @generated-start imports
 import { mutation } from "@cvx/_generated/server";
 import { auth } from "@cvx/auth";
 import { v } from "convex/values";
+import { zCustomMutation } from "convex-helpers/server/zod4";
+import { NoOp } from "convex-helpers/server/customFunctions";
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+import { zodToConvex } from "convex-helpers/server/zod4";
+{{/ifEq}}
+{{/each}}
+import {
+  create{{pascalCase name}}Input,
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+{{#if this.transitions}}
+  {{camelCase @key}},
+  {{upperSnakeCase @key}}_VALUES,
+{{/if}}
+{{/ifEq}}
+{{/each}}
+} from "../../src/shared/schemas/{{name}}";
+import { ERRORS } from "../../src/shared/errors";
+// @generated-end imports
 
-/**
- * {{pascalCase name}} mutations.
- *
- * Customize: Add your mutation functions here.
- * Use Zod validation via zCustomMutation for complex inputs.
- */
-export const create = mutation({
-  args: {
-    // TODO: Define your mutation arguments
-    // name: v.string(),
-  },
+// @custom-start imports
+// @custom-end imports
+
+const zMutation = zCustomMutation(mutation, NoOp);
+
+// @generated-start create
+export const create = zMutation({
+  args: create{{pascalCase name}}Input,
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
+    // @custom-start create-pre
+    // @custom-end create-pre
 
-    // TODO: Implement your mutation
-    // return await ctx.db.insert("{{name}}", { ...args, userId });
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    await ctx.db.insert("{{name}}", {
+{{#each fields}}
+      {{@key}}: args.{{@key}},
+{{/each}}
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+{{#if this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/if}}
+{{/ifEq}}
+{{/each}}
+{{#if behaviors.assignable}}
+      assigneeId: userId,
+{{/if}}
+      creatorId: userId,
+{{#if behaviors.orderable}}
+      position: Date.now(),
+{{/if}}
+    });
+
+    // @custom-start create-post
+    // @custom-end create-post
   },
 });
+// @generated-end create
+
+// @generated-start update
+export const update = mutation({
+  args: {
+    {{camelCase name}}Id: v.id("{{name}}"),
+{{#each fields}}
+{{#ifEq this.type "string"}}
+    {{@key}}: v.optional(v.string()),
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+    {{@key}}: v.optional(v.string()),
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+    {{@key}}: v.optional(v.boolean()),
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+    {{@key}}: v.optional(v.number()),
+{{/ifEq}}
+{{/each}}
+  },
+  handler: async (ctx, args) => {
+    // @custom-start update-pre
+    // @custom-end update-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    const {{camelCase name}} = await ctx.db.get(args.{{camelCase name}}Id);
+    if (!{{camelCase name}}) throw new Error(ERRORS.{{name}}.NOT_FOUND);
+
+    const patch: Record<string, unknown> = {};
+{{#each fields}}
+{{#ifEq this.type "string"}}
+    if (args.{{@key}} !== undefined) patch.{{@key}} = args.{{@key}};
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+    if (args.{{@key}} !== undefined) patch.{{@key}} = args.{{@key}};
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+    if (args.{{@key}} !== undefined) patch.{{@key}} = args.{{@key}};
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+    if (args.{{@key}} !== undefined) patch.{{@key}} = args.{{@key}};
+{{/ifEq}}
+{{/each}}
+
+    await ctx.db.patch(args.{{camelCase name}}Id, patch);
+
+    // @custom-start update-post
+    // @custom-end update-post
+  },
+});
+// @generated-end update
+
+// @generated-start remove
+{{#if behaviors.softDelete}}
+export const remove = mutation({
+  args: { {{camelCase name}}Id: v.id("{{name}}") },
+  handler: async (ctx, args) => {
+    // @custom-start remove-pre
+    // @custom-end remove-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    await ctx.db.patch(args.{{camelCase name}}Id, { deletedAt: Date.now() });
+
+    // @custom-start remove-post
+    // @custom-end remove-post
+  },
+});
+{{else}}
+export const remove = mutation({
+  args: { {{camelCase name}}Id: v.id("{{name}}") },
+  handler: async (ctx, args) => {
+    // @custom-start remove-pre
+    // @custom-end remove-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    await ctx.db.delete(args.{{camelCase name}}Id);
+
+    // @custom-start remove-post
+    // @custom-end remove-post
+  },
+});
+{{/if}}
+// @generated-end remove
+
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+{{#if this.transitions}}
+// @generated-start updateStatus
+export const update{{pascalCase @key}} = mutation({
+  args: {
+    {{camelCase ../name}}Id: v.id("{{../name}}"),
+    {{@key}}: zodToConvex({{camelCase @key}}),
+  },
+  handler: async (ctx, args) => {
+    // @custom-start updateStatus-pre
+    // @custom-end updateStatus-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    const {{camelCase ../name}} = await ctx.db.get(args.{{camelCase ../name}}Id);
+    if (!{{camelCase ../name}}) throw new Error(ERRORS.{{../name}}.NOT_FOUND);
+
+    const currentIndex = {{upperSnakeCase @key}}_VALUES.indexOf(
+      {{camelCase ../name}}.{{@key}} as (typeof {{upperSnakeCase @key}}_VALUES)[number],
+    );
+    const newIndex = {{upperSnakeCase @key}}_VALUES.indexOf(
+      args.{{@key}} as (typeof {{upperSnakeCase @key}}_VALUES)[number],
+    );
+
+    if (newIndex !== currentIndex + 1) {
+      throw new Error(ERRORS.{{../name}}.INVALID_STATUS_TRANSITION);
+    }
+
+    await ctx.db.patch(args.{{camelCase ../name}}Id, { {{@key}}: args.{{@key}} });
+
+    // @custom-start updateStatus-post
+    // @custom-end updateStatus-post
+  },
+});
+// @generated-end updateStatus
+{{/if}}
+{{/ifEq}}
+{{/each}}
+
+{{#if behaviors.assignable}}
+// @generated-start assign
+export const assign = mutation({
+  args: {
+    {{camelCase name}}Id: v.id("{{name}}"),
+    assigneeId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    // @custom-start assign-pre
+    // @custom-end assign-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    const {{camelCase name}} = await ctx.db.get(args.{{camelCase name}}Id);
+    if (!{{camelCase name}}) throw new Error(ERRORS.{{name}}.NOT_FOUND);
+
+    const patch: Record<string, unknown> = { assigneeId: args.assigneeId };
+
+    // Auto-flip: assigning to another user makes {{label}} shared
+    if (args.assigneeId && args.assigneeId !== {{camelCase name}}.creatorId) {
+      patch.visibility = "shared";
+    }
+    // Auto-flip: unassigning makes {{label}} shared (available in Team Pool)
+    if (!args.assigneeId) {
+      patch.visibility = "shared";
+    }
+
+    await ctx.db.patch(args.{{camelCase name}}Id, patch);
+
+    // @custom-start assign-post
+    // @custom-end assign-post
+  },
+});
+// @generated-end assign
+{{/if}}
+
+{{#if behaviors.orderable}}
+// @generated-start reorder
+export const reorder = mutation({
+  args: {
+    {{camelCase name}}Id: v.id("{{name}}"),
+    newPosition: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // @custom-start reorder-pre
+    // @custom-end reorder-pre
+
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    await ctx.db.patch(args.{{camelCase name}}Id, { position: args.newPosition });
+
+    // @custom-start reorder-post
+    // @custom-end reorder-post
+  },
+});
+// @generated-end reorder
+{{/if}}
