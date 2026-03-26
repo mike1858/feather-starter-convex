@@ -1,0 +1,304 @@
+// @generated-start imports
+import { describe, expect } from "vitest";
+import { api } from "../_generated/api";
+import { test } from "../test.setup";
+// @generated-end imports
+
+// @custom-start imports
+// @custom-end imports
+
+// @generated-start test-list
+describe("list", () => {
+  test("returns {{labelPlural}} for authenticated user", async ({
+    client,
+    userId,
+    testClient,
+  }) => {
+    // Create 2 records via the create mutation
+    await client.mutation(api.{{name}}.mutations.create, {
+{{#each fields}}
+{{#if this.required}}
+{{#ifEq this.type "string"}}
+      {{@key}}: "{{../label}} 1",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+      {{@key}}: "{{../label}} 1 content",
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+      {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+      {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+{{#unless this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/unless}}
+{{/ifEq}}
+{{/if}}
+{{/each}}
+    });
+    await client.mutation(api.{{name}}.mutations.create, {
+{{#each fields}}
+{{#if this.required}}
+{{#ifEq this.type "string"}}
+      {{@key}}: "{{../label}} 2",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+      {{@key}}: "{{../label}} 2 content",
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+      {{@key}}: 2,
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+      {{@key}}: true,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+{{#unless this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/unless}}
+{{/ifEq}}
+{{/if}}
+{{/each}}
+    });
+
+    const records = await client.query(api.{{name}}.queries.list, {});
+    expect(records).toHaveLength(2);
+  });
+
+  test("returns empty array when no {{labelPlural}}", async ({
+    client,
+  }) => {
+    const records = await client.query(api.{{name}}.queries.list, {});
+    expect(records).toHaveLength(0);
+  });
+
+{{#ifEq access.scope "owner"}}
+  test("returns empty when unauthenticated", async ({ testClient }) => {
+    const records = await testClient.query(api.{{name}}.queries.list, {});
+    expect(records).toEqual([]);
+  });
+{{/ifEq}}
+{{#ifEq access.scope "team"}}
+  test("returns empty when unauthenticated", async ({ testClient }) => {
+    const records = await testClient.query(api.{{name}}.queries.list, {});
+    expect(records).toEqual([]);
+  });
+{{/ifEq}}
+
+{{#if behaviors.orderable}}
+  test("returns records sorted by position ascending", async ({
+    client,
+    userId,
+    testClient,
+  }) => {
+    await testClient.run(async (ctx: any) => {
+      await ctx.db.insert("{{name}}", {
+{{#each fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "Second",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "Second content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 2,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        creatorId: userId,
+{{#if behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+        position: 200,
+      });
+      await ctx.db.insert("{{name}}", {
+{{#each fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "First",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "First content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        creatorId: userId,
+{{#if behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+        position: 100,
+      });
+    });
+
+    const records = await client.query(api.{{name}}.queries.list, {});
+    expect(records).toHaveLength(2);
+{{#each fields}}
+{{#ifEq this.type "string"}}
+{{#if @first}}
+    expect(records[0].{{@key}}).toBe("First");
+    expect(records[1].{{@key}}).toBe("Second");
+{{/if}}
+{{/ifEq}}
+{{/each}}
+  });
+{{/if}}
+});
+// @generated-end test-list
+
+// @generated-start test-get
+describe("get", () => {
+  test("returns a single {{label}}", async ({
+    client,
+    testClient,
+  }) => {
+    await client.mutation(api.{{name}}.mutations.create, {
+{{#each fields}}
+{{#if this.required}}
+{{#ifEq this.type "string"}}
+      {{@key}}: "Get test",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+      {{@key}}: "Get test content",
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+      {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+      {{@key}}: true,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+{{#unless this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/unless}}
+{{/ifEq}}
+{{/if}}
+{{/each}}
+    });
+
+    const records = await testClient.run(async (ctx: any) =>
+      ctx.db.query("{{name}}").collect(),
+    );
+
+    const record = await client.query(api.{{name}}.queries.get, {
+      id: records[0]._id,
+    });
+    expect(record).not.toBeNull();
+{{#each fields}}
+{{#if this.required}}
+{{#ifEq this.type "string"}}
+    expect(record!.{{@key}}).toBe("Get test");
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+    expect(record!.{{@key}}).toBe("Get test content");
+{{/ifEq}}
+{{/if}}
+{{/each}}
+  });
+
+{{#ifEq access.scope "public"}}
+{{else}}
+  test("returns null when unauthenticated", async ({ testClient }) => {
+    const recordId = await testClient.run(async (ctx: any) => {
+      const userId = await ctx.db.insert("users", { name: "Seed" });
+      return ctx.db.insert("{{name}}", {
+{{#each fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "Seed",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "Seed content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 0,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        creatorId: userId,
+{{#if behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+{{#if behaviors.orderable}}
+        position: 1,
+{{/if}}
+      });
+    });
+
+    const record = await testClient.query(api.{{name}}.queries.get, {
+      id: recordId,
+    });
+    expect(record).toBeNull();
+  });
+{{/ifEq}}
+});
+// @generated-end test-get
+
+{{#if views.filteredViews}}
+{{#each views.filteredViews}}
+// @generated-start test-{{camelCase this.name}}
+describe("{{camelCase this.name}}", () => {
+  test("returns only matching {{../labelPlural}}", async ({
+    client,
+    userId,
+    testClient,
+  }) => {
+    // Create matching and non-matching records via direct DB insert
+    await testClient.run(async (ctx: any) => {
+      await ctx.db.insert("{{../name}}", {
+{{#each ../fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "Matching",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "Matching content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        creatorId: userId,
+{{#if ../behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+{{#if ../behaviors.orderable}}
+        position: 1,
+{{/if}}
+      });
+    });
+
+    const records = await client.query(api.{{../name}}.queries.{{camelCase this.name}}, {});
+    expect(records).toBeDefined();
+    expect(Array.isArray(records)).toBe(true);
+  });
+
+  test("returns empty when unauthenticated", async ({ testClient }) => {
+    const records = await testClient.query(api.{{../name}}.queries.{{camelCase this.name}}, {});
+    expect(records).toEqual([]);
+  });
+});
+// @generated-end test-{{camelCase this.name}}
+{{/each}}
+{{/if}}
