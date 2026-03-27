@@ -152,6 +152,48 @@ describe("teamPool", () => {
   });
 });
 
+describe("getById", () => {
+  test("returns task by ID when authenticated", async ({
+    client,
+    userId,
+    testClient,
+  }) => {
+    const taskId = await testClient.run(async (ctx: any) =>
+      ctx.db.insert("tasks", {
+        title: "Get by ID task",
+        priority: false,
+        status: "todo",
+        visibility: "private",
+        creatorId: userId,
+        assigneeId: userId,
+        position: 1,
+      }),
+    );
+
+    const task = await client.query(api.tasks.queries.getById, { taskId });
+    expect(task).not.toBeNull();
+    expect(task!.title).toBe("Get by ID task");
+  });
+
+  test("returns null when unauthenticated", async ({ testClient }) => {
+    const taskId = await testClient.run(async (ctx: any) =>
+      ctx.db.insert("tasks", {
+        title: "Auth test",
+        priority: false,
+        status: "todo",
+        visibility: "private",
+        creatorId: await ctx.db.insert("users", { name: "Owner" }),
+        position: 1,
+      }),
+    );
+
+    const task = await testClient.query(api.tasks.queries.getById, {
+      taskId,
+    });
+    expect(task).toBeNull();
+  });
+});
+
 describe("listUsers", () => {
   test("returns all users with expected fields", async ({
     client,

@@ -1,5 +1,6 @@
 import { query } from "@cvx/_generated/server";
 import { auth } from "@cvx/auth";
+import { v } from "convex/values";
 
 export const myTasks = query({
   args: {},
@@ -26,6 +27,15 @@ export const teamPool = query({
     return sharedTasks
       .filter((t) => !t.assigneeId)
       .sort((a, b) => a.position - b.position);
+  },
+});
+
+export const getById = query({
+  args: { taskId: v.id("tasks") },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return null;
+    return ctx.db.get(args.taskId);
   },
 });
 
