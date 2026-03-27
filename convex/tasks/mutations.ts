@@ -119,6 +119,57 @@ export const assign = mutation({
   },
 });
 
+export const createInProject = mutation({
+  args: {
+    title: v.string(),
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    await ctx.db.insert("tasks", {
+      title: args.title,
+      status: "todo",
+      visibility: "shared",
+      priority: false,
+      creatorId: userId,
+      assigneeId: userId,
+      projectId: args.projectId,
+      position: Date.now(),
+    });
+  },
+});
+
+export const assignToProject = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    projectId: v.optional(v.id("projects")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) return;
+
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error(ERRORS.tasks.NOT_FOUND);
+
+    const patch: Record<string, unknown> = { projectId: args.projectId };
+
+    if (args.projectId) {
+      // Moving to project: auto-flip to shared (per D-06)
+      patch.visibility = "shared";
+    } else {
+      // Removing from project: restore private if creator=assignee (per D-07)
+      if (!task.assigneeId || task.assigneeId === task.creatorId) {
+        patch.visibility = "private";
+      }
+      // else: stays shared (assigned to someone other than creator)
+    }
+
+    await ctx.db.patch(args.taskId, patch);
+  },
+});
+
 export const reorder = mutation({
   args: {
     taskId: v.id("tasks"),
