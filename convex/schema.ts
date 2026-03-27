@@ -7,6 +7,10 @@ import {
   taskVisibility,
 } from "../src/shared/schemas/tasks";
 
+import {
+  status,
+} from "../src/shared/schemas/test-gen";
+
 const schema = defineSchema({
   ...authTables,
   users: defineTable({
@@ -42,6 +46,17 @@ const schema = defineSchema({
     text: v.optional(v.string()),
     sentAt: v.number(),
   }).index("sentAt", ["sentAt"]),
+  "test-gen": defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: zodToConvex(status),
+    priority: v.optional(v.boolean()),
+    userId: v.id("users"),
+    position: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"]),
+
 });
 
 export default schema;

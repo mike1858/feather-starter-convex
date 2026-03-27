@@ -1,0 +1,34 @@
+name: test-gen
+label: Test Item
+labelPlural: Test Items
+
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+  description:
+    type: text
+  status:
+    type: enum
+    values: [draft, active, completed]
+    default: draft
+    filterable: true
+    transitions:
+      draft: [active]
+      active: [completed]
+  priority:
+    type: boolean
+
+behaviors:
+  orderable: true
+
+views:
+  default:
+    defaultView: list
+    enabledViews: [list, card, table]
+  card:
+    size: default
+    imageStyle: none
+  list:
+    density: comfortable

@@ -30,7 +30,7 @@ export const list = query({
 {{#ifEq access.scope "owner"}}
     const all = await ctx.db
       .query("{{name}}")
-      .withIndex("by_creator", (q) => q.eq("creatorId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .collect();
 {{/ifEq}}
 {{#ifEq access.scope "team"}}

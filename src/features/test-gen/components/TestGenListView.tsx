@@ -1,6 +1,4 @@
-{{!-- @generated-start list-view --}}
 import { useRef, useEffect, useCallback } from "react";
-{{#if behaviors.orderable}}
 import {
   DndContext,
   closestCenter,
@@ -15,32 +13,26 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-{{/if}}
-import { {{pascalCase name}}Item } from "./{{pascalCase name}}Item";
-import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+import { TestGenItem } from "./TestGenItem";
+import { TestGenEmptyState } from "./TestGenEmptyState";
 
-interface {{pascalCase name}}ListViewProps {
+interface TestGenListViewProps {
   items: Array<Record<string, unknown>>;
   isLoading: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
-  {{#if behaviors.orderable}}
   onReorder?: (itemId: string, newPosition: number) => void;
-  {{/if}}
 }
 
-export function {{pascalCase name}}ListView({
+export function TestGenListView({
   items,
   isLoading,
   onLoadMore,
   hasMore,
-  {{#if behaviors.orderable}}
   onReorder,
-  {{/if}}
-}: {{pascalCase name}}ListViewProps) {
+}: TestGenListViewProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  {{#if behaviors.orderable}}
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor),
@@ -75,7 +67,6 @@ export function {{pascalCase name}}ListView({
 
     onReorder(active.id as string, newPosition);
   };
-  {{/if}}
 
   // Infinite scroll via IntersectionObserver
   const handleObserver = useCallback(
@@ -109,7 +100,7 @@ export function {{pascalCase name}}ListView({
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}"
+            className="rounded-lg bg-muted h-14 animate-pulse"
           />
         ))}
       </div>
@@ -118,7 +109,7 @@ export function {{pascalCase name}}ListView({
 
   // Empty state
   if (!isLoading && items.length === 0) {
-    return <{{pascalCase name}}EmptyState variant="noData" />;
+    return <TestGenEmptyState variant="noData" />;
   }
 
   const listContent = (
@@ -126,14 +117,12 @@ export function {{pascalCase name}}ListView({
       {items.map((item) => (
         <div
           key={item._id as string}
-          className="{{#ifEq views.list.density 'compact'}}py-2 gap-2{{else}}py-4 gap-4{{/ifEq}}"
+          className="py-4 gap-4"
         >
-          <{{pascalCase name}}Item
+          <TestGenItem
             item={item}
-            density="{{#if views.list.density}}{{views.list.density}}{{else}}comfortable{{/if}}"
-            {{#if behaviors.orderable}}
+            density="comfortable"
             draggable
-            {{/if}}
           />
         </div>
       ))}
@@ -144,14 +133,13 @@ export function {{pascalCase name}}ListView({
       {/* Loading more indicator */}
       {isLoading && hasMore && (
         <div className="flex flex-col gap-2">
-          <div className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}" />
-          <div className="{{#ifEq views.list.density 'compact'}}rounded-lg bg-muted h-10 animate-pulse{{else}}rounded-lg bg-muted h-14 animate-pulse{{/ifEq}}" />
+          <div className="rounded-lg bg-muted h-14 animate-pulse" />
+          <div className="rounded-lg bg-muted h-14 animate-pulse" />
         </div>
       )}
     </div>
   );
 
-  {{#if behaviors.orderable}}
   return (
     <DndContext
       sensors={sensors}
@@ -166,8 +154,4 @@ export function {{pascalCase name}}ListView({
       </SortableContext>
     </DndContext>
   );
-  {{else}}
-  return listContent;
-  {{/if}}
 }
-{{!-- @generated-end list-view --}}

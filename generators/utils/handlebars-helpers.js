@@ -131,11 +131,18 @@ export function registerHelpers(plop) {
 
   /**
    * Equality conditional helper.
-   * Usage: {{#ifEq a b}}...{{else}}...{{/ifEq}}
+   * Block usage: {{#ifEq a b}}...{{else}}...{{/ifEq}}
+   * Subexpression usage: {{#unless (eq a b)}}...{{/unless}}
    */
   plop.setHelper("ifEq", function (a, b, options) {
     return a === b ? options.fn(this) : options.inverse(this);
   });
+
+  /**
+   * Equality comparison helper for subexpressions.
+   * Usage: {{#if (eq a b)}}...{{/if}} or {{#unless (eq a b)}}...{{/unless}}
+   */
+  plop.setHelper("eq", (a, b) => a === b);
 
   /**
    * Array membership conditional helper.
@@ -168,6 +175,28 @@ export function registerHelpers(plop) {
   });
 
   /**
+   * Returns the dot CSS class for an enum badge.
+   * Usage: {{enumBadgeDot field value}}
+   */
+  plop.setHelper("enumBadgeDot", (field, value) => {
+    if (!field || !field.values) return "bg-gray-400";
+    const idx = field.values.indexOf(value);
+    const slot = idx >= 0 ? idx % 8 : 0;
+    return ENUM_PALETTE[slot].dot;
+  });
+
+  /**
+   * Returns the text CSS class for an enum badge.
+   * Usage: {{enumBadgeText field value}}
+   */
+  plop.setHelper("enumBadgeText", (field, value) => {
+    if (!field || !field.values) return "text-gray-600";
+    const idx = field.values.indexOf(value);
+    const slot = idx >= 0 ? idx % 8 : 0;
+    return ENUM_PALETTE[slot].text;
+  });
+
+  /**
    * Convert string to UPPER_SNAKE_CASE.
    * Usage: {{upperSnakeCase "camelCase"}}
    */
@@ -178,6 +207,54 @@ export function registerHelpers(plop) {
    * Usage: {{json obj}}
    */
   plop.setHelper("json", (obj) => JSON.stringify(obj));
+
+  /**
+   * Returns the API path for a feature name.
+   * Handles kebab-case names using bracket notation: api["my-feature"]
+   * For simple names uses dot notation: api.myFeature
+   * Usage: {{apiPath name}}
+   */
+  plop.setHelper("apiPath", (name) => {
+    if (name.includes("-")) {
+      return `api["${name}"]`;
+    }
+    return `api.${name}`;
+  });
+
+  /**
+   * Returns the ERRORS access path for a feature name.
+   * Handles kebab-case names: ERRORS["my-feature"]
+   * For simple names: ERRORS.myFeature
+   * Usage: {{errorsPath name}}
+   */
+  plop.setHelper("errorsPath", (name) => {
+    if (name.includes("-")) {
+      return `ERRORS["${name}"]`;
+    }
+    return `ERRORS.${name}`;
+  });
+
+  /**
+   * Returns the last element of an array.
+   * Usage: {{lastValue array}}
+   */
+  plop.setHelper("lastValue", (arr) => {
+    if (Array.isArray(arr) && arr.length > 0) {
+      return arr[arr.length - 1];
+    }
+    return "";
+  });
+
+  /**
+   * Returns the first element of an array.
+   * Usage: {{firstValue array}}
+   */
+  plop.setHelper("firstValue", (arr) => {
+    if (Array.isArray(arr) && arr.length > 0) {
+      return arr[0];
+    }
+    return "";
+  });
 
   /**
    * Check if a field should be shown on a given view.

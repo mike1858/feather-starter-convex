@@ -6,11 +6,6 @@ import { api } from "~/convex/_generated/api";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/ui/input";
 import { Button } from "@/ui/button";
-{{#each fields}}
-{{#ifEq type "boolean"}}
-import { Switch } from "@/ui/switch";
-{{/ifEq}}
-{{#ifEq type "enum"}}
 import {
   Select,
   SelectContent,
@@ -18,36 +13,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/ui/select";
-{{/ifEq}}
-{{/each}}
-import { {{camelCase name}}Schema } from "@/shared/schemas/{{name}}";
+import { Switch } from "@/ui/switch";
+import { testGenSchema } from "@/shared/schemas/test-gen";
 // @generated-end imports
 // @custom-start imports
 // @custom-end imports
 
-interface {{pascalCase name}}FormProps {
+interface TestGenFormProps {
   mode: "inline" | "full";
   defaultValues?: Partial<Record<string, unknown>>;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function {{pascalCase name}}Form({
+export function TestGenForm({
   mode,
   defaultValues,
   onSuccess,
   onCancel,
-}: {{pascalCase name}}FormProps) {
-  const { t } = useTranslation("{{name}}");
+}: TestGenFormProps) {
+  const { t } = useTranslation("test-gen");
   const { mutateAsync: createItem } = useMutation({
-    mutationFn: useConvexMutation({{{apiPath name}}}.mutations.create),
+    mutationFn: useConvexMutation(api["test-gen"].mutations.create),
   });
 
   const form = useForm({
     defaultValues: {
-      {{#each fields}}
-      {{@key}}: {{#ifEq type "string"}}""{{/ifEq}}{{#ifEq type "text"}}""{{/ifEq}}{{#ifEq type "boolean"}}{{default}}{{/ifEq}}{{#ifEq type "number"}}0{{/ifEq}}{{#ifEq type "enum"}}"{{firstValue values}}"{{/ifEq}},
-      {{/each}}
+      title: "",
+      description: "",
+      status: "draft",
+      priority: false,
       ...defaultValues,
     } as Record<string, unknown>,
     onSubmit: async ({ value }) => {
@@ -69,7 +64,7 @@ export function {{pascalCase name}}Form({
         }}
       >
         <form.Field
-          name="{{#each fields}}{{#ifEq @key "title"}}title{{/ifEq}}{{#ifEq @key "name"}}name{{/ifEq}}{{/each}}"
+          name="title"
           children={(field) => (
             <Input
               placeholder={t("form.addInline")}
@@ -100,76 +95,25 @@ export function {{pascalCase name}}Form({
         form.handleSubmit();
       }}
     >
-      {{#each fields}}
       <form.Field
-        name="{{@key}}"
+        name="title"
         children={(field) => (
           <div className="flex flex-col gap-1.5">
             <label className="text-xs tracking-wide text-muted-foreground uppercase">
-              {t("fields.{{@key}}", "{{sentenceCase @key}}")}
+              {t("fields.title", "Title")}
             </label>
 
-            {{#ifEq type "string"}}
             <Input
               value={field.state.value as string}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
               className="h-10"
-              {{#if max}}
-              maxLength={ {{max}} }
-              {{/if}}
+              maxLength={ 200 }
             />
-            {{/ifEq}}
 
-            {{#ifEq type "text"}}
-            <textarea
-              value={field.state.value as string}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              className="rounded-md border border-input bg-background px-4 py-2.5 text-sm min-h-[100px] resize-y focus-visible:ring-2 focus-visible:ring-ring"
-              {{#if max}}
-              maxLength={ {{max}} }
-              {{/if}}
-            />
-            {{/ifEq}}
 
-            {{#ifEq type "boolean"}}
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={field.state.value as boolean}
-                onCheckedChange={(checked) => field.handleChange(checked)}
-              />
-              <span className="text-sm text-primary">
-                {t("fields.{{@key}}", "{{sentenceCase @key}}")}
-              </span>
-            </div>
-            {{/ifEq}}
 
-            {{#ifEq type "number"}}
-            <Input
-              type="number"
-              value={field.state.value as number}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(Number(e.target.value))}
-              className="h-10 tabular-nums"
-            />
-            {{/ifEq}}
 
-            {{#ifEq type "enum"}}
-            <Select
-              value={field.state.value as string}
-              onValueChange={(val) => field.handleChange(val)}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {{#each values}}
-                <SelectItem value="{{this}}">{{sentenceCase this}}</SelectItem>
-                {{/each}}
-              </SelectContent>
-            </Select>
-            {{/ifEq}}
 
             {field.state.meta.errors.length > 0 && (
               <span className="text-xs text-destructive mt-1">
@@ -179,7 +123,98 @@ export function {{pascalCase name}}Form({
           </div>
         )}
       />
-      {{/each}}
+      <form.Field
+        name="description"
+        children={(field) => (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs tracking-wide text-muted-foreground uppercase">
+              {t("fields.description", "Description")}
+            </label>
+
+
+            <textarea
+              value={field.state.value as string}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              className="rounded-md border border-input bg-background px-4 py-2.5 text-sm min-h-[100px] resize-y focus-visible:ring-2 focus-visible:ring-ring"
+              maxLength={ 5000 }
+            />
+
+
+
+
+            {field.state.meta.errors.length > 0 && (
+              <span className="text-xs text-destructive mt-1">
+                {field.state.meta.errors[0]}
+              </span>
+            )}
+          </div>
+        )}
+      />
+      <form.Field
+        name="status"
+        children={(field) => (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs tracking-wide text-muted-foreground uppercase">
+              {t("fields.status", "Status")}
+            </label>
+
+
+
+
+
+            <Select
+              value={field.state.value as string}
+              onValueChange={(val) => field.handleChange(val)}
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {field.state.meta.errors.length > 0 && (
+              <span className="text-xs text-destructive mt-1">
+                {field.state.meta.errors[0]}
+              </span>
+            )}
+          </div>
+        )}
+      />
+      <form.Field
+        name="priority"
+        children={(field) => (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs tracking-wide text-muted-foreground uppercase">
+              {t("fields.priority", "Priority")}
+            </label>
+
+
+
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={field.state.value as boolean}
+                onCheckedChange={(checked) => field.handleChange(checked)}
+              />
+              <span className="text-sm text-primary">
+                {t("fields.priority", "Priority")}
+              </span>
+            </div>
+
+
+
+            {field.state.meta.errors.length > 0 && (
+              <span className="text-xs text-destructive mt-1">
+                {field.state.meta.errors[0]}
+              </span>
+            )}
+          </div>
+        )}
+      />
 
       {/* Actions */}
       <div className="flex items-center gap-4 pt-4 border-t border-border">

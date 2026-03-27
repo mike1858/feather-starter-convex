@@ -29,7 +29,7 @@ import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
 export function {{pascalCase name}}Page() {
   const { t } = useTranslation("{{name}}");
   const { data: items = [] } = useSuspenseQuery(
-    convexQuery(api.{{name}}.queries.list, {}),
+    convexQuery({{{apiPath name}}}.queries.list, {}),
   );
 
   // @generated-start state
@@ -66,7 +66,7 @@ export function {{pascalCase name}}Page() {
     if (filteredItems.length === 0) {
       return (
         <{{pascalCase name}}EmptyState
-          variant={{{#if views.filteredViews}}activeFilter !== "all" ? "noMatches" : "noData"{{else}}"noData"{{/if}}}
+          variant={ {{~#if views.filteredViews~}} activeFilter !== "all" ? "noMatches" : "noData" {{~else~}} "noData" {{~/if~}} }
         />
       );
     }
@@ -82,7 +82,7 @@ export function {{pascalCase name}}Page() {
         return <{{pascalCase ../name}}{{pascalCase this}}View items={filteredItems} />;
       {{/each}}
       default:
-        return <{{pascalCase ../name}}{{pascalCase views.default.defaultView}}View items={filteredItems} />;
+        return <{{pascalCase name}}{{pascalCase views.default.defaultView}}View items={filteredItems} />;
     }
     {{/ifEq}}
   };
@@ -91,7 +91,7 @@ export function {{pascalCase name}}Page() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-5xl">
       <{{pascalCase name}}TitleBar
-        {{#unless (ifEq views.default.enabledViews.length 1)}}
+        {{#unless (eq views.default.enabledViews.length 1)}}
         activeView={activeView}
         onViewChange={setActiveView}
         {{/unless}}

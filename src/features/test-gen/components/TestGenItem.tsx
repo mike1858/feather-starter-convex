@@ -3,65 +3,47 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "~/convex/_generated/api";
 import { useTranslation } from "react-i18next";
-import { Trash2{{#if behaviors.orderable}}, GripVertical{{/if}}{{#each fields}}{{#ifEq type "boolean"}}{{#ifEq @key "priority"}}, Flag{{/ifEq}}{{/ifEq}}{{/each}} } from "lucide-react";
+import { Trash2, GripVertical, Flag } from "lucide-react";
 import { Button } from "@/ui/button";
 import { useDoubleCheck } from "@/ui/use-double-check";
-{{#each fields}}
-{{#if transitions}}
-import { {{pascalCase ../name}}StatusBadge } from "./{{pascalCase ../name}}StatusBadge";
-{{/if}}
-{{/each}}
+import { TestGenStatusBadge } from "./TestGenStatusBadge";
 import type { Id } from "~/convex/_generated/dataModel";
 // @generated-end imports
 // @custom-start imports
 // @custom-end imports
 
-interface {{pascalCase name}}ItemData {
-  _id: Id<"{{name}}">;
-  {{#each fields}}
-  {{#showOnView this "list"}}
-  {{@key}}{{#unless required}}?{{/unless}}: {{#ifEq type "string"}}string{{/ifEq}}{{#ifEq type "text"}}string{{/ifEq}}{{#ifEq type "boolean"}}boolean{{/ifEq}}{{#ifEq type "number"}}number{{/ifEq}}{{#ifEq type "enum"}}string{{/ifEq}};
-  {{/showOnView}}
-  {{/each}}
+interface TestGenItemData {
+  _id: Id<"test-gen">;
+  title: string;
+  description?: string;
+  status?: string;
+  priority?: boolean;
 }
 
-interface {{pascalCase name}}ItemProps {
-  item: {{pascalCase name}}ItemData;
-  {{#if behaviors.orderable}}
+interface TestGenItemProps {
+  item: TestGenItemData;
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
-  {{/if}}
 }
 
-export function {{pascalCase name}}Item({
+export function TestGenItem({
   item,
-  {{#if behaviors.orderable}}
   dragHandleProps,
-  {{/if}}
-}: {{pascalCase name}}ItemProps) {
-  const { t } = useTranslation("{{name}}");
+}: TestGenItemProps) {
+  const { t } = useTranslation("test-gen");
 
   // @generated-start mutations
-  {{#if operations.delete}}
   const { mutateAsync: removeItem } = useMutation({
-    mutationFn: useConvexMutation({{{apiPath name}}}.mutations.remove),
+    mutationFn: useConvexMutation(api["test-gen"].mutations.remove),
   });
-  {{/if}}
-  {{#each fields}}
-  {{#ifEq type "boolean"}}
   const { mutateAsync: updateItem } = useMutation({
-    mutationFn: useConvexMutation({{{apiPath ../name}}}.mutations.update),
+    mutationFn: useConvexMutation(api["test-gen"].mutations.update),
   });
-  {{/ifEq}}
-  {{/each}}
   // @generated-end mutations
 
-  {{#if operations.delete}}
   const { doubleCheck, getButtonProps } = useDoubleCheck();
-  {{/if}}
 
   return (
     <div className="group flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-4 shadow-card hover:shadow-card-hover hover:border-border/80 transition-all duration-200 ease-out cursor-pointer">
-      {{#if behaviors.orderable}}
       {/* Drag handle */}
       {dragHandleProps && (
         <button
@@ -72,68 +54,33 @@ export function {{pascalCase name}}Item({
           <GripVertical className="h-4 w-4" />
         </button>
       )}
-      {{/if}}
 
-      {{#each fields}}
-      {{#if transitions}}
       {/* Status badge */}
-      <{{pascalCase ../name}}StatusBadge
-        status={item.{{@key~}} }
+      <TestGenStatusBadge
+        status={item.status}
         itemId={item._id}
       />
-      {{/if}}
-      {{/each}}
 
       {/* Title section */}
       <div className="flex-1 min-w-0">
-        {{#each fields}}
-        {{#ifEq @key "title"}}
         <span className="text-sm font-semibold text-primary truncate block">
           {item.title}
         </span>
-        {{/ifEq}}
-        {{#ifEq @key "name"}}
-        <span className="text-sm font-semibold text-primary truncate block">
-          {item.name}
-        </span>
-        {{/ifEq}}
-        {{/each}}
-        {{#each fields}}
-        {{#ifEq type "text"}}
-        {{#showOnView this "list"}}
-        {item.{{@key}} && (
+        {item.description && (
           <span className="text-xs text-primary/50 truncate block mt-0.5">
-            {item.{{@key~}} }
+            {item.description}
           </span>
         )}
-        {{/showOnView}}
-        {{/ifEq}}
-        {{/each}}
       </div>
 
       {/* Metadata: enum fields as dot badges, boolean fields as indicators */}
       <div className="flex items-center gap-4">
-        {{#each fields}}
-        {{#ifEq type "enum"}}
-        {{#unless transitions}}
-        {{#showOnView this "list"}}
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold">
-          <span className="h-2 w-2 rounded-full" aria-hidden="true" />
-          {item.{{@key~}} }
-        </span>
-        {{/showOnView}}
-        {{/unless}}
-        {{/ifEq}}
-        {{/each}}
 
-        {{#each fields}}
-        {{#ifEq type "boolean"}}
-        {{#ifEq @key "priority"}}
         {/* Priority flag */}
         <button
           type="button"
           onClick={async () => {
-            await updateItem({ {{camelCase ../name}}Id: item._id, priority: !item.priority });
+            await updateItem({ testGenId: item._id, priority: !item.priority });
           }}
           className={`rounded-md p-1.5 transition-colors hover:bg-primary/5 ${
             item.priority ? "text-orange-500" : "text-primary/20"
@@ -142,12 +89,8 @@ export function {{pascalCase name}}Item({
         >
           <Flag className="h-4 w-4" />
         </button>
-        {{/ifEq}}
-        {{/ifEq}}
-        {{/each}}
       </div>
 
-      {{#if operations.delete}}
       {/* Actions (visible on hover) */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <Button
@@ -157,7 +100,7 @@ export function {{pascalCase name}}Item({
           {...getButtonProps({
             onClick: doubleCheck
               ? async () => {
-                  await removeItem({ {{camelCase name}}Id: item._id });
+                  await removeItem({ testGenId: item._id });
                 }
               : undefined,
           })}
@@ -169,7 +112,6 @@ export function {{pascalCase name}}Item({
           )}
         </Button>
       </div>
-      {{/if}}
     </div>
   );
 }

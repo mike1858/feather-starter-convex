@@ -14,7 +14,7 @@ describe("create", () => {
     userId,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -81,7 +81,7 @@ describe("create", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#ifEq this.type "string"}}
       {{@key}}: "Full {{@key}}",
@@ -124,7 +124,7 @@ describe("create", () => {
   });
 
   test("does nothing when unauthenticated", async ({ testClient }) => {
-    await testClient.mutation(api.{{name}}.mutations.create, {
+    await testClient.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -189,7 +189,7 @@ describe("update", () => {
       });
     });
 
-    await testClient.mutation(api.{{name}}.mutations.update, {
+    await testClient.mutation({{{apiPath name}}}.mutations.update, {
       {{camelCase name}}Id: recordId,
 {{#each fields}}
 {{#ifEq this.type "string"}}
@@ -214,7 +214,7 @@ describe("update", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -243,7 +243,7 @@ describe("update", () => {
     );
     const recordId = records[0]._id;
 
-    await client.mutation(api.{{name}}.mutations.update, {
+    await client.mutation({{{apiPath name}}}.mutations.update, {
       {{camelCase name}}Id: recordId,
 {{#each fields}}
 {{#ifEq this.type "string"}}
@@ -267,7 +267,7 @@ describe("update", () => {
   });
 
   test("throws when {{label}} not found", async ({ client, testClient }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -297,7 +297,7 @@ describe("update", () => {
     await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
 
     await expect(
-      client.mutation(api.{{name}}.mutations.update, {
+      client.mutation({{{apiPath name}}}.mutations.update, {
         {{camelCase name}}Id: recordId,
 {{#each fields}}
 {{#ifEq this.type "string"}}
@@ -345,7 +345,7 @@ describe("remove", () => {
       });
     });
 
-    await testClient.mutation(api.{{name}}.mutations.remove, { {{camelCase name}}Id: recordId });
+    await testClient.mutation({{{apiPath name}}}.mutations.remove, { {{camelCase name}}Id: recordId });
 
     const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
     expect(record).not.toBeNull();
@@ -353,7 +353,7 @@ describe("remove", () => {
 
 {{#if behaviors.softDelete}}
   test("soft deletes a {{label}}", async ({ client, testClient }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -382,7 +382,7 @@ describe("remove", () => {
     );
     expect(records).toHaveLength(1);
 
-    await client.mutation(api.{{name}}.mutations.remove, {
+    await client.mutation({{{apiPath name}}}.mutations.remove, {
       {{camelCase name}}Id: records[0]._id,
     });
 
@@ -394,7 +394,7 @@ describe("remove", () => {
   });
 {{else}}
   test("deletes a {{label}}", async ({ client, testClient }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -423,7 +423,7 @@ describe("remove", () => {
     );
     expect(records).toHaveLength(1);
 
-    await client.mutation(api.{{name}}.mutations.remove, {
+    await client.mutation({{{apiPath name}}}.mutations.remove, {
       {{camelCase name}}Id: records[0]._id,
     });
 
@@ -444,8 +444,8 @@ describe("update{{pascalCase @key}}", () => {
   test("does nothing when unauthenticated", async ({ testClient }) => {
     const recordId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
-      return ctx.db.insert("{{../name}}", {
-{{#each ../fields}}
+      return ctx.db.insert("{{@root.name}}", {
+{{#each @root.fields}}
 {{#ifEq this.type "string"}}
         {{@key}}: "Seed",
 {{/ifEq}}
@@ -463,17 +463,17 @@ describe("update{{pascalCase @key}}", () => {
 {{/ifEq}}
 {{/each}}
         creatorId: userId,
-{{#if ../behaviors.assignable}}
+{{#if @root.behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
-{{#if ../behaviors.orderable}}
+{{#if @root.behaviors.orderable}}
         position: 1,
 {{/if}}
       });
     });
 
-    await testClient.mutation(api.{{../name}}.mutations.update{{pascalCase @key}}, {
-      {{camelCase ../name}}Id: recordId,
+    await testClient.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
+      {{camelCase @root.name}}Id: recordId,
       {{@key}}: "{{this.values.[1]}}",
     });
 
@@ -481,9 +481,9 @@ describe("update{{pascalCase @key}}", () => {
     expect(record.{{@key}}).toBe("{{this.values.[0]}}");
   });
 
-  test("throws when {{../label}} not found", async ({ client, testClient }) => {
-    await client.mutation(api.{{../name}}.mutations.create, {
-{{#each ../fields}}
+  test("throws when {{@root.label}} not found", async ({ client, testClient }) => {
+    await client.mutation({{{apiPath @root.name}}}.mutations.create, {
+{{#each @root.fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
       {{@key}}: "Temp",
@@ -506,14 +506,14 @@ describe("update{{pascalCase @key}}", () => {
 {{/each}}
     });
     const records = await testClient.run(async (ctx: any) =>
-      ctx.db.query("{{../name}}").collect(),
+      ctx.db.query("{{@root.name}}").collect(),
     );
     const recordId = records[0]._id;
     await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
 
     await expect(
-      client.mutation(api.{{../name}}.mutations.update{{pascalCase @key}}, {
-        {{camelCase ../name}}Id: recordId,
+      client.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
+        {{camelCase @root.name}}Id: recordId,
         {{@key}}: "{{this.values.[1]}}",
       }),
     ).rejects.toThrow("not found");
@@ -521,8 +521,8 @@ describe("update{{pascalCase @key}}", () => {
 
 {{#each this.transitions}}
   test("advances {{@key}} to {{#each this}}{{this}}{{#unless @last}} then {{/unless}}{{/each}}", async ({ client, testClient }) => {
-    await client.mutation(api.{{../../name}}.mutations.create, {
-{{#each ../../fields}}
+    await client.mutation({{{apiPath @root.name}}}.mutations.create, {
+{{#each @root.fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
       {{@key}}: "Status test",
@@ -546,20 +546,20 @@ describe("update{{pascalCase @key}}", () => {
     });
 
     const records = await testClient.run(async (ctx: any) =>
-      ctx.db.query("{{../../name}}").collect(),
+      ctx.db.query("{{@root.name}}").collect(),
     );
 
 {{#each this}}
-    await client.mutation(api.{{../../../name}}.mutations.update{{pascalCase ../../statusFieldKey}}, {
-      {{camelCase ../../../name}}Id: records[0]._id,
-      {{../../statusFieldKey}}: "{{this}}",
+    await client.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @root.statusFieldKey}}, {
+      {{camelCase @root.name}}Id: records[0]._id,
+      {{@root.statusFieldKey}}: "{{this}}",
     });
 {{/each}}
 
     const updated = await testClient.run(async (ctx: any) =>
       ctx.db.get(records[0]._id),
     );
-    expect(updated.{{../statusFieldKey}}).toBe("{{#each this}}{{#if @last}}{{this}}{{/if}}{{/each}}");
+    expect(updated.{{@root.statusFieldKey}}).toBe("{{#each this}}{{#if @last}}{{this}}{{/if}}{{/each}}");
   });
 {{/each}}
 
@@ -567,8 +567,8 @@ describe("update{{pascalCase @key}}", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{../name}}.mutations.create, {
-{{#each ../fields}}
+    await client.mutation({{{apiPath @root.name}}}.mutations.create, {
+{{#each @root.fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
       {{@key}}: "Status test",
@@ -592,13 +592,13 @@ describe("update{{pascalCase @key}}", () => {
     });
 
     const records = await testClient.run(async (ctx: any) =>
-      ctx.db.query("{{../name}}").collect(),
+      ctx.db.query("{{@root.name}}").collect(),
     );
 
     await expect(
-      client.mutation(api.{{../name}}.mutations.update{{pascalCase @key}}, {
-        {{camelCase ../name}}Id: records[0]._id,
-        {{@key}}: "{{this.values.[length-1]}}",
+      client.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
+        {{camelCase @root.name}}Id: records[0]._id,
+        {{@key}}: "{{lastValue this.values}}",
       }),
     ).rejects.toThrow("Invalid status transition");
   });
@@ -644,7 +644,7 @@ describe("assign", () => {
       ctx.db.insert("users", { name: "Other" }),
     );
 
-    await testClient.mutation(api.{{name}}.mutations.assign, {
+    await testClient.mutation({{{apiPath name}}}.mutations.assign, {
       {{camelCase name}}Id: recordId,
       assigneeId: otherUserId,
     });
@@ -654,7 +654,7 @@ describe("assign", () => {
   });
 
   test("throws when {{label}} not found", async ({ client, testClient }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -684,7 +684,7 @@ describe("assign", () => {
     await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
 
     await expect(
-      client.mutation(api.{{name}}.mutations.assign, {
+      client.mutation({{{apiPath name}}}.mutations.assign, {
         {{camelCase name}}Id: recordId,
         assigneeId: undefined,
       }),
@@ -695,7 +695,7 @@ describe("assign", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -728,7 +728,7 @@ describe("assign", () => {
       ctx.db.insert("users", { name: "Other User" }),
     );
 
-    await client.mutation(api.{{name}}.mutations.assign, {
+    await client.mutation({{{apiPath name}}}.mutations.assign, {
       {{camelCase name}}Id: records[0]._id,
       assigneeId: otherUserId,
     });
@@ -745,7 +745,7 @@ describe("assign", () => {
     userId,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -773,7 +773,7 @@ describe("assign", () => {
       ctx.db.query("{{name}}").collect(),
     );
 
-    await client.mutation(api.{{name}}.mutations.assign, {
+    await client.mutation({{{apiPath name}}}.mutations.assign, {
       {{camelCase name}}Id: records[0]._id,
       assigneeId: userId,
     });
@@ -789,7 +789,7 @@ describe("assign", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -817,7 +817,7 @@ describe("assign", () => {
     );
     expect(records[0].visibility).toBe("private");
 
-    await client.mutation(api.{{name}}.mutations.assign, {
+    await client.mutation({{{apiPath name}}}.mutations.assign, {
       {{camelCase name}}Id: records[0]._id,
       assigneeId: undefined,
     });
@@ -864,7 +864,7 @@ describe("reorder", () => {
       });
     });
 
-    await testClient.mutation(api.{{name}}.mutations.reorder, {
+    await testClient.mutation({{{apiPath name}}}.mutations.reorder, {
       {{camelCase name}}Id: recordId,
       newPosition: 999,
     });
@@ -874,7 +874,7 @@ describe("reorder", () => {
   });
 
   test("updates position field", async ({ client, testClient }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -902,7 +902,7 @@ describe("reorder", () => {
       ctx.db.query("{{name}}").collect(),
     );
 
-    await client.mutation(api.{{name}}.mutations.reorder, {
+    await client.mutation({{{apiPath name}}}.mutations.reorder, {
       {{camelCase name}}Id: records[0]._id,
       newPosition: 42,
     });

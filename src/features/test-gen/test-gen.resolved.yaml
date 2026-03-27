@@ -1,0 +1,115 @@
+timestamps: both
+behaviors:
+  softDelete: false
+  auditTrail: false
+  immutable: false
+  assignable: false
+  orderable: true
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+  sharing: false
+views:
+  default:
+    defaultView: list
+    enabledViews:
+      - list
+      - card
+      - table
+  table:
+    design: minimal
+    pageSize: 20
+  card:
+    size: default
+    orientation: grid
+    imageStyle: none
+  list:
+    density: comfortable
+  detail:
+    display: page
+  pagination:
+    table:
+      mode: offset
+      pageSize: 20
+    list:
+      mode: infinite
+    card:
+      mode: infinite
+    cover:
+      mode: infinite
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+search: false
+searchFields:
+  - title
+  - description
+i18n:
+  languages:
+    - en
+    - es
+name: test-gen
+label: Test Item
+labelPlural: Test Items
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+    showOn: all
+    hideOn: &a1 []
+    filterable: false
+    sortable: true
+  description:
+    type: text
+    required: false
+    max: 5000
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: false
+  status:
+    type: enum
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: true
+    sortable: true
+    values:
+      - draft
+      - active
+      - completed
+    default: draft
+    transitions:
+      draft:
+        - active
+      active:
+        - completed
+    colors:
+      draft: 0
+      active: 1
+      completed: 2
+  priority:
+    type: boolean
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: true
+    default: false
+indexes:
+  - name: by_userId
+    fields:
+      - userId
+  - name: by_status
+    fields:
+      - status
+statusFieldKey: status

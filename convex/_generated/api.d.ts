@@ -23,6 +23,8 @@ import type * as password_PasswordResetEmail from "../password/PasswordResetEmai
 import type * as password_ResendOTPPasswordReset from "../password/ResendOTPPasswordReset.js";
 import type * as tasks_mutations from "../tasks/mutations.js";
 import type * as tasks_queries from "../tasks/queries.js";
+import type * as test_gen_mutations from "../test-gen/mutations.js";
+import type * as test_gen_queries from "../test-gen/queries.js";
 import type * as testing_clearAll from "../testing/clearAll.js";
 import type * as uploads_mutations from "../uploads/mutations.js";
 import type * as users_mutations from "../users/mutations.js";
@@ -50,6 +52,8 @@ declare const fullApi: ApiFromModules<{
   "password/ResendOTPPasswordReset": typeof password_ResendOTPPasswordReset;
   "tasks/mutations": typeof tasks_mutations;
   "tasks/queries": typeof tasks_queries;
+  "test-gen/mutations": typeof test_gen_mutations;
+  "test-gen/queries": typeof test_gen_queries;
   "testing/clearAll": typeof testing_clearAll;
   "uploads/mutations": typeof uploads_mutations;
   "users/mutations": typeof users_mutations;

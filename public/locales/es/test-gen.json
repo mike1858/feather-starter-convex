@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "test-gen": "Test Items"
+  },
+  "page": {
+    "title": "Test Items",
+    "description": "Administra tus test items."
+  },
+  "form": {
+    "addInline": "Agregar test item...",
+    "submit": "Agregar",
+    "create": "Crear Test Item",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay test items",
+    "description": "Crea tu primer test item para comenzar.",
+    "cta": "Crear Test Item",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay test items que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "Test Item no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus test items. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar test items..."
+  },
+  "detail": {
+    "editing": "Editando {{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "completed": "Completed"
+  }
+}

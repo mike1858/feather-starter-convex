@@ -15,7 +15,7 @@ describe("list", () => {
     testClient,
   }) => {
     // Create 2 records via the create mutation
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -38,7 +38,7 @@ describe("list", () => {
 {{/if}}
 {{/each}}
     });
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -62,26 +62,26 @@ describe("list", () => {
 {{/each}}
     });
 
-    const records = await client.query(api.{{name}}.queries.list, {});
+    const records = await client.query({{{apiPath name}}}.queries.list, {});
     expect(records).toHaveLength(2);
   });
 
   test("returns empty array when no {{labelPlural}}", async ({
     client,
   }) => {
-    const records = await client.query(api.{{name}}.queries.list, {});
+    const records = await client.query({{{apiPath name}}}.queries.list, {});
     expect(records).toHaveLength(0);
   });
 
 {{#ifEq access.scope "owner"}}
   test("returns empty when unauthenticated", async ({ testClient }) => {
-    const records = await testClient.query(api.{{name}}.queries.list, {});
+    const records = await testClient.query({{{apiPath name}}}.queries.list, {});
     expect(records).toEqual([]);
   });
 {{/ifEq}}
 {{#ifEq access.scope "team"}}
   test("returns empty when unauthenticated", async ({ testClient }) => {
-    const records = await testClient.query(api.{{name}}.queries.list, {});
+    const records = await testClient.query({{{apiPath name}}}.queries.list, {});
     expect(records).toEqual([]);
   });
 {{/ifEq}}
@@ -143,7 +143,7 @@ describe("list", () => {
       });
     });
 
-    const records = await client.query(api.{{name}}.queries.list, {});
+    const records = await client.query({{{apiPath name}}}.queries.list, {});
     expect(records).toHaveLength(2);
 {{#each fields}}
 {{#ifEq this.type "string"}}
@@ -164,7 +164,7 @@ describe("get", () => {
     client,
     testClient,
   }) => {
-    await client.mutation(api.{{name}}.mutations.create, {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
@@ -192,7 +192,7 @@ describe("get", () => {
       ctx.db.query("{{name}}").collect(),
     );
 
-    const record = await client.query(api.{{name}}.queries.get, {
+    const record = await client.query({{{apiPath name}}}.queries.get, {
       id: records[0]._id,
     });
     expect(record).not.toBeNull();
@@ -241,7 +241,7 @@ describe("get", () => {
       });
     });
 
-    const record = await testClient.query(api.{{name}}.queries.get, {
+    const record = await testClient.query({{{apiPath name}}}.queries.get, {
       id: recordId,
     });
     expect(record).toBeNull();
@@ -289,13 +289,13 @@ describe("{{camelCase this.name}}", () => {
       });
     });
 
-    const records = await client.query(api.{{../name}}.queries.{{camelCase this.name}}, {});
+    const records = await client.query({{{apiPath ../name}}}.queries.{{camelCase this.name}}, {});
     expect(records).toBeDefined();
     expect(Array.isArray(records)).toBe(true);
   });
 
   test("returns empty when unauthenticated", async ({ testClient }) => {
-    const records = await testClient.query(api.{{../name}}.queries.{{camelCase this.name}}, {});
+    const records = await testClient.query({{{apiPath ../name}}}.queries.{{camelCase this.name}}, {});
     expect(records).toEqual([]);
   });
 });

@@ -40,7 +40,7 @@ test("renders {{lowerCase label}} items when data exists", async ({
       {{#each fields}}
       {{#ifEq @key "title"}}title: "Test {{sentenceCase ../name}}",{{/ifEq}}
       {{#ifEq @key "name"}}name: "Test {{sentenceCase ../name}}",{{/ifEq}}
-      {{#ifEq type "string"}}{{#unless (ifEq @key "title")}}{{#unless (ifEq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
+      {{#ifEq type "string"}}{{#unless (eq @key "title")}}{{#unless (eq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
       {{#ifEq type "text"}}{{@key}}: "test description",{{/ifEq}}
       {{#ifEq type "boolean"}}{{@key}}: {{default}},{{/ifEq}}
       {{#ifEq type "number"}}{{@key}}: 0,{{/ifEq}}
@@ -77,7 +77,7 @@ test("inline form creates a {{lowerCase label}}", async ({ client }) => {
   await user.click(screen.getByRole("button", { name: /add/i }));
 
   await waitFor(async () => {
-    const items = await client.query(api.{{name}}.queries.list, {});
+    const items = await client.query({{{apiPath name}}}.queries.list, {});
     expect(items.some((item: any) => {
       const title = item.title || item.name;
       return title === "New {{lowerCase label}} from form";
@@ -100,7 +100,7 @@ test("status badge advances status on click", async ({
       {{#each ../fields}}
       {{#ifEq @key "title"}}title: "Status test",{{/ifEq}}
       {{#ifEq @key "name"}}name: "Status test",{{/ifEq}}
-      {{#ifEq type "string"}}{{#unless (ifEq @key "title")}}{{#unless (ifEq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
+      {{#ifEq type "string"}}{{#unless (eq @key "title")}}{{#unless (eq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
       {{#ifEq type "text"}}{{@key}}: "",{{/ifEq}}
       {{#ifEq type "boolean"}}{{@key}}: {{default}},{{/ifEq}}
       {{#ifEq type "number"}}{{@key}}: 0,{{/ifEq}}
@@ -127,7 +127,7 @@ test("status badge advances status on click", async ({
   await user.click(screen.getByText("{{sentenceCase (firstValue values)}}"));
 
   await waitFor(async () => {
-    const items = await client.query(api.{{../name}}.queries.list, {});
+    const items = await client.query({{{apiPath ../name}}}.queries.list, {});
     expect(items[0].{{@key}}).not.toBe(firstStatus);
   });
 });
@@ -147,7 +147,7 @@ test("delete button removes {{lowerCase label}}", async ({
       {{#each fields}}
       {{#ifEq @key "title"}}title: "Delete me",{{/ifEq}}
       {{#ifEq @key "name"}}name: "Delete me",{{/ifEq}}
-      {{#ifEq type "string"}}{{#unless (ifEq @key "title")}}{{#unless (ifEq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
+      {{#ifEq type "string"}}{{#unless (eq @key "title")}}{{#unless (eq @key "name")}}{{@key}}: "test",{{/unless}}{{/unless}}{{/ifEq}}
       {{#ifEq type "text"}}{{@key}}: "",{{/ifEq}}
       {{#ifEq type "boolean"}}{{@key}}: {{default}},{{/ifEq}}
       {{#ifEq type "number"}}{{@key}}: 0,{{/ifEq}}
@@ -181,7 +181,7 @@ test("delete button removes {{lowerCase label}}", async ({
   await user.click(screen.getByText("Delete?"));
 
   await waitFor(async () => {
-    const items = await client.query(api.{{name}}.queries.list, {});
+    const items = await client.query({{{apiPath name}}}.queries.list, {});
     expect(items).toHaveLength(0);
   });
 });

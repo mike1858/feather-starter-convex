@@ -69,8 +69,8 @@ export function registerWiringActions(plop) {
     const fields = answers.fields || {};
     const indexes = answers.indexes || [];
 
-    // Check if already wired
-    if (content.includes(`${name}: defineTable(`)) {
+    // Check if already wired (handle both quoted and unquoted keys)
+    if (content.includes(`${name}: defineTable(`) || content.includes(`"${name}": defineTable(`)) {
       return `convex/schema.ts already contains ${name} table`;
     }
 
@@ -145,8 +145,9 @@ export function registerWiringActions(plop) {
       .map((idx) => `.index("${idx.name}", [${idx.fields.map((f) => `"${f}"`).join(", ")}])`)
       .map((chain) => `    ${chain}`);
 
+    const tableKey = name.includes("-") ? `"${name}"` : name;
     const tableLines = [
-      `  ${name}: defineTable({`,
+      `  ${tableKey}: defineTable({`,
       ...fieldLines,
       "  })",
       ...indexChains.map((c) => c),
@@ -257,12 +258,13 @@ export function registerWiringActions(plop) {
     let content = fs.readFileSync(errorsPath, "utf8");
     const { name, label } = answers;
 
-    // Check if already wired
-    if (content.includes(`${name}: {`)) {
+    // Check if already wired (handle both quoted and unquoted keys)
+    if (content.includes(`${name}: {`) || content.includes(`"${name}": {`)) {
       return `src/shared/errors.ts already contains ${name} group`;
     }
 
-    const errorGroup = `  ${name}: {
+    const errorKey = name.includes("-") ? `"${name}"` : name;
+    const errorGroup = `  ${errorKey}: {
     NOT_FOUND: "${label} not found.",
     INVALID_STATUS_TRANSITION: "Invalid status transition.",
   },`;

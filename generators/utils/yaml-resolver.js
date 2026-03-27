@@ -118,6 +118,14 @@ export function resolveDefaults(featureConfig, defaultsPath) {
 
   merged.indexes = indexes;
 
+  // Compute statusFieldKey: first enum field with transitions (used by test templates)
+  for (const [fieldName, fieldConfig] of Object.entries(merged.fields)) {
+    if (fieldConfig.type === "enum" && fieldConfig.transitions) {
+      merged.statusFieldKey = fieldName;
+      break;
+    }
+  }
+
   return merged;
 }
 

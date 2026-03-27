@@ -1,6 +1,6 @@
 // @generated-start imports
 import { useTranslation } from "react-i18next";
-{{#unless (ifEq views.default.enabledViews.length 1)}}
+{{#unless (eq views.default.enabledViews.length 1)}}
 import { {{pascalCase name}}ViewSwitcher } from "./{{pascalCase name}}ViewSwitcher";
 {{/unless}}
 {{#if behaviors.search}}
@@ -13,7 +13,7 @@ import { Button } from "@/ui/button";
 // @custom-end imports
 
 interface {{pascalCase name}}TitleBarProps {
-  {{#unless (ifEq views.default.enabledViews.length 1)}}
+  {{#unless (eq views.default.enabledViews.length 1)}}
   activeView: string;
   onViewChange: (view: string) => void;
   {{/unless}}
@@ -24,7 +24,7 @@ interface {{pascalCase name}}TitleBarProps {
 }
 
 export function {{pascalCase name}}TitleBar({
-  {{#unless (ifEq views.default.enabledViews.length 1)}}
+  {{#unless (eq views.default.enabledViews.length 1)}}
   activeView,
   onViewChange,
   {{/unless}}
@@ -80,7 +80,7 @@ export function {{pascalCase name}}TitleBar({
         </div>
         {{/if}}
 
-        {{#unless (ifEq views.default.enabledViews.length 1)}}
+        {{#unless (eq views.default.enabledViews.length 1)}}
         <{{pascalCase name}}ViewSwitcher
           activeView={activeView}
           onViewChange={onViewChange}

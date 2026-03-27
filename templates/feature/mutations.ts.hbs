@@ -40,19 +40,20 @@ export const create = zMutation({
 
     await ctx.db.insert("{{name}}", {
 {{#each fields}}
-      {{@key}}: args.{{@key}},
-{{/each}}
-{{#each fields}}
 {{#ifEq this.type "enum"}}
 {{#if this.transitions}}
       {{@key}}: "{{this.values.[0]}}",
+{{else}}
+      {{@key}}: args.{{@key}},
 {{/if}}
+{{else}}
+      {{@key}}: args.{{@key}},
 {{/ifEq}}
 {{/each}}
 {{#if behaviors.assignable}}
       assigneeId: userId,
 {{/if}}
-      creatorId: userId,
+      userId,
 {{#if behaviors.orderable}}
       position: Date.now(),
 {{/if}}
@@ -91,7 +92,7 @@ export const update = mutation({
     if (!userId) return;
 
     const {{camelCase name}} = await ctx.db.get(args.{{camelCase name}}Id);
-    if (!{{camelCase name}}) throw new Error(ERRORS.{{name}}.NOT_FOUND);
+    if (!{{camelCase name}}) throw new Error({{{errorsPath name}}}.NOT_FOUND);
 
     const patch: Record<string, unknown> = {};
 {{#each fields}}
@@ -170,7 +171,7 @@ export const update{{pascalCase @key}} = mutation({
     if (!userId) return;
 
     const {{camelCase ../name}} = await ctx.db.get(args.{{camelCase ../name}}Id);
-    if (!{{camelCase ../name}}) throw new Error(ERRORS.{{../name}}.NOT_FOUND);
+    if (!{{camelCase ../name}}) throw new Error({{{errorsPath ../name}}}.NOT_FOUND);
 
     const currentIndex = {{upperSnakeCase @key}}_VALUES.indexOf(
       {{camelCase ../name}}.{{@key}} as (typeof {{upperSnakeCase @key}}_VALUES)[number],
@@ -180,7 +181,7 @@ export const update{{pascalCase @key}} = mutation({
     );
 
     if (newIndex !== currentIndex + 1) {
-      throw new Error(ERRORS.{{../name}}.INVALID_STATUS_TRANSITION);
+      throw new Error({{{errorsPath ../name}}}.INVALID_STATUS_TRANSITION);
     }
 
     await ctx.db.patch(args.{{camelCase ../name}}Id, { {{@key}}: args.{{@key}} });
@@ -209,12 +210,12 @@ export const assign = mutation({
     if (!userId) return;
 
     const {{camelCase name}} = await ctx.db.get(args.{{camelCase name}}Id);
-    if (!{{camelCase name}}) throw new Error(ERRORS.{{name}}.NOT_FOUND);
+    if (!{{camelCase name}}) throw new Error({{{errorsPath name}}}.NOT_FOUND);
 
     const patch: Record<string, unknown> = { assigneeId: args.assigneeId };
 
     // Auto-flip: assigning to another user makes {{label}} shared
-    if (args.assigneeId && args.assigneeId !== {{camelCase name}}.creatorId) {
+    if (args.assigneeId && args.assigneeId !== {{camelCase name}}.userId) {
       patch.visibility = "shared";
     }
     // Auto-flip: unassigning makes {{label}} shared (available in Team Pool)

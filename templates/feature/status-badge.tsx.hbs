@@ -15,7 +15,7 @@ import type { Id } from "~/convex/_generated/dataModel";
  */
 const {{upperSnakeCase @key}}_COLORS: Record<string, { dot: string; text: string }> = {
   {{#each values}}
-  "{{this}}": { dot: "{{enumBadgeClasses ../this this}}" },
+  "{{this}}": { dot: "{{enumBadgeDot ../this this}}", text: "{{enumBadgeText ../this this}}" },
   {{/each}}
 };
 
@@ -24,7 +24,7 @@ const {{upperSnakeCase @key}}_COLORS: Record<string, { dot: string; text: string
  */
 const {{upperSnakeCase @key}}_TRANSITIONS: Record<string, string | null> = {
   {{#each transitions}}
-  "{{@key}}": "{{this}}",
+  "{{@key}}": "{{firstValue this}}",
   {{/each}}
 };
 
@@ -53,7 +53,7 @@ export function {{pascalCase ../name}}StatusBadge({
   const { t } = useTranslation("{{../name}}");
 
   const { mutateAsync: updateStatus } = useMutation({
-    mutationFn: useConvexMutation(api.{{../name}}.mutations.updateStatus),
+    mutationFn: useConvexMutation({{{apiPath ../name}}}.mutations.update{{pascalCase @key}}),
   });
 
   const colors = {{upperSnakeCase @key}}_COLORS[status] || { dot: "bg-gray-400", text: "text-gray-600" };
