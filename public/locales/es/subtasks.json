@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "subtasks": "Subtasks"
+  },
+  "page": {
+    "title": "Subtasks",
+    "description": "Administra tus subtasks."
+  },
+  "form": {
+    "addInline": "Agregar subtask...",
+    "submit": "Agregar",
+    "create": "Crear Subtask",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay subtasks",
+    "description": "Crea tu primer subtask para comenzar.",
+    "cta": "Crear Subtask",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay subtasks que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "Subtask no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus subtasks. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar subtasks..."
+  },
+  "detail": {
+    "editing": "Editando {{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  },
+  "status": {
+    "todo": "Todo",
+    "done": "Done",
+    "promoted": "Promoted"
+  }
+}

@@ -1,0 +1,43 @@
+name: work-logs
+label: Work Log
+labelPlural: Work Logs
+
+fields:
+  body:
+    type: text
+    required: true
+    max: 2000
+  timeMinutes:
+    type: number
+    required: false
+
+timestamps: false
+
+behaviors:
+  assignable: false
+  orderable: false
+  softDelete: false
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: authenticated
+    update: owner
+    delete: owner
+
+views:
+  default:
+    defaultView: list
+    enabledViews: [list]
+
+relationships:
+  task:
+    type: belongs_to
+    target: tasks
+    required: true
+    column: taskId
+
+indexes:
+  - name: by_task
+    fields: [taskId]

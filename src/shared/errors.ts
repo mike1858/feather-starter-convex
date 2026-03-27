@@ -24,4 +24,12 @@ export const ERRORS = {
   },
   // Plugin errors go here:
   // admin: { ... }
+  subtasks: {
+    NOT_FOUND: "Subtask not found.",
+    INVALID_STATUS_TRANSITION: "Invalid status transition.",
+  },
+  "work-logs": {
+    NOT_FOUND: "Work Log not found.",
+    INVALID_STATUS_TRANSITION: "Invalid status transition.",
+  },
 } as const;

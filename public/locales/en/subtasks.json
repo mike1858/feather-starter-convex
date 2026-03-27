@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "subtasks": "Subtasks"
+  },
+  "page": {
+    "title": "Subtasks",
+    "description": "Manage your subtasks."
+  },
+  "form": {
+    "addInline": "Add subtask...",
+    "submit": "Add",
+    "create": "Create Subtask",
+    "save": "Save Changes",
+    "edit": "Edit",
+    "discard": "Discard",
+    "discardChanges": "Discard Changes",
+    "close": "Close"
+  },
+  "empty": {
+    "title": "No subtasks yet",
+    "description": "Create your first subtask to get started.",
+    "cta": "Create Subtask",
+    "noResults": "No results",
+    "noResultsDescription": "No subtasks match the current filter. Try adjusting your filters."
+  },
+  "error": {
+    "notFound": "Subtask not found.",
+    "invalidTransition": "Invalid status transition.",
+    "authRequired": "Sign in required.",
+    "loadFailedTitle": "Something went wrong",
+    "loadFailedDescription": "We couldn't load your subtasks. Please try again.",
+    "retry": "Retry"
+  },
+  "delete": {
+    "confirm": "Delete?"
+  },
+  "table": {
+    "showing": "Showing {{start}}-{{end}} of {{total}}",
+    "rowsPerPage": "Rows per page"
+  },
+  "filter": {
+    "all": "All"
+  },
+  "search": {
+    "placeholder": "Search subtasks..."
+  },
+  "detail": {
+    "editing": "Editing {{recordTitle}}",
+    "notSet": "Not set"
+  },
+  "priority": {
+    "high": "High Priority",
+    "normal": "Normal"
+  },
+  "status": {
+    "todo": "Todo",
+    "done": "Done",
+    "promoted": "Promoted"
+  }
+}

@@ -10,6 +10,10 @@ import { projectStatus } from "../src/shared/schemas/projects";
 
 
 
+import {
+  status,
+} from "../src/shared/schemas/subtasks";
+
 const schema = defineSchema({
   ...authTables,
   users: defineTable({
@@ -53,6 +57,26 @@ const schema = defineSchema({
     text: v.optional(v.string()),
     sentAt: v.number(),
   }).index("sentAt", ["sentAt"]),
+
+  subtasks: defineTable({
+    title: v.string(),
+    status: zodToConvex(status),
+    userId: v.id("users"),
+    position: v.number(),
+  })
+    .index("by_task", ["taskId"])
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_taskId", ["taskId"]),
+
+  "work-logs": defineTable({
+    body: v.string(),
+    timeMinutes: v.optional(v.number()),
+    userId: v.id("users"),
+  })
+    .index("by_task", ["taskId"])
+    .index("by_userId", ["userId"])
+    .index("by_taskId", ["taskId"]),
 
 });
 

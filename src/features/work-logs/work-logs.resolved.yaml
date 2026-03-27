@@ -1,0 +1,91 @@
+timestamps: false
+behaviors:
+  softDelete: false
+  auditTrail: false
+  immutable: false
+  assignable: false
+  orderable: false
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: authenticated
+    update: owner
+    delete: owner
+  sharing: false
+views:
+  default:
+    defaultView: list
+    enabledViews:
+      - list
+  table:
+    design: minimal
+    pageSize: 20
+  card:
+    size: default
+    orientation: grid
+    imageStyle: none
+  list:
+    density: comfortable
+  detail:
+    display: page
+  pagination:
+    table:
+      mode: offset
+      pageSize: 20
+    list:
+      mode: infinite
+    card:
+      mode: infinite
+    cover:
+      mode: infinite
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+search: false
+searchFields:
+  - title
+  - description
+i18n:
+  languages:
+    - en
+    - es
+name: work-logs
+label: Work Log
+labelPlural: Work Logs
+fields:
+  body:
+    type: text
+    required: true
+    max: 2000
+    showOn: all
+    hideOn: &a1 []
+    filterable: false
+    sortable: false
+  timeMinutes:
+    type: number
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: true
+    default: 0
+relationships:
+  task:
+    type: belongs_to
+    target: tasks
+    required: true
+    column: taskId
+indexes:
+  - name: by_task
+    fields:
+      - taskId
+  - name: by_userId
+    fields:
+      - userId
+  - name: by_taskId
+    fields:
+      - taskId

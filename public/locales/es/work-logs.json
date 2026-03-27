@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "work-logs": "Work Logs"
+  },
+  "page": {
+    "title": "Work Logs",
+    "description": "Administra tus work logs."
+  },
+  "form": {
+    "addInline": "Agregar work log...",
+    "submit": "Agregar",
+    "create": "Crear Work Log",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay work logs",
+    "description": "Crea tu primer work log para comenzar.",
+    "cta": "Crear Work Log",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay work logs que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "Work Log no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus work logs. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar work logs..."
+  },
+  "detail": {
+    "editing": "Editando {{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  }
+}
