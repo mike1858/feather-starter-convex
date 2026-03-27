@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to execute
-last_updated: "2026-03-26T14:39:59.054Z"
+last_updated: "2026-03-27T03:15:59.575Z"
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 18
-  completed_plans: 12
+  completed_plans: 15
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 03.2 (crud-generator-upgrade) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Plan: 3 of 6
 | Phase 03.1 P01 | 7min | 2 tasks | 10 files |
 | Phase 03.2 P01 | 9min | 3 tasks | 11 files |
 | Phase 03.2 P02 | 5min | 2 tasks | 5 files |
+| Phase Phase 03.2 P06 P06 | 23min | 2 tasks | 45 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent:
 - [Phase 03.2]: deepmerge array strategy: feature YAML arrays replace defaults entirely (no merge)
 - [Phase 03.2]: Schema template builds Zod types inline (not via zodType helper) for precise control over exports and max-length constants
 - [Phase 03.2]: Enum fields with transitions excluded from createInput; dedicated updateStatus mutation generated instead
+- [Phase 03.2]: Use @root.property for deeply nested Handlebars contexts (Plop scope resolution unreliable past 2 levels)
+- [Phase 03.2]: Add apiPath/errorsPath helpers for bracket notation with kebab-case feature names
 
 ### Pending Todos
 

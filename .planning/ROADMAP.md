@@ -28,7 +28,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 - [x] **Phase 02.1: Stripe Plugin Extraction** (INSERTED) - Extract billing/Stripe to optional plugin branch (completed 2026-03-10)
 - [x] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views (completed 2026-03-25)
 - [x] **Phase 03.1: Verification Bug Fixes** (INSERTED) - Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish (completed 2026-03-25)
-- [ ] **Phase 03.2: CRUD Generator Upgrade** (INSERTED) - Upgrade Plop.js generators to produce fully working CRUD features; generator output is a runnable feature that agents then customize
+- [x] **Phase 03.2: CRUD Generator Upgrade** (INSERTED) - Upgrade Plop.js generators to produce fully working CRUD features; generator output is a runnable feature that agents then customize (completed 2026-03-27)
 - [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
 - [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
 - [ ] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities
@@ -95,15 +95,15 @@ Plans:
   2. Generated code follows all existing conventions (feature folders, Zod schemas, zodToConvex, auth guards, i18n, nav wiring, error constants)
   3. Phase 4 (Projects) can be started by running the generator and then customizing the output
   4. The tasks feature (Phase 3) structure is consistent with what the generator would produce
-**Plans:** 2/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 03.2-01-PLAN.md — Generator infrastructure: YAML resolver, marked regions parser, Handlebars helpers, design system CSS tokens (Inter font, shadows, transitions)
 - [x] 03.2-02-PLAN.md — Backend templates: Zod schema, CRUD mutations, queries, and backend test templates
-- [ ] 03.2-03-PLAN.md — Core frontend templates: Page, TitleBar, Item, Form, StatusBadge, ViewSwitcher, EmptyState, FilterBar, barrel export, frontend test, i18n locales
-- [ ] 03.2-04-PLAN.md — View + detail templates: ListView, CardView (4 image styles), TableView (sorting, grouping, pagination), DetailPage (3 display modes), LoadingSkeleton
-- [ ] 03.2-05-PLAN.md — Plopfile rewrite + auto-wiring: modular plopfile, custom Plop actions, all generator definitions (gen:feature, gen:schema, gen:backend, gen:frontend)
-- [ ] 03.2-06-PLAN.md — Validation + tasks alignment: generate test entity, verify pipeline, retroactive tasks.gen.yaml, human verification
+- [x] 03.2-03-PLAN.md — Core frontend templates: Page, TitleBar, Item, Form, StatusBadge, ViewSwitcher, EmptyState, FilterBar, barrel export, frontend test, i18n locales
+- [x] 03.2-04-PLAN.md — View + detail templates: ListView, CardView (4 image styles), TableView (sorting, grouping, pagination), DetailPage (3 display modes), LoadingSkeleton
+- [x] 03.2-05-PLAN.md — Plopfile rewrite + auto-wiring: modular plopfile, custom Plop actions, all generator definitions (gen:feature, gen:schema, gen:backend, gen:frontend)
+- [x] 03.2-06-PLAN.md — Validation + tasks alignment: generate test entity, verify pipeline, retroactive tasks.gen.yaml, human verification
 
 ### Phase 03.1: Verification Bug Fixes (INSERTED)
 
@@ -197,7 +197,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6
 | 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
 | 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
 | 03.1 Verification Bug Fixes | v2.0 | 2/2 | Complete    | 2026-03-25 |
-| 03.2 CRUD Generator Upgrade | v2.0 | 2/6 | In Progress|  |
+| 03.2 CRUD Generator Upgrade | v2.0 | 6/6 | Complete   | 2026-03-27 |
 | 4. Projects | v2.0 | 0/2 | Planned | - |
 | 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
 | 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |
