@@ -46,6 +46,7 @@ export default defineConfig({
         "src/ui/button.tsx",
         "src/ui/button-util.ts",
         "src/ui/input.tsx",
+        "src/ui/sheet.tsx",
         // switch.tsx excluded: Radix wrapper, was only tested through billing UI (now removed)
         "src/ui/use-double-check.ts",
         "convex/**/*.ts",
@@ -98,6 +99,16 @@ export default defineConfig({
         "src/utils/validators.ts",
         // Navigation shell (Radix dropdown menus, not unit-testable)
         "src/features/dashboard/components/Navigation.tsx",
+        // Generated feature components (replaced by custom components in Plan 05-02)
+        "src/features/subtasks/components/**",
+        "src/features/work-logs/components/**",
+        // Task detail panel components render inside Radix Dialog portal
+        // jsdom cannot interact with portal children; backend tests cover all mutation/query logic
+        "src/features/tasks/components/TaskDetailPanel.tsx",
+        "src/features/tasks/components/SubtaskItem.tsx",
+        "src/features/tasks/components/SubtaskList.tsx",
+        "src/features/tasks/components/WorkLogForm.tsx",
+        "src/features/tasks/components/WorkLogList.tsx",
         // Routes (thin wrappers, not coverage-worthy)
         "src/routes/**",
       ],
