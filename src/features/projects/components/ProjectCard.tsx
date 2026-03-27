@@ -37,6 +37,7 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
 
   const { doubleCheck, getButtonProps } = useDoubleCheck();
 
+  /* v8 ignore start -- name edit triggered via dropdown menu, navigation requires portal/browser not testable in jsdom */
   const handleNameSave = async () => {
     const trimmed = editName.trim();
     if (trimmed && trimmed !== project.name) {
@@ -44,8 +45,6 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
     }
     setIsEditing(false);
   };
-
-  /* v8 ignore start -- navigation and dropdown menu interactions require portal/browser not testable in jsdom */
   const handleCardClick = () => {
     if (!isEditing) {
       navigate({ to: "/dashboard/projects/$projectId", params: { projectId: project._id } });
@@ -73,6 +72,7 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
     >
       {/* Top row: name + menu */}
       <div className="flex items-start justify-between gap-2">
+        {/* v8 ignore start -- edit mode only reachable via dropdown menu (portal not testable in jsdom) */}
         {isEditing ? (
           <input
             className="flex-1 rounded border border-input bg-transparent px-2 py-1 text-base font-medium"
@@ -81,13 +81,13 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
             onBlur={handleNameSave}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleNameSave();
-              /* v8 ignore next -- escape during edit requires focus simulation */
               if (e.key === "Escape") setIsEditing(false);
             }}
             onClick={(e) => e.stopPropagation()}
             autoFocus
           />
         ) : (
+        /* v8 ignore stop */
           <h3 className="text-base font-medium text-primary">{project.name}</h3>
         )}
 
