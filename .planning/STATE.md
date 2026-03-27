@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Phase complete — ready for verification
-last_updated: "2026-03-27T11:06:53.741Z"
+last_updated: "2026-03-27T11:08:15.683Z"
 progress:
   total_phases: 9
   completed_phases: 8
@@ -96,6 +96,7 @@ Recent:
 - [Phase 03.2]: Enum fields with transitions excluded from createInput; dedicated updateStatus mutation generated instead
 - [Phase 03.2]: Use @root.property for deeply nested Handlebars contexts (Plop scope resolution unreliable past 2 levels)
 - [Phase 03.2]: Add apiPath/errorsPath helpers for bracket notation with kebab-case feature names
+- [Phase 06]: Activity logs use camelCase activityLogs table, entityId as v.string() for multi-table references, inline logActivity helper pattern — Consistent with existing workLogs/devEmails conventions; v.string() needed because entityId references tasks, projects, and subtasks tables
 
 ### Pending Todos
 
