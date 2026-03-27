@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Ready to execute
-last_updated: "2026-03-27T03:15:59.575Z"
+status: Ready to plan
+last_updated: "2026-03-27T04:00:44.781Z"
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 
 ## Current Position
 
-Phase: 03.2 (crud-generator-upgrade) — EXECUTING
-Plan: 4 of 6
+Phase: 04
+Plan: Not started
 
 ## Performance Metrics
 
