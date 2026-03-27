@@ -51,7 +51,12 @@ export function {{pascalCase name}}Form({
       ...defaultValues,
     } as Record<string, unknown>,
     onSubmit: async ({ value }) => {
+      {{#hasEnumTransitions fields}}
+      const { {{enumTransitionKeys fields}}, ...createFields } = value as Record<string, unknown>;
+      await createItem(createFields as any);
+      {{else}}
       await createItem(value as any);
+      {{/hasEnumTransitions}}
       form.reset();
       onSuccess?.();
     },

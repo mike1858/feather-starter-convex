@@ -260,6 +260,68 @@ export function registerHelpers(plop) {
    * Check if a field should be shown on a given view.
    * Usage: {{#showOnView field "list"}}...{{/showOnView}}
    */
+  /**
+   * Check if any enum field has transitions (block helper).
+   * Usage: {{#hasEnumTransitions fields}}...{{else}}...{{/hasEnumTransitions}}
+   */
+  plop.setHelper("hasEnumTransitions", function (fields, options) {
+    const hasTransitions = Object.values(fields).some(
+      (f) => f.type === "enum" && f.transitions,
+    );
+    return hasTransitions ? options.fn(this) : options.inverse(this);
+  });
+
+  /**
+   * List enum field keys that have transitions (inline helper).
+   * Usage: {{enumTransitionKeys fields}} → "status: _status, priority: _priority"
+   */
+  plop.setHelper("enumTransitionKeys", (fields) => {
+    return Object.entries(fields)
+      .filter(([, f]) => f.type === "enum" && f.transitions)
+      .map(([key]) => `${key}: _${key}`)
+      .join(", ");
+  });
+
+  /**
+   * Check if any field has filterable: true (block helper).
+   * Usage: {{#hasFilterableFields fields}}...{{else}}...{{/hasFilterableFields}}
+   */
+  plop.setHelper("hasFilterableFields", function (fields, options) {
+    const has = Object.values(fields).some((f) => f.filterable);
+    return has ? options.fn(this) : options.inverse(this);
+  });
+
+  /**
+   * Check if either filteredViews or filterable fields exist (block helper).
+   * Usage: {{#hasAnyFilters fields views}}...{{/hasAnyFilters}}
+   */
+  plop.setHelper("hasAnyFilters", function (fields, views, options) {
+    const hasFilteredViews = views && views.filteredViews && views.filteredViews.length > 0;
+    const hasFilterableFields = Object.values(fields).some((f) => f.filterable);
+    return hasFilteredViews || hasFilterableFields
+      ? options.fn(this)
+      : options.inverse(this);
+  });
+
+  /**
+   * Generate filter entries for filterable enum fields (inline helper).
+   * Returns JS array entries like: { key: "status:draft", labelKey: "status.draft" },
+   * Usage: {{{filterableEnumEntries fields}}}
+   */
+  plop.setHelper("filterableEnumEntries", (fields) => {
+    const entries = [];
+    for (const [key, field] of Object.entries(fields)) {
+      if (field.filterable && field.type === "enum" && Array.isArray(field.values)) {
+        for (const val of field.values) {
+          entries.push(
+            `  { key: "${key}:${val}", labelKey: "status.${val}" },`,
+          );
+        }
+      }
+    }
+    return entries.join("\n");
+  });
+
   plop.setHelper("showOnView", function (field, viewName, options) {
     // Check hideOn first
     if (Array.isArray(field.hideOn) && field.hideOn.includes(viewName)) {

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/ui/button";
 import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+import { {{pascalCase name}}StatusBadge } from "./{{pascalCase name}}StatusBadge";
 
 {{!-- Column width mapping --}}
 const WIDTH_MAP: Record<string, number> = {
@@ -194,10 +195,10 @@ export function {{pascalCase name}}TableView({
         );
       case "enum":
         return (
-          <span className="inline-flex items-center gap-1.5 text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-current" />
-            <span>{value as string}</span>
-          </span>
+          <{{pascalCase name}}StatusBadge
+            status={value as string}
+            itemId={item._id as any}
+          />
         );
       case "image":
         return value ? (
@@ -424,8 +425,8 @@ export function {{pascalCase name}}TableView({
       </table>
       {/* @generated-end table-content */}
 
-      {/* Pagination footer */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-surface-secondary">
+      {/* Pagination footer — hidden when all items fit on one page */}
+      {(totalCount || sortedItems.length) > pageSize && <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-surface-secondary">
         {/* Showing count */}
         <span className="text-xs text-muted-foreground">
           Showing {startIdx + 1}-{Math.min(endIdx, totalCount || sortedItems.length)} of {totalCount || sortedItems.length}
@@ -487,7 +488,7 @@ export function {{pascalCase name}}TableView({
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

@@ -2,7 +2,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "~/convex/_generated/api";
-import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { {{pascalCase name}}TitleBar } from "./{{pascalCase name}}TitleBar";
 {{#if operations.create}}
@@ -13,21 +12,19 @@ import { {{pascalCase name}}Form } from "./{{pascalCase name}}Form";
 import { {{pascalCase ../name}}{{pascalCase this}}View } from "./{{pascalCase ../name}}{{pascalCase this}}View";
 {{/each}}
 {{else}}
-import { {{pascalCase name}}ViewSwitcher } from "./{{pascalCase name}}ViewSwitcher";
 {{#each views.default.enabledViews}}
 import { {{pascalCase ../name}}{{pascalCase this}}View } from "./{{pascalCase ../name}}{{pascalCase this}}View";
 {{/each}}
 {{/ifEq}}
-{{#if views.filteredViews}}
+{{#hasAnyFilters fields views}}
 import { {{pascalCase name}}FilterBar } from "./{{pascalCase name}}FilterBar";
-{{/if}}
+{{/hasAnyFilters}}
 import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
 // @generated-end imports
 // @custom-start imports
 // @custom-end imports
 
 export function {{pascalCase name}}Page() {
-  const { t } = useTranslation("{{name}}");
   const { data: items = [] } = useSuspenseQuery(
     convexQuery({{{apiPath name}}}.queries.list, {}),
   );
@@ -36,14 +33,14 @@ export function {{pascalCase name}}Page() {
   const [activeView, setActiveView] = useState<string>(
     () => localStorage.getItem("{{name}}-view-preference") || "{{views.default.defaultView}}"
   );
-  {{#if views.filteredViews}}
+  {{#hasAnyFilters fields views}}
   const [activeFilter, setActiveFilter] = useState<string>("all");
-  {{/if}}
+  {{/hasAnyFilters}}
   // @generated-end state
   // @custom-start state
   // @custom-end state
 
-  {{#if views.filteredViews}}
+  {{#hasAnyFilters fields views}}
   const filteredItems = activeFilter === "all"
     ? items
     : items.filter((item: any) => {
@@ -55,18 +52,23 @@ export function {{pascalCase name}}Page() {
           return true;
         }
         {{/each}}
+        {{! Filterable enum field support: filter key format is "field:value" }}
+        if (activeFilter.includes(":")) {
+          const [field, value] = activeFilter.split(":");
+          return item[field] === value;
+        }
         return true;
       });
   {{else}}
   const filteredItems = items;
-  {{/if}}
+  {{/hasAnyFilters}}
 
   // @generated-start render
   const renderActiveView = () => {
     if (filteredItems.length === 0) {
       return (
         <{{pascalCase name}}EmptyState
-          variant={ {{~#if views.filteredViews~}} activeFilter !== "all" ? "noMatches" : "noData" {{~else~}} "noData" {{~/if~}} }
+          variant={ {{~#hasAnyFilters fields views~}} activeFilter !== "all" ? "noMatches" : "noData" {{~else~}} "noData" {{~/hasAnyFilters~}} }
         />
       );
     }
@@ -102,12 +104,12 @@ export function {{pascalCase name}}Page() {
       <{{pascalCase name}}Form mode="inline" />
       {{/if}}
 
-      {{#if views.filteredViews}}
+      {{#hasAnyFilters fields views}}
       <{{pascalCase name}}FilterBar
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
       />
-      {{/if}}
+      {{/hasAnyFilters}}
 
       {/* @custom-start content */}
       {renderActiveView()}

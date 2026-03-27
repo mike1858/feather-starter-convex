@@ -3,6 +3,7 @@ import { useRef, useEffect, useCallback, useState } from "react";
 import { Pencil, Trash2, ImageIcon, LayoutGrid } from "lucide-react";
 import { Button } from "@/ui/button";
 import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
+import { {{pascalCase name}}StatusBadge } from "./{{pascalCase name}}StatusBadge";
 
 interface {{pascalCase name}}CardViewProps {
   items: Array<Record<string, unknown>>;
@@ -159,10 +160,10 @@ export function {{pascalCase name}}CardView({
               {{#each fields}}
               {{#ifEq this.type "enum"}}
               {{#if @first}}{{else}}
-              <span className="inline-flex items-center gap-1.5 text-xs">
-                <span className="h-1.5 w-1.5 rounded-full" />
-                <span>{item.{{@key}} as string}</span>
-              </span>
+              <{{pascalCase ../name}}StatusBadge
+                status={item.{{@key}} as string}
+                itemId={item._id as any}
+              />
               {{/if}}
               {{/ifEq}}
               {{/each}}
