@@ -37,6 +37,11 @@ System auto-generates audit trail entries for task, project, and subtask events.
 - **D-15:** Reuses Phase 4's horizontal tab pattern (D-11) for status filtering
 - **D-16:** Filter state persisted in URL search params for back-navigation (per Phase 4, D-12)
 
+### Generator-First Workflow
+- **D-17:** The `activityLogs` entity MUST be scaffolded via `npx plop feature -- --yamlPath <yaml>` BEFORE writing custom code
+- **D-18:** Generator produces the base CRUD; customization adds inline-in-mutation logging, timeline rendering, and search indexing
+- **D-19:** This validates the Phase 03.2 generators with a third production entity
+
 ### Claude's Discretion
 - Activity entry icon selection (different icons per action type)
 - Empty timeline state ("No activity yet")

@@ -45,6 +45,11 @@ Users can break tasks into subtasks (with promotion to full tasks) and log work 
 - Subtask assignee picker implementation (dropdown vs @mention)
 - Work log entry ordering (newest first vs oldest first)
 
+### Generator-First Workflow
+- **D-19:** Every new entity (subtasks, workLogs) MUST be scaffolded via `npx plop feature -- --yamlPath <yaml>` BEFORE writing custom code
+- **D-20:** Create a `.gen.yaml` for each entity, run the generator, then customize the output for domain-specific logic (e.g., promotion, ownership rules, time parsing)
+- **D-21:** This validates the Phase 03.2 generators with real production entities — bugs found here feed back to template fixes
+
 </decisions>
 
 <canonical_refs>
