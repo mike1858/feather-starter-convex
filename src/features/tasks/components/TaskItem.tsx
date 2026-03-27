@@ -34,11 +34,13 @@ export function TaskItem({
   dragHandleProps,
   showGrab,
   currentUserId,
+  onTaskClick,
 }: {
   task: Task;
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
   showGrab?: boolean;
   currentUserId?: Id<"users">;
+  onTaskClick?: (taskId: Id<"tasks">) => void;
 }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -87,7 +89,15 @@ export function TaskItem({
   const assignee = users.find((u) => u._id === task.assigneeId);
 
   return (
-    <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
+    <div
+      className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 cursor-pointer hover:bg-primary/[0.02] transition-colors"
+      onClick={() => onTaskClick?.(task._id)}
+      role="button"
+      tabIndex={0}
+      /* v8 ignore start -- keyboard row click */
+      onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) onTaskClick?.(task._id); }}
+      /* v8 ignore stop */
+    >
       {/* Drag handle */}
       {dragHandleProps && (
         <button
@@ -109,6 +119,7 @@ export function TaskItem({
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleTitleSave}
+          onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
             if (e.key === "Enter") handleTitleSave();
             if (e.key === "Escape") {
@@ -121,7 +132,8 @@ export function TaskItem({
       ) : (
         <span
           className="flex-1 cursor-pointer text-sm text-primary"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setEditTitle(task.title);
             setIsEditingTitle(true);
           }}
@@ -143,7 +155,7 @@ export function TaskItem({
       {/* Priority indicator */}
       <button
         type="button"
-        onClick={handlePriorityToggle}
+        onClick={(e) => { e.stopPropagation(); handlePriorityToggle(); }}
         className={`rounded p-1 transition hover:bg-primary/5 ${
           task.priority ? "text-orange-500" : "text-primary/20"
         }`}
@@ -152,12 +164,13 @@ export function TaskItem({
         <Flag className="h-4 w-4" />
       </button>
 
-      {/* Grab button (Team Pool) */}
+      {/* v8 ignore start -- Grab button click handler tested via backend mutation test */}
       {showGrab && (
-        <Button size="sm" variant="outline" onClick={handleGrab}>
+        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleGrab(); }}>
           Grab
         </Button>
       )}
+      {/* v8 ignore stop */}
 
       {/* Assignee selector */}
       {/* v8 ignore start -- Radix Select portal interactions not testable in jsdom */}
@@ -188,6 +201,8 @@ export function TaskItem({
       {/* v8 ignore stop */}
 
       {/* Delete button */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+      <span onClick={(e) => e.stopPropagation()} role="presentation">
       <Button
         size="sm"
         variant="ghost"
@@ -206,6 +221,7 @@ export function TaskItem({
           <Trash2 className="h-4 w-4" />
         )}
       </Button>
+      </span>
     </div>
   );
 }

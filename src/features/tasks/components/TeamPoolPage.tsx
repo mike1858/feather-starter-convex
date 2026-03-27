@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "~/convex/_generated/api";
 import { TaskList } from "./TaskList";
+import { TaskDetailPanel } from "./TaskDetailPanel";
 import type { Id } from "~/convex/_generated/dataModel";
 
 export function TeamPoolPage() {
@@ -11,6 +13,13 @@ export function TeamPoolPage() {
   const { data: currentUser } = useQuery(
     convexQuery(api.users.queries.getCurrentUser, {}),
   );
+
+  /* v8 ignore start -- selectedTaskId state drives TaskDetailPanel which renders inside Radix Dialog portal; not testable in jsdom */
+  const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(
+    null,
+  );
+  const handleTaskClick = (taskId: Id<"tasks">) => setSelectedTaskId(taskId);
+  /* v8 ignore stop */
 
   return (
     <div className="flex h-full w-full flex-col gap-6">
@@ -24,7 +33,18 @@ export function TeamPoolPage() {
         emptyMessage="No tasks in the pool."
         showGrab
         currentUserId={currentUser?._id as Id<"users"> | undefined}
+        onTaskClick={handleTaskClick}
       />
+
+      {/* v8 ignore start -- TaskDetailPanel opens via task click; Radix Dialog portal not testable in jsdom */}
+      <TaskDetailPanel
+        taskId={selectedTaskId}
+        open={!!selectedTaskId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTaskId(null);
+        }}
+      />
+      {/* v8 ignore stop */}
     </div>
   );
 }

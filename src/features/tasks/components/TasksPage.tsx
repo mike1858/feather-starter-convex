@@ -1,12 +1,19 @@
+import { useState } from "react";
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "~/convex/_generated/api";
 import { TaskForm } from "./TaskForm";
 import { TaskList } from "./TaskList";
+import { TaskDetailPanel } from "./TaskDetailPanel";
+import type { Id } from "~/convex/_generated/dataModel";
 
 export function TasksPage() {
   const { data: tasks = [] } = useQuery(
     convexQuery(api.tasks.queries.myTasks, {}),
+  );
+
+  const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(
+    null,
   );
 
   return (
@@ -21,7 +28,18 @@ export function TasksPage() {
       <TaskList
         tasks={tasks}
         emptyMessage="No tasks yet. Create one above!"
+        onTaskClick={(taskId) => setSelectedTaskId(taskId)}
       />
+
+      {/* v8 ignore start -- TaskDetailPanel opens via task click; Radix Dialog portal not testable in jsdom */}
+      <TaskDetailPanel
+        taskId={selectedTaskId}
+        open={!!selectedTaskId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTaskId(null);
+        }}
+      />
+      {/* v8 ignore stop */}
     </div>
   );
 }

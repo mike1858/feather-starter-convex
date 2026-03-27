@@ -37,10 +37,12 @@ function SortableTaskItem({
   task,
   showGrab,
   currentUserId,
+  onTaskClick,
 }: {
   task: Task;
   showGrab?: boolean;
   currentUserId?: Id<"users">;
+  onTaskClick?: (taskId: Id<"tasks">) => void;
 }) {
   const {
     attributes,
@@ -65,6 +67,7 @@ function SortableTaskItem({
         dragHandleProps={listeners}
         showGrab={showGrab}
         currentUserId={currentUserId}
+        onTaskClick={onTaskClick}
       />
     </div>
   );
@@ -75,11 +78,13 @@ export function TaskList({
   emptyMessage = "No tasks yet.",
   showGrab,
   currentUserId,
+  onTaskClick,
 }: {
   tasks: Task[];
   emptyMessage?: string;
   showGrab?: boolean;
   currentUserId?: Id<"users">;
+  onTaskClick?: (taskId: Id<"tasks">) => void;
 }) {
   const { mutateAsync: reorderTask } = useMutation({
     mutationFn: useConvexMutation(api.tasks.mutations.reorder),
@@ -150,6 +155,7 @@ export function TaskList({
               task={task}
               showGrab={showGrab}
               currentUserId={currentUserId}
+              onTaskClick={onTaskClick}
             />
           ))}
         </div>
