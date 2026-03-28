@@ -233,10 +233,10 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 **Design doc:** `.planning/design/FEATHER-DX-ARCHITECTURE.md`
 **Research status:** Complete — Frappe, Glide, WordPress, Laravel patterns studied; 8-dimension framework defined; user's prior thinking (Gemini notes) integrated
 **Requirements:** TBD
-**Plans:** 0/6 plans executed
+**Plans:** 1/6 plans executed
 
 Plans:
-- [ ] 999.1-01-PLAN.md — Feature YAML schema: Zod-validated feather.yaml format (Wave 1)
+- [x] 999.1-01-PLAN.md — Feature YAML schema: Zod-validated feather.yaml format (Wave 1)
 - [ ] 999.1-02-PLAN.md — ts-morph AST wiring layer: reliable file modification (Wave 1)
 - [ ] 999.1-03-PLAN.md — Generated/custom directory split: retarget templates and pipeline (Wave 2)
 - [ ] 999.1-04-PLAN.md — Cross-entity UI generation: master-detail views and related records (Wave 2)
