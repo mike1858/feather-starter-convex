@@ -1,9 +1,14 @@
+// Test Matrix: auth queries
+// | # | Query              | State   | What to verify                                    |
+// |---|--------------------|---------| --------------------------------------------------|
+// | 1 | availableProviders | default | returns password, otp, github boolean flags        |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("availableProviders", () => {
-  test("returns provider availability", async ({ testClient }) => {
+  test("returns password, otp, and github provider flags", async ({ testClient }) => {
     const providers = await testClient.query(
       api.auth.queries.availableProviders,
       {},

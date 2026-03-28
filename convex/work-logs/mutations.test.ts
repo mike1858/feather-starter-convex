@@ -1,3 +1,19 @@
+// Test Matrix: work-logs mutations
+// | # | Mutation | State                        | What to verify                              |
+// |---|---------|------------------------------|---------------------------------------------|
+// | 1 | create  | body only                    | body, no timeMinutes, creatorId, taskId     |
+// | 2 | create  | body + timeMinutes           | both fields persisted                       |
+// | 3 | create  | unauthenticated              | no work log inserted                        |
+// | 4 | update  | body (owner)                 | body updated                                |
+// | 5 | update  | timeMinutes (owner)          | timeMinutes updated                         |
+// | 6 | update  | non-owner                    | throws "only edit your own"                 |
+// | 7 | update  | unauthenticated              | no change                                   |
+// | 8 | update  | work log not found           | throws "Work log not found"                 |
+// | 9 | remove  | owner                        | work log deleted                            |
+// |10 | remove  | non-owner                    | throws "only edit your own"                 |
+// |11 | remove  | unauthenticated              | work log not deleted                        |
+// |12 | remove  | work log not found           | throws "Work log not found"                 |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
@@ -63,7 +79,7 @@ describe("create", () => {
     expect(records[0].timeMinutes).toBe(90);
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const taskId = await seedTask(testClient);
 
     await testClient.mutation(api["work-logs"].mutations.create, {
@@ -79,11 +95,7 @@ describe("create", () => {
 });
 
 describe("update", () => {
-  test("updates body when authenticated and is owner", async ({
-    client,
-    userId,
-    testClient,
-  }) => {
+  test("updates body when owner", async ({ client, userId, testClient }) => {
     const taskId = await seedTask(testClient, userId);
     await client.mutation(api["work-logs"].mutations.create, {
       body: "Original",
@@ -105,7 +117,7 @@ describe("update", () => {
     expect(updated.body).toBe("Updated body");
   });
 
-  test("updates timeMinutes when authenticated and is owner", async ({
+  test("updates timeMinutes when owner", async ({
     client,
     userId,
     testClient,
@@ -132,14 +144,13 @@ describe("update", () => {
     expect(updated.timeMinutes).toBe(60);
   });
 
-  test("rejects update when authenticated but NOT owner", async ({
+  test("rejects update from non-owner", async ({
     client,
     userId,
     testClient,
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    // Create work log owned by a different user
     const otherUserId = await testClient.run(async (ctx: any) =>
       ctx.db.insert("users", { name: "Other" }),
     );
@@ -159,7 +170,7 @@ describe("update", () => {
     ).rejects.toThrow("You can only edit your own work logs");
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const taskId = await seedTask(testClient);
     const workLogId = await testClient.run(async (ctx: any) => {
       const uid = (await ctx.db.query("users").collect())[0]._id;
@@ -181,7 +192,7 @@ describe("update", () => {
     expect(record.body).toBe("Seed");
   });
 
-  test("throws NOT_FOUND for nonexistent ID", async ({
+  test("throws 'Work log not found' for deleted work log", async ({
     client,
     userId,
     testClient,
@@ -207,7 +218,7 @@ describe("update", () => {
 });
 
 describe("remove", () => {
-  test("deletes work log when authenticated and is owner", async ({
+  test("deletes work log when owner", async ({
     client,
     userId,
     testClient,
@@ -227,13 +238,14 @@ describe("remove", () => {
       workLogId: records[0]._id,
     });
 
-    const remaining = await testClient.run(async (ctx: any) =>
-      ctx.db.query("workLogs").collect(),
-    );
-    expect(remaining).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("workLogs").collect(),
+      ),
+    ).toHaveLength(0);
   });
 
-  test("rejects delete when authenticated but NOT owner", async ({
+  test("rejects delete from non-owner", async ({
     client,
     userId,
     testClient,
@@ -255,7 +267,7 @@ describe("remove", () => {
     ).rejects.toThrow("You can only edit your own work logs");
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const taskId = await seedTask(testClient);
     const workLogId = await testClient.run(async (ctx: any) => {
       const uid = (await ctx.db.query("users").collect())[0]._id;
@@ -276,7 +288,7 @@ describe("remove", () => {
     expect(record).not.toBeNull();
   });
 
-  test("throws NOT_FOUND for nonexistent ID", async ({
+  test("throws 'Work log not found' for deleted work log", async ({
     client,
     userId,
     testClient,

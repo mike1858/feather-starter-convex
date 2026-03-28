@@ -1,3 +1,11 @@
+// Test Matrix: subtasks queries
+// | # | Query      | State                       | What to verify                              |
+// |---|------------|-----------------------------|---------------------------------------------|
+// | 1 | listByTask | no subtasks                 | empty list, completionCount { done:0, total:0 } |
+// | 2 | listByTask | multiple subtasks           | sorted by position ascending                |
+// | 3 | listByTask | mixed statuses              | completionCount counts done+promoted as done |
+// | 4 | listByTask | unauthenticated             | empty list, zero counts                     |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
@@ -35,7 +43,7 @@ describe("listByTask", () => {
     expect(result.completionCount).toEqual({ done: 0, total: 0 });
   });
 
-  test("returns subtasks sorted by position", async ({
+  test("returns subtasks sorted by position ascending", async ({
     client,
     userId,
     testClient,
@@ -76,7 +84,7 @@ describe("listByTask", () => {
     expect(result.subtasks[2].title).toBe("Third");
   });
 
-  test("returns correct completionCount", async ({
+  test("counts done and promoted as completed in completionCount", async ({
     client,
     userId,
     testClient,
@@ -112,17 +120,15 @@ describe("listByTask", () => {
     });
 
     expect(result.subtasks).toHaveLength(3);
-    // done + promoted both count as "done"
     expect(result.completionCount).toEqual({ done: 2, total: 3 });
   });
 
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty list when unauthenticated", async ({ testClient }) => {
     const taskId = await seedTask(testClient);
 
-    const result = await testClient.query(
-      api.subtasks.queries.listByTask,
-      { taskId },
-    );
+    const result = await testClient.query(api.subtasks.queries.listByTask, {
+      taskId,
+    });
 
     expect(result.subtasks).toHaveLength(0);
     expect(result.completionCount).toEqual({ done: 0, total: 0 });

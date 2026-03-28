@@ -1,17 +1,30 @@
+// Test Matrix: tasks queries
+// | # | Query     | State                        | What to verify                                   |
+// |---|-----------|------------------------------|--------------------------------------------------|
+// | 1 | myTasks   | with assigned tasks          | returns only current user's tasks                |
+// | 2 | myTasks   | position ordering            | sorted by position ascending                     |
+// | 3 | myTasks   | unauthenticated              | returns empty array                              |
+// | 4 | teamPool  | mixed visibility/assignment  | returns only unassigned shared tasks             |
+// | 5 | teamPool  | position ordering            | sorted by position ascending                     |
+// | 6 | teamPool  | unauthenticated              | returns empty array                              |
+// | 7 | getById   | valid task                   | returns full task object                         |
+// | 8 | getById   | unauthenticated              | returns null                                     |
+// | 9 | listUsers | multiple users               | returns all users with expected fields           |
+// |10 | listUsers | unauthenticated              | returns empty array                              |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("myTasks", () => {
-  test("returns tasks assigned to current user", async ({
+  test("returns only tasks assigned to current user", async ({
     client,
     testClient,
   }) => {
-    // Create 2 tasks assigned to the authenticated user
     await client.mutation(api.tasks.mutations.create, { title: "Task 1" });
     await client.mutation(api.tasks.mutations.create, { title: "Task 2" });
 
-    // Create another user and a task assigned to them
+    // Other user's task (raw insert — can't call mutation as another user)
     const otherUserId = await testClient.run(async (ctx: any) =>
       ctx.db.insert("users", { name: "Other" }),
     );
@@ -33,12 +46,12 @@ describe("myTasks", () => {
     expect(tasks.map((t: any) => t.title)).toContain("Task 2");
   });
 
-  test("returns tasks sorted by position ascending", async ({
+  test("sorts by position ascending", async ({
     client,
     userId,
     testClient,
   }) => {
-    // Insert tasks with specific positions out of order
+    // Raw insert with specific positions (mutation uses Date.now())
     await testClient.run(async (ctx: any) => {
       await ctx.db.insert("tasks", {
         title: "Second",
@@ -78,7 +91,7 @@ describe("teamPool", () => {
     userId,
     testClient,
   }) => {
-    // Shared + unassigned (should appear)
+    // Shared + unassigned (raw insert — create always assigns to creator)
     await testClient.run(async (ctx: any) =>
       ctx.db.insert("tasks", {
         title: "Pool task",
@@ -90,12 +103,12 @@ describe("teamPool", () => {
       }),
     );
 
-    // Private task (should NOT appear)
+    // Private task (excluded)
     await client.mutation(api.tasks.mutations.create, {
       title: "Private task",
     });
 
-    // Shared + assigned (should NOT appear)
+    // Shared + assigned (excluded)
     const otherUserId = await testClient.run(async (ctx: any) =>
       ctx.db.insert("users", { name: "Other" }),
     );
@@ -116,7 +129,7 @@ describe("teamPool", () => {
     expect(pool[0].title).toBe("Pool task");
   });
 
-  test("returns sorted by position ascending", async ({
+  test("sorts by position ascending", async ({
     client,
     userId,
     testClient,
@@ -158,21 +171,20 @@ describe("getById", () => {
     userId,
     testClient,
   }) => {
-    const taskId = await testClient.run(async (ctx: any) =>
-      ctx.db.insert("tasks", {
-        title: "Get by ID task",
-        priority: false,
-        status: "todo",
-        visibility: "private",
-        creatorId: userId,
-        assigneeId: userId,
-        position: 1,
-      }),
+    await client.mutation(api.tasks.mutations.create, {
+      title: "Get by ID task",
+    });
+
+    const tasks = await testClient.run(async (ctx: any) =>
+      ctx.db.query("tasks").collect(),
     );
 
-    const task = await client.query(api.tasks.queries.getById, { taskId });
+    const task = await client.query(api.tasks.queries.getById, {
+      taskId: tasks[0]._id,
+    });
     expect(task).not.toBeNull();
     expect(task!.title).toBe("Get by ID task");
+    expect(task!.creatorId).toBe(userId);
   });
 
   test("returns null when unauthenticated", async ({ testClient }) => {
@@ -195,11 +207,10 @@ describe("getById", () => {
 });
 
 describe("listUsers", () => {
-  test("returns all users with expected fields", async ({
+  test("returns all users with name, username, and email fields", async ({
     client,
     testClient,
   }) => {
-    // The test fixture already creates one user; add another with all fields
     await testClient.run(async (ctx: any) =>
       ctx.db.insert("users", {
         name: "Second User",
@@ -211,14 +222,11 @@ describe("listUsers", () => {
     const users = await client.query(api.tasks.queries.listUsers, {});
     expect(users.length).toBeGreaterThanOrEqual(2);
 
-    // Every user has _id
     for (const u of users) {
       expect(u).toHaveProperty("_id");
     }
 
-    // The explicitly created user has all fields
     const secondUser = users.find((u: any) => u.username === "second");
-    expect(secondUser).toBeDefined();
     expect(secondUser!.name).toBe("Second User");
     expect(secondUser!.email).toBe("second@example.com");
   });

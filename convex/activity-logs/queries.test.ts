@@ -1,3 +1,18 @@
+// Test Matrix: activity-logs queries
+// | # | Query         | State                        | What to verify                                     |
+// |---|---------------|------------------------------|----------------------------------------------------|
+// | 1 | listByEntity  | no logs                      | returns empty array                                |
+// | 2 | listByEntity  | with task activity           | returns logs filtered by entityType + entityId     |
+// | 3 | listByEntity  | different entity             | does not leak logs from other entities             |
+// | 4 | listByEntity  | unauthenticated              | returns empty array                                |
+// | 5 | taskTimeline  | no activity or work logs     | returns empty array                                |
+// | 6 | taskTimeline  | with task activity           | entries have type='activity' and correct fields    |
+// | 7 | taskTimeline  | with work log                | entries have type='workLog' and correct fields     |
+// | 8 | taskTimeline  | mixed activity + work logs   | sorted newest first, both types present            |
+// | 9 | taskTimeline  | subtask activities           | includes subtask created/promoted in timeline      |
+// |10 | taskTimeline  | metadata parsing             | JSON metadata string parsed to object              |
+// |11 | taskTimeline  | unauthenticated              | returns empty array                                |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
@@ -32,9 +47,7 @@ async function insertActivityLog(
 }
 
 describe("listByEntity", () => {
-  test("returns empty array for entity with no activity logs", async ({
-    client,
-  }) => {
+  test("returns empty array for entity with no logs", async ({ client }) => {
     const result = await client.query(
       api["activity-logs"].queries.listByEntity,
       { entityType: "task", entityId: "nonexistent" },
@@ -42,18 +55,17 @@ describe("listByEntity", () => {
     expect(result).toEqual([]);
   });
 
-  test("returns activity logs filtered by entityType and entityId", async ({
+  test("returns logs filtered by entityType and entityId", async ({
     client,
     testClient,
   }) => {
-    // Create a task to get a valid ID
+    // Create task via mutation (generates "created" activity log)
     await client.mutation(api.tasks.mutations.create, { title: "Test task" });
     const tasks = await testClient.run(async (ctx: any) =>
       ctx.db.query("tasks").collect(),
     );
     const taskId = tasks[0]._id;
 
-    // The create mutation already logged an activity; query for it
     const result = await client.query(
       api["activity-logs"].queries.listByEntity,
       { entityType: "task", entityId: taskId },
@@ -64,13 +76,9 @@ describe("listByEntity", () => {
     expect(result[0].action).toBe("created");
   });
 
-  test("does not return logs for different entity", async ({
-    client,
-  }) => {
-    // Create task (logs activity for that task)
+  test("excludes logs for different entities", async ({ client }) => {
     await client.mutation(api.tasks.mutations.create, { title: "Task A" });
 
-    // Query for project logs — should return empty
     const result = await client.query(
       api["activity-logs"].queries.listByEntity,
       { entityType: "project", entityId: "nonexistent" },
@@ -78,7 +86,7 @@ describe("listByEntity", () => {
     expect(result).toEqual([]);
   });
 
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty array when unauthenticated", async ({ testClient }) => {
     const userId = await seedUser(testClient);
     await insertActivityLog(testClient, {
       entityType: "task",
@@ -101,7 +109,7 @@ describe("taskTimeline", () => {
     userId,
     testClient,
   }) => {
-    // Seed task directly (no activity log)
+    // Raw insert — bypasses mutation to avoid creating activity log
     const taskId = await testClient.run(async (ctx: any) =>
       ctx.db.insert("tasks", {
         title: "Empty task",
@@ -121,11 +129,10 @@ describe("taskTimeline", () => {
     expect(timeline).toEqual([]);
   });
 
-  test("returns activity log entries with type 'activity'", async ({
+  test("returns activity entries with type 'activity'", async ({
     client,
     testClient,
   }) => {
-    // Create task via mutation (which logs "created")
     await client.mutation(api.tasks.mutations.create, {
       title: "Timeline task",
     });
@@ -149,7 +156,6 @@ describe("taskTimeline", () => {
     userId,
     testClient,
   }) => {
-    // Create task
     await client.mutation(api.tasks.mutations.create, {
       title: "Work log task",
     });
@@ -158,7 +164,6 @@ describe("taskTimeline", () => {
     );
     const taskId = tasks[0]._id;
 
-    // Insert a work log directly
     await testClient.run(async (ctx: any) =>
       ctx.db.insert("workLogs", {
         body: "Did some work",
@@ -180,11 +185,10 @@ describe("taskTimeline", () => {
     expect(workLogEntries[0].timeMinutes).toBe(30);
   });
 
-  test("merges activity logs and work logs sorted newest first", async ({
+  test("merges activity and work logs sorted newest first", async ({
     client,
     testClient,
   }) => {
-    // Create task
     await client.mutation(api.tasks.mutations.create, {
       title: "Merged timeline",
     });
@@ -193,13 +197,11 @@ describe("taskTimeline", () => {
     );
     const taskId = tasks[0]._id;
 
-    // Add work log
     await client.mutation(api["work-logs"].mutations.create, {
       body: "Work entry",
       taskId,
     });
 
-    // Update task status
     await client.mutation(api.tasks.mutations.updateStatus, {
       taskId,
       status: "in_progress",
@@ -210,7 +212,6 @@ describe("taskTimeline", () => {
       { taskId },
     );
 
-    // Should have: created activity, work log, status_changed activity
     expect(timeline.length).toBeGreaterThanOrEqual(3);
 
     // Verify sorted newest first
@@ -220,17 +221,15 @@ describe("taskTimeline", () => {
       );
     }
 
-    // Verify both types present
     const types = timeline.map((e: any) => e.type);
     expect(types).toContain("activity");
     expect(types).toContain("workLog");
   });
 
-  test("includes subtask activity entries in the timeline", async ({
+  test("includes subtask activity entries in timeline", async ({
     client,
     testClient,
   }) => {
-    // Create task
     await client.mutation(api.tasks.mutations.create, {
       title: "Task with subtask",
     });
@@ -239,7 +238,6 @@ describe("taskTimeline", () => {
     );
     const taskId = tasks[0]._id;
 
-    // Create subtask (logs "created" for subtask entity)
     await client.mutation(api.subtasks.mutations.create, {
       title: "Child subtask",
       taskId,
@@ -249,7 +247,6 @@ describe("taskTimeline", () => {
       ctx.db.query("subtasks").collect(),
     );
 
-    // Promote subtask (logs "promoted" with metadata { newTaskId })
     await client.mutation(api.subtasks.mutations.promote, {
       subtaskId: subtasks[0]._id,
     });
@@ -259,50 +256,27 @@ describe("taskTimeline", () => {
       { taskId },
     );
 
-    // Should include subtask's "created" and "promoted" activities
     const subtaskActivities = timeline.filter(
       (e: any) => e.type === "activity" && e.entityType === "subtask",
     );
     expect(subtaskActivities.length).toBeGreaterThanOrEqual(2);
 
-    const createdActivity = subtaskActivities.find((e: any) => e.action === "created");
-    expect(createdActivity).toBeDefined();
-
-    // Promoted has metadata — verifies JSON.parse path for subtask activities
-    const promotedActivity = subtaskActivities.find((e: any) => e.action === "promoted");
-    expect(promotedActivity).toBeDefined();
-    expect(promotedActivity.metadata).toBeDefined();
-    expect(promotedActivity.metadata.newTaskId).toBeDefined();
-  });
-
-  test("returns empty when unauthenticated", async ({
-    testClient,
-  }) => {
-    const taskId = await testClient.run(async (ctx: any) => {
-      const userId = await ctx.db.insert("users", { name: "Seed" });
-      return ctx.db.insert("tasks", {
-        title: "Auth test task",
-        priority: false,
-        status: "todo",
-        visibility: "private",
-        creatorId: userId,
-        assigneeId: userId,
-        position: 1,
-      });
-    });
-
-    const timeline = await testClient.query(
-      api["activity-logs"].queries.taskTimeline,
-      { taskId },
+    const createdActivity = subtaskActivities.find(
+      (e: any) => e.action === "created",
     );
-    expect(timeline).toEqual([]);
+    expect(createdActivity.entityType).toBe("subtask");
+
+    const promotedActivity = subtaskActivities.find(
+      (e: any) => e.action === "promoted",
+    );
+    expect(promotedActivity.entityType).toBe("subtask");
+    expect(promotedActivity.metadata.newTaskId).toBeTypeOf("string");
   });
 
-  test("parses metadata JSON string back to object", async ({
+  test("parses metadata JSON string to object", async ({
     client,
     testClient,
   }) => {
-    // Create task then update status (which logs metadata with from/to)
     await client.mutation(api.tasks.mutations.create, {
       title: "Metadata task",
     });
@@ -324,10 +298,30 @@ describe("taskTimeline", () => {
     const statusChange = timeline.find(
       (e: any) => e.action === "status_changed",
     );
-    expect(statusChange).toBeDefined();
     expect(statusChange.metadata).toEqual({
       from: "todo",
       to: "in_progress",
     });
+  });
+
+  test("returns empty array when unauthenticated", async ({ testClient }) => {
+    const taskId = await testClient.run(async (ctx: any) => {
+      const userId = await ctx.db.insert("users", { name: "Seed" });
+      return ctx.db.insert("tasks", {
+        title: "Auth test task",
+        priority: false,
+        status: "todo",
+        visibility: "private",
+        creatorId: userId,
+        assigneeId: userId,
+        position: 1,
+      });
+    });
+
+    const timeline = await testClient.query(
+      api["activity-logs"].queries.taskTimeline,
+      { taskId },
+    );
+    expect(timeline).toEqual([]);
   });
 });

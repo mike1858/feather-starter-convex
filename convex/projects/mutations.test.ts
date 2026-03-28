@@ -1,9 +1,23 @@
+// Test Matrix: projects mutations
+// | # | Mutation | State                                    | What to verify                                  |
+// |---|---------|------------------------------------------|-------------------------------------------------|
+// | 1 | create  | with name                                | name, status=active, creatorId, "created" log   |
+// | 2 | create  | unauthenticated                          | no project inserted                             |
+// | 3 | update  | name only                                | name changed, status untouched, "edited" log    |
+// | 4 | update  | status only                              | status changed, name untouched, "status_changed"|
+// | 5 | update  | unauthenticated                          | no change                                       |
+// | 6 | update  | project not found                        | throws "Project not found"                      |
+// | 7 | remove  | project with tasks                       | project + tasks deleted                         |
+// | 8 | remove  | empty project                            | project deleted, "deleted" log                  |
+// | 9 | remove  | cascades through tasks to subtasks/logs  | subtasks + work logs also deleted               |
+// |10 | remove  | unauthenticated                          | project not deleted                             |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("create", () => {
-  test("creates project with name, defaults status to active", async ({
+  test("creates project with active status and logs created activity", async ({
     client,
     userId,
     testClient,
@@ -20,7 +34,6 @@ describe("create", () => {
     expect(projects[0].status).toBe("active");
     expect(projects[0].creatorId).toBe(userId);
 
-    // Verify activity log was created
     const logs = await testClient.run(async (ctx: any) =>
       ctx.db.query("activityLogs").collect(),
     );
@@ -30,7 +43,7 @@ describe("create", () => {
     expect(logs[0].action).toBe("created");
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     await testClient.mutation(api.projects.mutations.create, {
       name: "Should not be created",
     });
@@ -43,7 +56,7 @@ describe("create", () => {
 });
 
 describe("update", () => {
-  test("updates name only when specified", async ({
+  test("updates name and logs edited activity", async ({
     client,
     testClient,
   }) => {
@@ -67,18 +80,16 @@ describe("update", () => {
     expect(updated.name).toBe("Updated");
     expect(updated.status).toBe("active"); // unchanged
 
-    // Verify activity log for edit
     const logs = await testClient.run(async (ctx: any) =>
       ctx.db.query("activityLogs").collect(),
     );
     const editLog = logs.find((l: any) => l.action === "edited");
-    expect(editLog).toBeDefined();
     expect(editLog.entityType).toBe("project");
     const metadata = JSON.parse(editLog.metadata);
     expect(metadata.fields).toContain("name");
   });
 
-  test("updates status only when specified", async ({
+  test("updates status and logs status_changed activity", async ({
     client,
     testClient,
   }) => {
@@ -102,19 +113,17 @@ describe("update", () => {
     expect(updated.status).toBe("on_hold");
     expect(updated.name).toBe("Status Project"); // unchanged
 
-    // Verify activity log for status change
     const logs = await testClient.run(async (ctx: any) =>
       ctx.db.query("activityLogs").collect(),
     );
     const statusLog = logs.find((l: any) => l.action === "status_changed");
-    expect(statusLog).toBeDefined();
     expect(statusLog.entityType).toBe("project");
     const metadata = JSON.parse(statusLog.metadata);
     expect(metadata.from).toBe("active");
     expect(metadata.to).toBe("on_hold");
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const projectId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
       return ctx.db.insert("projects", {
@@ -135,7 +144,7 @@ describe("update", () => {
     expect(project.name).toBe("Seed Project");
   });
 
-  test("throws 'Project not found.' for nonexistent project", async ({
+  test("throws 'Project not found' for deleted project", async ({
     client,
     testClient,
   }) => {
@@ -158,7 +167,7 @@ describe("update", () => {
 });
 
 describe("remove", () => {
-  test("deletes project and all its tasks (cascade)", async ({
+  test("deletes project and cascades to tasks", async ({
     client,
     userId,
     testClient,
@@ -172,7 +181,6 @@ describe("remove", () => {
     );
     const projectId = projects[0]._id;
 
-    // Add tasks to the project
     await testClient.run(async (ctx: any) => {
       await ctx.db.insert("tasks", {
         title: "Task 1",
@@ -198,18 +206,19 @@ describe("remove", () => {
 
     await client.mutation(api.projects.mutations.remove, { projectId });
 
-    const remainingProjects = await testClient.run(async (ctx: any) =>
-      ctx.db.query("projects").collect(),
-    );
-    expect(remainingProjects).toHaveLength(0);
-
-    const remainingTasks = await testClient.run(async (ctx: any) =>
-      ctx.db.query("tasks").collect(),
-    );
-    expect(remainingTasks).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("projects").collect(),
+      ),
+    ).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("tasks").collect(),
+      ),
+    ).toHaveLength(0);
   });
 
-  test("deleting project with no tasks works without error", async ({
+  test("deletes empty project and logs deleted activity", async ({
     client,
     testClient,
   }) => {
@@ -224,21 +233,96 @@ describe("remove", () => {
 
     await client.mutation(api.projects.mutations.remove, { projectId });
 
-    const remaining = await testClient.run(async (ctx: any) =>
-      ctx.db.query("projects").collect(),
-    );
-    expect(remaining).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("projects").collect(),
+      ),
+    ).toHaveLength(0);
 
-    // Verify activity log for delete
     const logs = await testClient.run(async (ctx: any) =>
       ctx.db.query("activityLogs").collect(),
     );
     const deleteLog = logs.find((l: any) => l.action === "deleted");
-    expect(deleteLog).toBeDefined();
     expect(deleteLog.entityType).toBe("project");
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("cascades through tasks to subtasks and work logs", async ({
+    client,
+    userId,
+    testClient,
+  }) => {
+    await client.mutation(api.projects.mutations.create, {
+      name: "Cascade Project",
+    });
+    const projects = await testClient.run(async (ctx: any) =>
+      ctx.db.query("projects").collect(),
+    );
+    const projectId = projects[0]._id;
+
+    await testClient.run(async (ctx: any) => {
+      const taskId = await ctx.db.insert("tasks", {
+        title: "Project Task",
+        priority: false,
+        status: "todo",
+        visibility: "shared",
+        creatorId: userId,
+        assigneeId: userId,
+        projectId,
+        position: 1,
+      });
+
+      await ctx.db.insert("subtasks", {
+        title: "Child subtask",
+        status: "todo",
+        taskId,
+        position: 1,
+        creatorId: userId,
+      });
+
+      await ctx.db.insert("workLogs", {
+        body: "Logged work",
+        timeMinutes: 30,
+        taskId,
+        creatorId: userId,
+      });
+    });
+
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("tasks").collect(),
+      ),
+    ).toHaveLength(1);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("subtasks").collect(),
+      ),
+    ).toHaveLength(1);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("workLogs").collect(),
+      ),
+    ).toHaveLength(1);
+
+    await client.mutation(api.projects.mutations.remove, { projectId });
+
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("tasks").collect(),
+      ),
+    ).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("subtasks").collect(),
+      ),
+    ).toHaveLength(0);
+    expect(
+      await testClient.run(async (ctx: any) =>
+        ctx.db.query("workLogs").collect(),
+      ),
+    ).toHaveLength(0);
+  });
+
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const projectId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
       return ctx.db.insert("projects", {
@@ -254,81 +338,5 @@ describe("remove", () => {
       ctx.db.get(projectId),
     );
     expect(project).not.toBeNull();
-  });
-
-  test("remove cascades through tasks to subtasks and work logs", async ({
-    client,
-    userId,
-    testClient,
-  }) => {
-    // Create project
-    await client.mutation(api.projects.mutations.create, {
-      name: "Cascade Project",
-    });
-    const projects = await testClient.run(async (ctx: any) =>
-      ctx.db.query("projects").collect(),
-    );
-    const projectId = projects[0]._id;
-
-    // Create task in project
-    await testClient.run(async (ctx: any) => {
-      const taskId = await ctx.db.insert("tasks", {
-        title: "Project Task",
-        priority: false,
-        status: "todo",
-        visibility: "shared",
-        creatorId: userId,
-        assigneeId: userId,
-        projectId,
-        position: 1,
-      });
-
-      // Create subtask on that task
-      await ctx.db.insert("subtasks", {
-        title: "Child subtask",
-        status: "todo",
-        taskId,
-        position: 1,
-        creatorId: userId,
-      });
-
-      // Create work log on that task
-      await ctx.db.insert("workLogs", {
-        body: "Logged work",
-        timeMinutes: 30,
-        taskId,
-        creatorId: userId,
-      });
-    });
-
-    // Verify everything exists
-    const tasksBefore = await testClient.run(async (ctx: any) =>
-      ctx.db.query("tasks").collect(),
-    );
-    const subtasksBefore = await testClient.run(async (ctx: any) =>
-      ctx.db.query("subtasks").collect(),
-    );
-    const logsBefore = await testClient.run(async (ctx: any) =>
-      ctx.db.query("workLogs").collect(),
-    );
-    expect(tasksBefore).toHaveLength(1);
-    expect(subtasksBefore).toHaveLength(1);
-    expect(logsBefore).toHaveLength(1);
-
-    // Delete project — should cascade through everything
-    await client.mutation(api.projects.mutations.remove, { projectId });
-
-    const tasksAfter = await testClient.run(async (ctx: any) =>
-      ctx.db.query("tasks").collect(),
-    );
-    const subtasksAfter = await testClient.run(async (ctx: any) =>
-      ctx.db.query("subtasks").collect(),
-    );
-    const logsAfter = await testClient.run(async (ctx: any) =>
-      ctx.db.query("workLogs").collect(),
-    );
-    expect(tasksAfter).toHaveLength(0);
-    expect(subtasksAfter).toHaveLength(0);
-    expect(logsAfter).toHaveLength(0);
   });
 });

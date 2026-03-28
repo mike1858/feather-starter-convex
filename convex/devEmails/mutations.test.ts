@@ -1,9 +1,16 @@
+// Test Matrix: devEmails mutations
+// | # | Mutation | State                  | What to verify                             |
+// |---|---------|------------------------|--------------------------------------------|
+// | 1 | store   | with all fields        | to, subject, html, text, sentAt persisted  |
+// | 2 | store   | without optional text  | text field is undefined                    |
+// | 3 | clearAll| with existing emails   | all emails deleted                         |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("devEmails mutations", () => {
-  test("store inserts an email record", async ({ testClient }) => {
+  test("stores email record with all fields", async ({ testClient }) => {
     await testClient.mutation(api.devEmails.mutations.store, {
       to: ["user@example.com"],
       subject: "Test Subject",
@@ -23,7 +30,7 @@ describe("devEmails mutations", () => {
     expect(emails[0].sentAt).toBe(1000);
   });
 
-  test("store works without optional text field", async ({ testClient }) => {
+  test("stores email without optional text field", async ({ testClient }) => {
     await testClient.mutation(api.devEmails.mutations.store, {
       to: ["a@b.com"],
       subject: "No text",
@@ -38,7 +45,7 @@ describe("devEmails mutations", () => {
     expect(emails[0].text).toBeUndefined();
   });
 
-  test("clearAll removes all email records", async ({ testClient }) => {
+  test("clears all email records", async ({ testClient }) => {
     // Insert two emails
     await testClient.mutation(api.devEmails.mutations.store, {
       to: ["a@b.com"],

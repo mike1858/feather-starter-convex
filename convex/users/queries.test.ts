@@ -1,3 +1,13 @@
+// Test Matrix: users queries
+// | # | Query          | State                   | What to verify                         |
+// |---|----------------|-------------------------|----------------------------------------|
+// | 1 | getCurrentUser | unauthenticated         | returns null                           |
+// | 2 | getCurrentUser | no avatar               | returns user with undefined avatarUrl  |
+// | 3 | getCurrentUser | image field set         | avatarUrl from image URL               |
+// | 4 | getCurrentUser | imageId set             | avatarUrl from storage                 |
+// | 5 | getCurrentUser | neither image/imageId   | avatarUrl is undefined                 |
+// | 6 | getCurrentUser | user doc deleted        | returns null                           |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
@@ -8,9 +18,8 @@ describe("getCurrentUser", () => {
     expect(result).toBeNull();
   });
 
-  test("returns user without avatarUrl", async ({ client, userId }) => {
+  test("returns user with undefined avatarUrl when no avatar set", async ({ client, userId }) => {
     const result = await client.query(api.users.queries.getCurrentUser, {});
-    expect(result).toBeDefined();
     expect(result!._id).toBe(userId);
     expect(result!.avatarUrl).toBeUndefined();
   });
@@ -33,7 +42,6 @@ describe("getCurrentUser", () => {
     testClient,
     userId,
   }) => {
-    // Upload a file to storage to get a valid storage ID
     const imageId = await testClient.run(async (ctx: any) => {
       const blob = new Blob(["test"], { type: "image/png" });
       return ctx.storage.store(blob);
@@ -43,8 +51,8 @@ describe("getCurrentUser", () => {
     });
 
     const result = await client.query(api.users.queries.getCurrentUser, {});
-    expect(result!.avatarUrl).toBeDefined();
     expect(typeof result!.avatarUrl).toBe("string");
+    expect(result!.avatarUrl!.length).toBeGreaterThan(0);
   });
 
   test("returns undefined avatarUrl when neither imageId nor image is set", async ({

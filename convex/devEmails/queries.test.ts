@@ -1,16 +1,22 @@
+// Test Matrix: devEmails queries
+// | # | Query | State              | What to verify                          |
+// |---|-------|--------------------|------------------------------------------|
+// | 1 | list  | no emails          | returns empty array                      |
+// | 2 | list  | multiple emails    | returns emails sorted by sentAt desc     |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("devEmails queries", () => {
-  test("list returns empty array when no emails exist", async ({
+  test("returns empty array when no emails exist", async ({
     testClient,
   }) => {
     const result = await testClient.query(api.devEmails.queries.list, {});
     expect(result).toEqual([]);
   });
 
-  test("list returns emails sorted by sentAt descending", async ({
+  test("returns emails sorted by sentAt descending", async ({
     testClient,
   }) => {
     // Insert emails in ascending order

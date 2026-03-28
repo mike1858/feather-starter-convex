@@ -1,3 +1,12 @@
+// Test Matrix: work-logs queries
+// | # | Query      | State                     | What to verify                              |
+// |---|------------|---------------------------|---------------------------------------------|
+// | 1 | listByTask | no work logs              | empty entries, totalMinutes=0               |
+// | 2 | listByTask | with entries              | returns all entries for task                |
+// | 3 | listByTask | totalMinutes calculation  | sums all timeMinutes values                 |
+// | 4 | listByTask | entries without time      | ignores undefined timeMinutes in total      |
+// | 5 | listByTask | unauthenticated           | empty entries, totalMinutes=0               |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
@@ -20,7 +29,7 @@ async function seedTask(testClient: any, userId?: string) {
 }
 
 describe("listByTask", () => {
-  test("returns empty list and totalMinutes 0 for task with no work logs", async ({
+  test("returns empty entries and zero totalMinutes for task with no logs", async ({
     client,
     userId,
     testClient,
@@ -36,7 +45,7 @@ describe("listByTask", () => {
     expect(result.totalMinutes).toBe(0);
   });
 
-  test("returns entries for a task", async ({
+  test("returns all entries for a task", async ({
     client,
     userId,
     testClient,
@@ -62,7 +71,7 @@ describe("listByTask", () => {
     expect(result.entries).toHaveLength(2);
   });
 
-  test("calculates totalMinutes as sum of all timeMinutes values", async ({
+  test("sums timeMinutes across all entries", async ({
     client,
     userId,
     testClient,
@@ -88,7 +97,7 @@ describe("listByTask", () => {
     expect(result.totalMinutes).toBe(90);
   });
 
-  test("ignores entries with no timeMinutes in total calculation", async ({
+  test("ignores entries without timeMinutes in total", async ({
     client,
     userId,
     testClient,
@@ -114,7 +123,9 @@ describe("listByTask", () => {
     expect(result.totalMinutes).toBe(45);
   });
 
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty entries when unauthenticated", async ({
+    testClient,
+  }) => {
     const taskId = await seedTask(testClient);
 
     const result = await testClient.query(

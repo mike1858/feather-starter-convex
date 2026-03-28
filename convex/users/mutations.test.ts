@@ -1,3 +1,17 @@
+// Test Matrix: users mutations
+// | # | Mutation                 | State                   | What to verify                      |
+// |---|--------------------------|-------------------------|-------------------------------------|
+// | 1 | updateUsername           | authenticated           | username field updated               |
+// | 2 | updateUsername           | unauthenticated         | silently returns                     |
+// | 3 | updateUserImage         | with valid imageId      | imageId set on user                 |
+// | 4 | updateUserImage         | unauthenticated         | silently returns                     |
+// | 5 | removeUserImage         | with image fields set   | imageId and image cleared           |
+// | 6 | removeUserImage         | unauthenticated         | silently returns                     |
+// | 7 | deleteCurrentUserAccount| authenticated           | user doc deleted                    |
+// | 8 | deleteCurrentUserAccount| with auth accounts      | auth accounts cascade deleted       |
+// | 9 | deleteCurrentUserAccount| user doc missing        | throws "User not found"             |
+// |10 | deleteCurrentUserAccount| unauthenticated         | silently returns                     |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";

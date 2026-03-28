@@ -1,3 +1,10 @@
+// Test Matrix: onboarding mutations
+// | # | Mutation           | State              | What to verify                       |
+// |---|--------------------|--------------------|--------------------------------------|
+// | 1 | completeOnboarding | authenticated      | username set on user doc             |
+// | 2 | completeOnboarding | unauthenticated    | silently returns                     |
+// | 3 | completeOnboarding | user doc missing   | silently returns (no throw)          |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";

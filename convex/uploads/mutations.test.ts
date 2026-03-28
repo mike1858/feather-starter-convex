@@ -1,3 +1,9 @@
+// Test Matrix: uploads mutations
+// | # | Mutation           | State           | What to verify                  |
+// |---|--------------------|-----------------|---------------------------------|
+// | 1 | generateUploadUrl  | authenticated   | returns a string URL            |
+// | 2 | generateUploadUrl  | unauthenticated | throws "User not found"         |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";

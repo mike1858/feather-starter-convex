@@ -1,11 +1,20 @@
+// Test Matrix: projects queries
+// | # | Query        | State                  | What to verify                                  |
+// |---|--------------|------------------------|-------------------------------------------------|
+// | 1 | list         | no filter              | returns all projects                            |
+// | 2 | list         | status='active' filter | returns only active projects                    |
+// | 3 | list         | with tasks             | taskCounts { total, todo, in_progress, done }   |
+// | 4 | list         | unauthenticated        | returns empty array                             |
+// | 5 | getWithTasks | project with tasks     | returns project + tasks + statusSummary         |
+// | 6 | getWithTasks | nonexistent project    | returns null                                    |
+// | 7 | getWithTasks | unauthenticated        | returns null                                    |
+
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
 import { test } from "../test.setup";
 
 describe("list", () => {
-  test("returns all projects when no status filter", async ({
-    client,
-  }) => {
+  test("returns all projects when no status filter", async ({ client }) => {
     await client.mutation(api.projects.mutations.create, { name: "Alpha" });
     await client.mutation(api.projects.mutations.create, { name: "Beta" });
 
@@ -15,16 +24,12 @@ describe("list", () => {
     expect(projects.map((p: any) => p.name)).toContain("Beta");
   });
 
-  test("returns only active projects when status='active'", async ({
-    client,
-    testClient,
-  }) => {
+  test("filters by status when specified", async ({ client, testClient }) => {
     await client.mutation(api.projects.mutations.create, { name: "Active" });
     await client.mutation(api.projects.mutations.create, {
       name: "To Archive",
     });
 
-    // Change second project to archived
     const projects = await testClient.run(async (ctx: any) =>
       ctx.db.query("projects").collect(),
     );
@@ -41,7 +46,7 @@ describe("list", () => {
     expect(activeProjects[0].name).toBe("Active");
   });
 
-  test("returns projects with taskCounts { total, todo, in_progress, done }", async ({
+  test("returns taskCounts per project", async ({
     client,
     userId,
     testClient,
@@ -55,7 +60,7 @@ describe("list", () => {
     );
     const projectId = projects[0]._id;
 
-    // Add tasks with various statuses
+    // Raw insert — need specific statuses that mutation API can't set directly
     await testClient.run(async (ctx: any) => {
       await ctx.db.insert("tasks", {
         title: "Todo 1",
@@ -106,7 +111,7 @@ describe("list", () => {
 });
 
 describe("getWithTasks", () => {
-  test("returns project with tasks array and statusSummary", async ({
+  test("returns project with tasks and statusSummary", async ({
     client,
     userId,
     testClient,
@@ -120,7 +125,7 @@ describe("getWithTasks", () => {
     );
     const projectId = projects[0]._id;
 
-    // Add tasks
+    // Raw insert — need specific statuses
     await testClient.run(async (ctx: any) => {
       await ctx.db.insert("tasks", {
         title: "Todo Task",
@@ -161,7 +166,6 @@ describe("getWithTasks", () => {
     client,
     testClient,
   }) => {
-    // Create and delete a project to get a valid-format but non-existent ID
     await client.mutation(api.projects.mutations.create, {
       name: "Temporary",
     });
@@ -177,10 +181,7 @@ describe("getWithTasks", () => {
     expect(result).toBeNull();
   });
 
-  test("returns null when unauthenticated", async ({
-    client,
-    testClient,
-  }) => {
+  test("returns null when unauthenticated", async ({ client, testClient }) => {
     await client.mutation(api.projects.mutations.create, {
       name: "Auth Test",
     });
@@ -190,10 +191,9 @@ describe("getWithTasks", () => {
     );
     const projectId = projects[0]._id;
 
-    const result = await testClient.query(
-      api.projects.queries.getWithTasks,
-      { projectId },
-    );
+    const result = await testClient.query(api.projects.queries.getWithTasks, {
+      projectId,
+    });
     expect(result).toBeNull();
   });
 });
