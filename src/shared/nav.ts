@@ -31,6 +31,16 @@ export const navItems: NavItem[] = [
     i18nKey: "projects.nav.projects",
     to: "/dashboard/projects",
   },
+    {
+    label: "Todos",
+    i18nKey: "todos.nav.todos",
+    to: "/dashboard/todos",
+  },
+    {
+    label: "Tickets",
+    i18nKey: "tickets.nav.tickets",
+    to: "/dashboard/tickets",
+  },
   {
     label: "Settings",
     i18nKey: "dashboard.nav.settings",

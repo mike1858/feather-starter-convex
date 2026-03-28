@@ -1,0 +1,43 @@
+name: todos
+label: Todo
+labelPlural: Todos
+
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+  completed:
+    type: boolean
+    default: false
+    filterable: true
+
+timestamps: false
+
+behaviors:
+  softDelete: false
+  auditTrail: false
+  immutable: false
+  assignable: false
+  orderable: true
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+
+views:
+  default:
+    defaultView: list
+    enabledViews: [list]
+  list:
+    density: comfortable
+
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true

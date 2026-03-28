@@ -35,4 +35,12 @@ export const ERRORS = {
   activityLogs: {
     NOT_FOUND: "Activity log not found.",
   },
+  todos: {
+    NOT_FOUND: "Todo not found.",
+    INVALID_STATUS_TRANSITION: "Invalid status transition.",
+  },
+  tickets: {
+    NOT_FOUND: "Ticket not found.",
+    INVALID_STATUS_TRANSITION: "Invalid status transition.",
+  },
 } as const;

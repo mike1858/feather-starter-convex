@@ -1,0 +1,51 @@
+name: tickets
+label: Ticket
+labelPlural: Tickets
+
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+  description:
+    type: text
+  status:
+    type: enum
+    values: [open, in_progress, resolved, closed]
+    default: open
+    filterable: true
+  priority:
+    type: enum
+    values: [low, medium, high, critical]
+    default: medium
+    filterable: true
+
+timestamps: false
+
+behaviors:
+  softDelete: false
+  auditTrail: false
+  immutable: false
+  assignable: true
+  orderable: true
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+
+views:
+  default:
+    defaultView: list
+    enabledViews: [list]
+  list:
+    density: comfortable
+
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true

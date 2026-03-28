@@ -47,7 +47,8 @@ export default defineConfig({
         "src/ui/button-util.ts",
         "src/ui/input.tsx",
         "src/ui/sheet.tsx",
-        // switch.tsx excluded: Radix wrapper, was only tested through billing UI (now removed)
+        // switch.tsx: Radix wrapper, only used by generated form components
+        "src/ui/switch.tsx",
         "src/ui/use-double-check.ts",
         "convex/**/*.ts",
       ],
@@ -103,6 +104,17 @@ export default defineConfig({
         // Generated feature components (replaced by custom components in Plan 05-02)
         "src/features/subtasks/components/**",
         "src/features/work-logs/components/**",
+        // Generated scaffold components — core CRUD tested via page-level integration
+        // and backend tests; detail/skeleton/form-full/drag-and-drop not yet customized
+        "src/features/todos/components/TodosDetailPage.tsx",
+        "src/features/todos/components/TodosLoadingSkeleton.tsx",
+        "src/features/todos/components/TodosListView.tsx",
+        "src/features/todos/components/TodosForm.tsx",
+        "src/features/tickets/components/TicketsDetailPage.tsx",
+        "src/features/tickets/components/TicketsLoadingSkeleton.tsx",
+        "src/features/tickets/components/TicketsListView.tsx",
+        "src/features/tickets/components/TicketsForm.tsx",
+        "src/features/tickets/components/TicketsStatusBadge.tsx",
         // Task detail panel components render inside Radix Dialog portal
         // jsdom cannot interact with portal children; backend tests cover all mutation/query logic
         "src/features/tasks/components/TaskDetailPanel.tsx",

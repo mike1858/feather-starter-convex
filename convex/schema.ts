@@ -13,6 +13,11 @@ import {
   activityLogAction,
 } from "../src/shared/schemas/activity-logs";
 
+import {
+  status as tickets_status,
+  priority as tickets_priority,
+} from "../src/shared/schemas/tickets";
+
 const schema = defineSchema({
   ...authTables,
   users: defineTable({
@@ -81,6 +86,28 @@ const schema = defineSchema({
   })
     .index("by_entity", ["entityType", "entityId"])
     .index("by_actor", ["actor"]),
+  todos: defineTable({
+    title: v.string(),
+    completed: v.optional(v.boolean()),
+    userId: v.id("users"),
+    position: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_completed", ["completed"]),
+
+  tickets: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: zodToConvex(tickets_status),
+    priority: zodToConvex(tickets_priority),
+    userId: v.id("users"),
+    assigneeId: v.optional(v.id("users")),
+    position: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_priority", ["priority"]),
+
 });
 
 export default schema;

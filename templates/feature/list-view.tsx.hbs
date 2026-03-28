@@ -21,7 +21,7 @@ import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
 
 interface {{pascalCase name}}ListViewProps {
   items: Array<Record<string, unknown>>;
-  isLoading: boolean;
+  isLoading?: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
   {{#if behaviors.orderable}}

@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "todos": "Todos"
+  },
+  "page": {
+    "title": "Todos",
+    "description": "Manage your todos."
+  },
+  "form": {
+    "addInline": "Add todo...",
+    "submit": "Add",
+    "create": "Create Todo",
+    "save": "Save Changes",
+    "edit": "Edit",
+    "discard": "Discard",
+    "discardChanges": "Discard Changes",
+    "close": "Close"
+  },
+  "empty": {
+    "title": "No todos yet",
+    "description": "Create your first todo to get started.",
+    "cta": "Create Todo",
+    "noResults": "No results",
+    "noResultsDescription": "No todos match the current filter. Try adjusting your filters."
+  },
+  "error": {
+    "notFound": "Todo not found.",
+    "invalidTransition": "Invalid status transition.",
+    "authRequired": "Sign in required.",
+    "loadFailedTitle": "Something went wrong",
+    "loadFailedDescription": "We couldn't load your todos. Please try again.",
+    "retry": "Retry"
+  },
+  "delete": {
+    "confirm": "Delete?"
+  },
+  "table": {
+    "showing": "Showing {{start}}-{{end}} of {{total}}",
+    "rowsPerPage": "Rows per page"
+  },
+  "filter": {
+    "all": "All"
+  },
+  "search": {
+    "placeholder": "Search todos..."
+  },
+  "detail": {
+    "editing": "Editing {{recordTitle}}",
+    "notSet": "Not set"
+  },
+  "priority": {
+    "high": "High Priority",
+    "normal": "Normal"
+  }
+}

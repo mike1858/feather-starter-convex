@@ -10,7 +10,6 @@ import {
 {{#ifEq this.type "enum"}}
 {{#if this.transitions}}
   {{camelCase @key}},
-  {{upperSnakeCase @key}}_VALUES,
 {{/if}}
 {{/ifEq}}
 {{/each}}

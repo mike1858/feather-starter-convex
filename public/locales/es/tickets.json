@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "tickets": "Tickets"
+  },
+  "page": {
+    "title": "Tickets",
+    "description": "Administra tus tickets."
+  },
+  "form": {
+    "addInline": "Agregar ticket...",
+    "submit": "Agregar",
+    "create": "Crear Ticket",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay tickets",
+    "description": "Crea tu primer ticket para comenzar.",
+    "cta": "Crear Ticket",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay tickets que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "Ticket no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus tickets. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar tickets..."
+  },
+  "detail": {
+    "editing": "Editando {{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  },
+  "status": {
+    "open": "Open",
+    "in_progress": "In progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  }
+}

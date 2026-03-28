@@ -30,9 +30,11 @@ export function {{pascalCase name}}Page() {
   );
 
   // @generated-start state
+  {{#unless (eq views.default.enabledViews.length 1)}}
   const [activeView, setActiveView] = useState<string>(
     () => localStorage.getItem("{{name}}-view-preference") || "{{views.default.defaultView}}"
   );
+  {{/unless}}
   {{#hasAnyFilters fields views}}
   const [activeFilter, setActiveFilter] = useState<string>("all");
   {{/hasAnyFilters}}
