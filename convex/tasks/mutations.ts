@@ -11,7 +11,7 @@ import {
   TASK_STATUS_VALUES,
 } from "../../src/shared/schemas/tasks";
 import { ERRORS } from "../../src/shared/errors";
-import { logActivity } from "@cvx/activity-logs/helpers";
+import { logActivity } from "@cvx/activityLogs/helpers";
 
 const zMutation = zCustomMutation(mutation, NoOp);
 

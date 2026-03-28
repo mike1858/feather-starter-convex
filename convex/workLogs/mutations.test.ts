@@ -43,7 +43,7 @@ describe("create", () => {
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Did some work",
       taskId,
     });
@@ -65,7 +65,7 @@ describe("create", () => {
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Timed work",
       timeMinutes: 90,
       taskId,
@@ -82,7 +82,7 @@ describe("create", () => {
   test("silently ignores unauthenticated call", async ({ testClient }) => {
     const taskId = await seedTask(testClient);
 
-    await testClient.mutation(api["work-logs"].mutations.create, {
+    await testClient.mutation(api.workLogs.mutations.create, {
       body: "Should not be created",
       taskId,
     });
@@ -97,7 +97,7 @@ describe("create", () => {
 describe("update", () => {
   test("updates body when owner", async ({ client, userId, testClient }) => {
     const taskId = await seedTask(testClient, userId);
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Original",
       taskId,
     });
@@ -106,7 +106,7 @@ describe("update", () => {
       ctx.db.query("workLogs").collect(),
     );
 
-    await client.mutation(api["work-logs"].mutations.update, {
+    await client.mutation(api.workLogs.mutations.update, {
       workLogId: records[0]._id,
       body: "Updated body",
     });
@@ -123,7 +123,7 @@ describe("update", () => {
     testClient,
   }) => {
     const taskId = await seedTask(testClient, userId);
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Timed",
       timeMinutes: 30,
       taskId,
@@ -133,7 +133,7 @@ describe("update", () => {
       ctx.db.query("workLogs").collect(),
     );
 
-    await client.mutation(api["work-logs"].mutations.update, {
+    await client.mutation(api.workLogs.mutations.update, {
       workLogId: records[0]._id,
       timeMinutes: 60,
     });
@@ -163,7 +163,7 @@ describe("update", () => {
     );
 
     await expect(
-      client.mutation(api["work-logs"].mutations.update, {
+      client.mutation(api.workLogs.mutations.update, {
         workLogId,
         body: "Stolen",
       }),
@@ -181,7 +181,7 @@ describe("update", () => {
       });
     });
 
-    await testClient.mutation(api["work-logs"].mutations.update, {
+    await testClient.mutation(api.workLogs.mutations.update, {
       workLogId,
       body: "Should not change",
     });
@@ -198,7 +198,7 @@ describe("update", () => {
     testClient,
   }) => {
     const taskId = await seedTask(testClient, userId);
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Temp",
       taskId,
     });
@@ -209,7 +209,7 @@ describe("update", () => {
     await testClient.run(async (ctx: any) => ctx.db.delete(workLogId));
 
     await expect(
-      client.mutation(api["work-logs"].mutations.update, {
+      client.mutation(api.workLogs.mutations.update, {
         workLogId,
         body: "Nope",
       }),
@@ -224,7 +224,7 @@ describe("remove", () => {
     testClient,
   }) => {
     const taskId = await seedTask(testClient, userId);
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "To delete",
       taskId,
     });
@@ -234,7 +234,7 @@ describe("remove", () => {
     );
     expect(records).toHaveLength(1);
 
-    await client.mutation(api["work-logs"].mutations.remove, {
+    await client.mutation(api.workLogs.mutations.remove, {
       workLogId: records[0]._id,
     });
 
@@ -263,7 +263,7 @@ describe("remove", () => {
     );
 
     await expect(
-      client.mutation(api["work-logs"].mutations.remove, { workLogId }),
+      client.mutation(api.workLogs.mutations.remove, { workLogId }),
     ).rejects.toThrow("You can only edit your own work logs");
   });
 
@@ -278,7 +278,7 @@ describe("remove", () => {
       });
     });
 
-    await testClient.mutation(api["work-logs"].mutations.remove, {
+    await testClient.mutation(api.workLogs.mutations.remove, {
       workLogId,
     });
 
@@ -294,7 +294,7 @@ describe("remove", () => {
     testClient,
   }) => {
     const taskId = await seedTask(testClient, userId);
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Temp",
       taskId,
     });
@@ -305,7 +305,7 @@ describe("remove", () => {
     await testClient.run(async (ctx: any) => ctx.db.delete(workLogId));
 
     await expect(
-      client.mutation(api["work-logs"].mutations.remove, { workLogId }),
+      client.mutation(api.workLogs.mutations.remove, { workLogId }),
     ).rejects.toThrow("Work log not found");
   });
 });

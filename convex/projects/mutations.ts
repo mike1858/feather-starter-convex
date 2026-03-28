@@ -7,7 +7,7 @@ import { zodToConvex } from "convex-helpers/server/zod4";
 import { asyncMap } from "convex-helpers";
 import { createProjectInput, projectStatus } from "../../src/shared/schemas/projects";
 import { ERRORS } from "../../src/shared/errors";
-import { logActivity } from "@cvx/activity-logs/helpers";
+import { logActivity } from "@cvx/activityLogs/helpers";
 
 const zMutation = zCustomMutation(mutation, NoOp);
 

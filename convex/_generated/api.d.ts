@@ -8,10 +8,11 @@
  * @module
  */
 
-import type * as activity_logs_helpers from "../activity-logs/helpers.js";
-import type * as activity_logs_queries from "../activity-logs/queries.js";
+import type * as activityLogs_helpers from "../activityLogs/helpers.js";
+import type * as activityLogs_queries from "../activityLogs/queries.js";
 import type * as auth from "../auth.js";
 import type * as auth_queries from "../auth/queries.js";
+import type * as config from "../config.js";
 import type * as devEmails_mutations from "../devEmails/mutations.js";
 import type * as devEmails_queries from "../devEmails/queries.js";
 import type * as email_index from "../email/index.js";
@@ -29,16 +30,16 @@ import type * as subtasks_mutations from "../subtasks/mutations.js";
 import type * as subtasks_queries from "../subtasks/queries.js";
 import type * as tasks_mutations from "../tasks/mutations.js";
 import type * as tasks_queries from "../tasks/queries.js";
-import type * as todos_mutations from "../todos/mutations.js";
-import type * as todos_queries from "../todos/queries.js";
+import type * as testing_clearAll from "../testing/clearAll.js";
 import type * as tickets_mutations from "../tickets/mutations.js";
 import type * as tickets_queries from "../tickets/queries.js";
-import type * as testing_clearAll from "../testing/clearAll.js";
+import type * as todos_mutations from "../todos/mutations.js";
+import type * as todos_queries from "../todos/queries.js";
 import type * as uploads_mutations from "../uploads/mutations.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
-import type * as work_logs_mutations from "../work-logs/mutations.js";
-import type * as work_logs_queries from "../work-logs/queries.js";
+import type * as workLogs_mutations from "../workLogs/mutations.js";
+import type * as workLogs_queries from "../workLogs/queries.js";
 
 import type {
   ApiFromModules,
@@ -47,10 +48,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "activity-logs/helpers": typeof activity_logs_helpers;
-  "activity-logs/queries": typeof activity_logs_queries;
+  "activityLogs/helpers": typeof activityLogs_helpers;
+  "activityLogs/queries": typeof activityLogs_queries;
   auth: typeof auth;
   "auth/queries": typeof auth_queries;
+  config: typeof config;
   "devEmails/mutations": typeof devEmails_mutations;
   "devEmails/queries": typeof devEmails_queries;
   "email/index": typeof email_index;
@@ -68,16 +70,16 @@ declare const fullApi: ApiFromModules<{
   "subtasks/queries": typeof subtasks_queries;
   "tasks/mutations": typeof tasks_mutations;
   "tasks/queries": typeof tasks_queries;
-  "todos/mutations": typeof todos_mutations;
-  "todos/queries": typeof todos_queries;
+  "testing/clearAll": typeof testing_clearAll;
   "tickets/mutations": typeof tickets_mutations;
   "tickets/queries": typeof tickets_queries;
-  "testing/clearAll": typeof testing_clearAll;
+  "todos/mutations": typeof todos_mutations;
+  "todos/queries": typeof todos_queries;
   "uploads/mutations": typeof uploads_mutations;
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;
-  "work-logs/mutations": typeof work_logs_mutations;
-  "work-logs/queries": typeof work_logs_queries;
+  "workLogs/mutations": typeof workLogs_mutations;
+  "workLogs/queries": typeof workLogs_queries;
 }>;
 
 /**

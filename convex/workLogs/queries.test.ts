@@ -37,7 +37,7 @@ describe("listByTask", () => {
     const taskId = await seedTask(testClient, userId);
 
     const result = await client.query(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       { taskId },
     );
 
@@ -52,19 +52,19 @@ describe("listByTask", () => {
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "First entry",
       timeMinutes: 30,
       taskId,
     });
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Second entry",
       timeMinutes: 60,
       taskId,
     });
 
     const result = await client.query(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       { taskId },
     );
 
@@ -78,19 +78,19 @@ describe("listByTask", () => {
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Entry 1",
       timeMinutes: 30,
       taskId,
     });
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Entry 2",
       timeMinutes: 60,
       taskId,
     });
 
     const result = await client.query(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       { taskId },
     );
 
@@ -104,18 +104,18 @@ describe("listByTask", () => {
   }) => {
     const taskId = await seedTask(testClient, userId);
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "With time",
       timeMinutes: 45,
       taskId,
     });
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Without time",
       taskId,
     });
 
     const result = await client.query(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       { taskId },
     );
 
@@ -129,7 +129,7 @@ describe("listByTask", () => {
     const taskId = await seedTask(testClient);
 
     const result = await testClient.query(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       { taskId },
     );
 

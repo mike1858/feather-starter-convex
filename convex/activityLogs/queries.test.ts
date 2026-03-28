@@ -49,7 +49,7 @@ async function insertActivityLog(
 describe("listByEntity", () => {
   test("returns empty array for entity with no logs", async ({ client }) => {
     const result = await client.query(
-      api["activity-logs"].queries.listByEntity,
+      api.activityLogs.queries.listByEntity,
       { entityType: "task", entityId: "nonexistent" },
     );
     expect(result).toEqual([]);
@@ -67,7 +67,7 @@ describe("listByEntity", () => {
     const taskId = tasks[0]._id;
 
     const result = await client.query(
-      api["activity-logs"].queries.listByEntity,
+      api.activityLogs.queries.listByEntity,
       { entityType: "task", entityId: taskId },
     );
     expect(result.length).toBeGreaterThanOrEqual(1);
@@ -80,7 +80,7 @@ describe("listByEntity", () => {
     await client.mutation(api.tasks.mutations.create, { title: "Task A" });
 
     const result = await client.query(
-      api["activity-logs"].queries.listByEntity,
+      api.activityLogs.queries.listByEntity,
       { entityType: "project", entityId: "nonexistent" },
     );
     expect(result).toEqual([]);
@@ -96,7 +96,7 @@ describe("listByEntity", () => {
     });
 
     const result = await testClient.query(
-      api["activity-logs"].queries.listByEntity,
+      api.activityLogs.queries.listByEntity,
       { entityType: "task", entityId: "some-id" },
     );
     expect(result).toEqual([]);
@@ -123,7 +123,7 @@ describe("taskTimeline", () => {
     );
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
     expect(timeline).toEqual([]);
@@ -142,7 +142,7 @@ describe("taskTimeline", () => {
     const taskId = tasks[0]._id;
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
     expect(timeline.length).toBeGreaterThanOrEqual(1);
@@ -174,7 +174,7 @@ describe("taskTimeline", () => {
     );
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
     const workLogEntries = timeline.filter(
@@ -197,7 +197,7 @@ describe("taskTimeline", () => {
     );
     const taskId = tasks[0]._id;
 
-    await client.mutation(api["work-logs"].mutations.create, {
+    await client.mutation(api.workLogs.mutations.create, {
       body: "Work entry",
       taskId,
     });
@@ -208,7 +208,7 @@ describe("taskTimeline", () => {
     });
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
 
@@ -252,7 +252,7 @@ describe("taskTimeline", () => {
     });
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
 
@@ -291,7 +291,7 @@ describe("taskTimeline", () => {
     });
 
     const timeline = await client.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
 
@@ -319,7 +319,7 @@ describe("taskTimeline", () => {
     });
 
     const timeline = await testClient.query(
-      api["activity-logs"].queries.taskTimeline,
+      api.activityLogs.queries.taskTimeline,
       { taskId },
     );
     expect(timeline).toEqual([]);

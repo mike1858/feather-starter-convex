@@ -2,7 +2,7 @@ import { mutation } from "@cvx/_generated/server";
 import { auth } from "@cvx/auth";
 import { v } from "convex/values";
 import { ERRORS } from "../../src/shared/errors";
-import { logActivity } from "@cvx/activity-logs/helpers";
+import { logActivity } from "@cvx/activityLogs/helpers";
 
 export const create = mutation({
   args: {

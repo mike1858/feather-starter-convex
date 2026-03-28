@@ -12,7 +12,7 @@ export function WorkLogForm({ taskId }: { taskId: Id<"tasks"> }) {
   const [timeInput, setTimeInput] = useState("");
 
   const { mutateAsync: createWorkLog } = useMutation({
-    mutationFn: useConvexMutation(api["work-logs"].mutations.create),
+    mutationFn: useConvexMutation(api.workLogs.mutations.create),
   });
 
   const handleSubmit = async () => {

@@ -20,14 +20,14 @@ function relativeTime(timestamp: number): string {
 
 export function WorkLogList({ taskId }: { taskId: Id<"tasks"> }) {
   const { data } = useQuery(
-    convexQuery(api["work-logs"].queries.listByTask, { taskId }),
+    convexQuery(api.workLogs.queries.listByTask, { taskId }),
   );
   const { data: currentUser } = useQuery(
     convexQuery(api.users.queries.getCurrentUser, {}),
   );
 
   const { mutateAsync: removeWorkLog } = useMutation({
-    mutationFn: useConvexMutation(api["work-logs"].mutations.remove),
+    mutationFn: useConvexMutation(api.workLogs.mutations.remove),
   });
 
   const entries = data?.entries ?? [];

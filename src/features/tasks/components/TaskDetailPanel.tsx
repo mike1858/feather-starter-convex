@@ -46,7 +46,7 @@ export function TaskDetailPanel({
 
   const { data: workLogData } = useQuery({
     ...convexQuery(
-      api["work-logs"].queries.listByTask,
+      api.workLogs.queries.listByTask,
       taskId ? { taskId } : "skip",
     ),
     enabled: !!taskId,
