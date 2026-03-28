@@ -106,6 +106,16 @@ Plans:
 - [x] 03.2-05-PLAN.md — Plopfile rewrite + auto-wiring: modular plopfile, custom Plop actions, all generator definitions (gen:feature, gen:schema, gen:backend, gen:frontend)
 - [x] 03.2-06-PLAN.md — Validation + tasks alignment: generate test entity, verify pipeline, retroactive tasks.gen.yaml, human verification
 
+### Phase 03.2.1: Generator Test Philosophy Upgrade (INSERTED)
+
+**Goal:** Upgrade generator test templates to produce tests following the feather-testing-convex testing philosophy (integration-first, MECE, property-based happy path, edge case unit tests). Re-run generators on example apps (todos, tickets, contacts) and verify output. Compare with Phase 7 hand-written tests and close gaps. Target: generated tests are indistinguishable from senior developer tests.
+**Requirements**: TBD
+**Depends on:** Phase 03.2
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 03.2.1 to break down)
+
 ### Phase 03.1: Verification Bug Fixes (INSERTED)
 
 **Goal:** Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish
@@ -223,7 +233,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 **Design doc:** `.planning/design/FEATHER-DX-ARCHITECTURE.md`
 **Research status:** Complete — Frappe, Glide, WordPress, Laravel patterns studied; 8-dimension framework defined; user's prior thinking (Gemini notes) integrated
 **Requirements:** TBD
-**Plans:** 6 plans in 3 waves
+**Plans:** 0/6 plans executed
 
 Plans:
 - [ ] 999.1-01-PLAN.md — Feature YAML schema: Zod-validated feather.yaml format (Wave 1)

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Phase complete — ready for verification
-last_updated: "2026-03-28T07:24:24.163Z"
+status: Ready to execute
+last_updated: "2026-03-28T14:48:43.792Z"
 progress:
-  total_phases: 9
+  total_phases: 11
   completed_phases: 9
-  total_plans: 24
+  total_plans: 30
   completed_plans: 24
 ---
 
@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 07 — mece-test-rewrite
+**Current focus:** Phase 999.1 — feather-dx-architecture
 
 ## Current Position
 
-Phase: 07 (mece-test-rewrite) — EXECUTING
-Plan: 3 of 3
+Phase: 999.1 (feather-dx-architecture) — EXECUTING
+Plan: 2 of 6
 
 ## Performance Metrics
 
@@ -112,6 +112,7 @@ Recent:
 - Plan 02.1-01 completed: core is billing-free, all tests pass at 100%
 - Plan 02.1-02 completed: plugin/billing branch created, 3 existing plugins rebased onto billing-free main
 - Phase 03.2 inserted after Phase 3: CRUD Generator Upgrade (URGENT) -- Generators produce TODO stubs, not working CRUD; upgrade to Phoenix gen.live / Rails scaffold level before building more features
+- Phase 03.2.1 inserted after Phase 03.2: Generator Test Philosophy Upgrade (URGENT) -- Generator test templates produce shallow "renders heading" tests, not the feather-testing-convex philosophy (integration-first, MECE, property-based). Fix templates so generated tests are indistinguishable from senior developer tests.
 
 ### Blockers/Concerns
 
