@@ -178,14 +178,123 @@ PHASE 3: Validation
 | Visibility conditions | Show/hide any component based on data | Generate conditional rendering from Access Control declarations |
 | Escape hatch | Explicit ceiling with way out | Every generated line is editable — no ceiling |
 
-## 6. Open Questions
+## 6. Excel-to-System Pipeline
+
+### 6.1 Target Domain
+
+Primary use cases are ERP-like transactional systems:
+- Order management, POS, inventory
+- Leave management, payroll
+- Help desk / ticketing (Freshservice/Zendesk-like)
+- Learning management systems
+- Budget tracking, financial reporting
+
+Common pattern: user has Excel master data → needs a working system quickly.
+
+### 6.2 Import Workflow (5 steps)
+
+1. **User provides Excel** (one sheet per entity, or flat data)
+2. **LLM analyzes structure**: infers field types, classifies entities, detects relationships
+   - Low cardinality values → Lookup/enum (departments, statuses)
+   - Name + personal data → Master WHO (employees, customers)
+   - Name + description → Reference WHAT (products, categories)
+   - Dates + references + amounts → Transaction (orders, movements)
+3. **User confirms/adjusts** (rename fields, accept/reject normalization, fix types)
+4. **Confirmed analysis → feather.yaml** with entity types, relationships, seed data
+5. **Generated seed script** imports data in dependency order (lookups → masters → transactions)
+
+Research: `docs/research-excel-to-system-workflows.md`
+
+### 6.3 Schema Reconciliation — The #1 Differentiator
+
+**No existing tool handles Excel schema changes gracefully.** Every tool treats column renames as deletion + addition.
+
+**Three-phase reconciliation:**
+
+1. **DIFF** — Detect changes using:
+   - Jaro-Winkler string similarity (50% weight)
+   - Position similarity (20% weight)
+   - Data fingerprinting on sample rows (30% weight)
+
+2. **CONFIRM** — Interactive diff UI:
+   - Renames with confidence scores ("Emp Name" → "Employee Name", 93% match)
+   - New columns (add to system)
+   - Removed columns (archive/delete/keep hidden)
+   - Type changes (convert/keep/new field)
+   - Data changes (modified rows, new rows, system-only rows preserved)
+
+3. **MIGRATE** — Atomic schema + data changes with audit trail
+
+**Persistent column mapping** (the key data structure):
+```
+Excel column name → system field ID (stable, survives renames on both sides)
++ import history tracking all renames over time
+```
+
+**Tool comparison:**
+
+| Tool | Col Rename | Col Add | Col Delete | Data Preservation |
+|------|-----------|---------|-----------|-------------------|
+| Grist | breaks | breaks (dropped) | graceful | good |
+| Airtable | manual | breaks (perms) | graceful | good |
+| NocoDB | manual | manual | graceful | fair |
+| Frappe | manual | manual | graceful | poor (child delete) |
+| Odoo | manual | manual | graceful | good |
+| Power Query | breaks | graceful* | breaks | none |
+| dbt | breaks (add+drop) | graceful | graceful | good |
+| **Feather (target)** | **fuzzy detect** | **auto-detect** | **confirm first** | **always preserve** |
+
+Research: Schema evolution agent output (not yet in a file — to be written)
+
+## 7. Generator Stress Test Results
+
+Three agents tried to build real features with our current generators.
+
+### 7.1 Results Summary
+
+| Test | Generator Coverage | Compile Errors | Cross-Entity Support |
+|------|-------------------|----------------|---------------------|
+| Advanced Todo | ~65% | 6 blocking bugs | None (kanban = manual) |
+| Simple CRM | ~75% | 9 bugs | None (pipeline, activity log = manual) |
+| Inventory | ~15% (hit old gen) | 27 type errors | None |
+
+### 7.2 Consistent Bugs Found
+
+1. Schema collisions — two features with same-named enums collide
+2. `belongs_to` FK columns never added to schema table definition
+3. Branching transitions broken by `currentIndex + 1` logic
+4. FilterBar generates duplicate tabs
+5. Route template uses wrong auth pattern for this codebase
+6. No cross-entity features (pipeline, kanban, detail-with-related, activity logs)
+
+### 7.3 The #1 Gap for ERP Systems
+
+Cross-entity features are exactly what transactional systems need most:
+- Orders showing line items
+- Contacts showing deals
+- Products showing stock movements
+- Tickets showing activity history
+
+The generator handles individual entities at ~65-75% coverage but has **zero support for relationship-level UI**.
+
+### 7.4 Percentage Breakdown (averaged)
+
+- Auto-generated: ~50% (schema, CRUD, basic views, tests, wiring)
+- Declarable (could be generated with better YAML): ~25% (status flow, filters, grouped views, cascade rules)
+- Truly custom: ~25% (business rules, cross-entity views, domain-specific logic)
+
+Reports: `.planning/design/GENERATOR-TEST-{TODO,CRM,INVENTORY}.md`
+
+## 8. Open Questions
 
 1. **YAML schema format** — What does `feather.yaml` actually look like? Need to design the full schema.
 2. **Generator implementation** — Extend existing Plop.js generators or build a new generation pipeline?
-3. **Telemetry** — How to collect what users build (custom/ directory patterns) and surface errors without requiring accounts?
-4. **Bundle distribution** — Registry? npm packages? Git-based? How do users discover and install bundles?
-5. **Safe upstream updates** — Regeneration strategy: how to handle conflicts when user has modified generated code?
-6. **PR #8 integration** — Zaseem's setup script is the v1 of `feather start project`. How does it evolve?
+3. **Schema reconciliation engine** — How to implement the diff/confirm/migrate workflow? Standalone tool or integrated into `feather` CLI?
+4. **Telemetry** — How to collect what users build (custom/ directory patterns) and surface errors without requiring accounts?
+5. **Bundle distribution** — Registry? npm packages? Git-based? How do users discover and install bundles?
+6. **Safe upstream updates** — Regeneration strategy: how to handle conflicts when user has modified generated code?
+7. **PR #8 integration** — Zaseem's setup script is the v1 of `feather start project`. How does it evolve?
+8. **Generator bug fixes** — 6+ blocking bugs found in stress tests need fixing before building on top
 
 ## 7. Relationship to PR #8
 
