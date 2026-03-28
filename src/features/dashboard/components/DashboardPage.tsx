@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/misc.js";
 import { buttonVariants } from "@/ui/button-util";
+import siteConfig from "~/site.config";
 
 export function DashboardPage() {
   const { t } = useTranslation("dashboard");
@@ -33,7 +34,7 @@ export function DashboardPage() {
                     {t("title")}
                   </p>
                   <p className="text-center text-base font-normal text-primary/60">
-                    {t("description")}
+                    {t("description", { appName: siteConfig.siteTitle })}
                   </p>
                   <span className="hidden select-none items-center rounded-full bg-green-500/5 px-3 py-1 text-xs font-medium tracking-tight text-green-700 ring-1 ring-inset ring-green-600/20 backdrop-blur-md dark:bg-green-900/40 dark:text-green-100 md:flex">
                     TIP: Try changing the language!

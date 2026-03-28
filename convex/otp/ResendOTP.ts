@@ -3,6 +3,7 @@ import { alphabet, generateRandomString } from "oslo/crypto";
 import { Resend as ResendAPI } from "resend";
 import { VerificationCodeEmail } from "./VerificationCodeEmail";
 import { AUTH_EMAIL, AUTH_RESEND_KEY } from "@cvx/env";
+import { APP_NAME } from "@cvx/config";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@cvx/_generated/api";
 
@@ -32,7 +33,7 @@ export const ResendOTP = Email({
     token,
     expires,
   }) {
-    const subject = "Sign in to Feather Starter";
+    const subject = `Sign in to ${APP_NAME}`;
     const html = `<p>Your verification code is: <strong>${token}</strong></p><p>Expires: ${expires.toISOString()}</p>`;
 
     // Store in dev mailbox when enabled
@@ -47,7 +48,7 @@ export const ResendOTP = Email({
 
     const resend = new ResendAPI(provider.apiKey);
     const { error } = await resend.emails.send({
-      from: AUTH_EMAIL ?? "Feather Starter <onboarding@resend.dev>",
+      from: AUTH_EMAIL ?? `${APP_NAME} <onboarding@resend.dev>`,
       to: [email],
       subject,
       react: VerificationCodeEmail({ code: token, expires }),

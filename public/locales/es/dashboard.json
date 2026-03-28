@@ -1,4 +1,4 @@
 {
   "title": "Crea tu Aplicacion",
-  "description": "Bienvenido a Feather Starter. Explora el panel y comienza a construir tu aplicacion."
+  "description": "Bienvenido a {{appName}}. Explora el panel y comienza a construir tu aplicacion."
 }

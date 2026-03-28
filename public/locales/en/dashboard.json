@@ -1,4 +1,4 @@
 {
   "title": "Create your App",
-  "description": "Welcome to Feather Starter. Explore the dashboard and start building your app."
+  "description": "Welcome to {{appName}}. Explore the dashboard and start building your app."
 }

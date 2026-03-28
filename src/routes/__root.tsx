@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 import { createPortal } from "react-dom";
+import siteConfig from "~/site.config";
 
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
@@ -36,6 +37,6 @@ export const Route = createRootRouteWithContext<{
 }>()({
   component: RootComponent,
   head: () => ({
-    meta: [{ title: "Feather Starter" }],
+    meta: [{ title: siteConfig.siteTitle }],
   }),
 });

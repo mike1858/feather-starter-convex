@@ -3,6 +3,7 @@ import { generateRandomString, type RandomReader } from "@oslojs/crypto/random";
 import { Resend as ResendAPI } from "resend";
 import { PasswordResetEmail } from "./PasswordResetEmail";
 import { AUTH_EMAIL, AUTH_RESEND_KEY } from "@cvx/env";
+import { APP_NAME } from "@cvx/config";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@cvx/_generated/api";
 
@@ -55,7 +56,7 @@ export const ResendOTPPasswordReset = Email({
 
     const resend = new ResendAPI(provider.apiKey);
     const { error } = await resend.emails.send({
-      from: AUTH_EMAIL ?? "Feather Starter <onboarding@resend.dev>",
+      from: AUTH_EMAIL ?? `${APP_NAME} <onboarding@resend.dev>`,
       to: [email],
       subject,
       react: PasswordResetEmail({ code: token, expires }),

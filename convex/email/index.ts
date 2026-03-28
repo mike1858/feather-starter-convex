@@ -1,4 +1,5 @@
 import { AUTH_EMAIL, AUTH_RESEND_KEY } from "@cvx/env";
+import { APP_NAME } from "@cvx/config";
 import { ERRORS } from "~/errors";
 import { z } from "zod";
 
@@ -31,7 +32,7 @@ export async function sendEmail(options: SendEmailOptions) {
     throw new Error(`Resend - ${ERRORS.common.ENVS_NOT_INITIALIZED}`);
   }
 
-  const from = AUTH_EMAIL ?? "Feather Starter <onboarding@resend.dev>";
+  const from = AUTH_EMAIL ?? `${APP_NAME} <onboarding@resend.dev>`;
   const email = { from, ...options };
 
   const response = await fetch("https://api.resend.com/emails", {

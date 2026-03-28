@@ -14,6 +14,7 @@ import { Route as DashboardRoute } from "@/routes/_app/_auth/dashboard/_layout.i
 import { useQuery } from "@tanstack/react-query";
 import { convexQuery, useConvexAuth } from "@convex-dev/react-query";
 import { api } from "@cvx/_generated/api";
+import siteConfig from "~/site.config";
 
 export const Route = createFileRoute("/_app/login/_layout/")({
   component: Login,
@@ -81,7 +82,7 @@ function MainLoginForm({
     <div className="mx-auto flex h-full w-full max-w-96 flex-col items-center justify-center gap-6">
       <div className="mb-2 flex flex-col gap-2">
         <h3 className="text-center text-2xl font-medium text-primary">
-          Continue to Feather Starter
+          Continue to {siteConfig.siteTitle}
         </h3>
         <p className="text-center text-base font-normal text-primary/60">
           Welcome back! Please log in to continue.
