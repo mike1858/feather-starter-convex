@@ -1,4 +1,4 @@
-name: activity-logs
+name: activityLogs
 label: Activity Log
 labelPlural: Activity Logs
 
@@ -7,9 +7,15 @@ fields:
     type: enum
     values: [task, project, subtask]
     required: true
+  entityId:
+    type: string
+    required: true
   action:
     type: enum
     values: [created, status_changed, assigned, unassigned, edited, deleted, completed, promoted]
+    required: true
+  actor:
+    type: string
     required: true
   metadata:
     type: text
@@ -25,23 +31,22 @@ behaviors:
   immutable: true
 
 access:
-  scope: authenticated
+  scope: custom
   permissions:
-    create: authenticated
+    create: custom
     read: authenticated
-    update: false
-    delete: false
+    update: custom
+    delete: custom
 
 operations:
-  create: true
+  create: false
   read: true
   update: false
   delete: false
 
 views:
-  default:
-    defaultView: list
-    enabledViews: [list]
+  defaultView: list
+  enabledViews: [list]
 
 indexes:
   - name: by_entity

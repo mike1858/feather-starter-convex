@@ -1,0 +1,65 @@
+name: projects
+label: Project
+labelPlural: Projects
+
+fields:
+  name:
+    type: string
+    required: true
+    max: 100
+  status:
+    type: enum
+    values: [active, on_hold, completed, archived]
+    default: active
+    filterable: true
+
+timestamps: false
+
+behaviors:
+  assignable: false
+  orderable: false
+  softDelete: false
+  auditTrail: true
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+
+views:
+  defaultView: list
+  enabledViews: [list, card]
+  filteredViews:
+    - name: by-status
+      label: By Status
+      filter: { status: $param }
+      navEntry: false
+
+relationships:
+  tasks:
+    type: has_many
+    target: tasks
+    foreignKey: projectId
+    cascade: true
+
+detailView:
+  layout: panels
+  relatedRecords:
+    - source: tasks
+      display: table
+      inline: true
+      filters: [status, priority, assignee]
+
+derivedData:
+  taskCount:
+    type: count
+    source: tasks
+
+indexes:
+  - name: by_status
+    fields: [status]
+  - name: by_creator
+    fields: [creatorId]

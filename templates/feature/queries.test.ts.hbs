@@ -1,3 +1,29 @@
+// Test Matrix: {{name}} queries
+// | # | Query     | State                        | What to verify                                   |
+// |---|-----------|------------------------------|--------------------------------------------------|
+// | 1 | list      | with data                    | returns user's {{labelPlural}}                   |
+// | 2 | list      | empty                        | returns empty array                              |
+{{#ifEq access.scope "owner"}}
+// | 3 | list      | unauthenticated              | returns empty array                              |
+{{/ifEq}}
+{{#ifEq access.scope "team"}}
+// | 3 | list      | unauthenticated              | returns empty array                              |
+{{/ifEq}}
+{{#if behaviors.orderable}}
+// | 4 | list      | ordering                     | sorted by position ascending                     |
+{{/if}}
+// | 5 | get       | valid record                 | returns full record with expected fields          |
+{{#ifEq access.scope "public"}}
+{{else}}
+// | 6 | get       | unauthenticated              | returns null                                     |
+{{/ifEq}}
+{{#if views.filteredViews}}
+{{#each views.filteredViews}}
+// |   | {{camelCase this.name}} | with matching data           | returns only matching records            |
+// |   | {{camelCase this.name}} | unauthenticated              | returns empty array                      |
+{{/each}}
+{{/if}}
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
@@ -9,12 +35,10 @@ import { test } from "../test.setup";
 
 // @generated-start test-list
 describe("list", () => {
-  test("returns {{labelPlural}} for authenticated user", async ({
+  test("returns {{lowerCase labelPlural}} for authenticated user", async ({
     client,
-    userId,
     testClient,
   }) => {
-    // Create 2 records via the create mutation
     await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
@@ -66,7 +90,7 @@ describe("list", () => {
     expect(records).toHaveLength(2);
   });
 
-  test("returns empty array when no {{labelPlural}}", async ({
+  test("returns empty array when no {{lowerCase labelPlural}}", async ({
     client,
   }) => {
     const records = await client.query({{{apiPath name}}}.queries.list, {});
@@ -74,20 +98,20 @@ describe("list", () => {
   });
 
 {{#ifEq access.scope "owner"}}
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty array when unauthenticated", async ({ testClient }) => {
     const records = await testClient.query({{{apiPath name}}}.queries.list, {});
     expect(records).toEqual([]);
   });
 {{/ifEq}}
 {{#ifEq access.scope "team"}}
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty array when unauthenticated", async ({ testClient }) => {
     const records = await testClient.query({{{apiPath name}}}.queries.list, {});
     expect(records).toEqual([]);
   });
 {{/ifEq}}
 
 {{#if behaviors.orderable}}
-  test("returns records sorted by position ascending", async ({
+  test("sorts by position ascending", async ({
     client,
     userId,
     testClient,
@@ -111,7 +135,7 @@ describe("list", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
+        userId: userId,
 {{#if behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
@@ -135,7 +159,7 @@ describe("list", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
+        userId: userId,
 {{#if behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
@@ -160,8 +184,9 @@ describe("list", () => {
 
 // @generated-start test-get
 describe("get", () => {
-  test("returns a single {{label}}", async ({
+  test("returns {{lowerCase label}} by ID with expected fields", async ({
     client,
+    userId,
     testClient,
   }) => {
     await client.mutation({{{apiPath name}}}.mutations.create, {
@@ -206,6 +231,7 @@ describe("get", () => {
 {{/ifEq}}
 {{/if}}
 {{/each}}
+    expect(record!.userId).toBe(userId);
   });
 
 {{#ifEq access.scope "public"}}
@@ -231,7 +257,7 @@ describe("get", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
+        userId: userId,
 {{#if behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
@@ -254,47 +280,41 @@ describe("get", () => {
 {{#each views.filteredViews}}
 // @generated-start test-{{camelCase this.name}}
 describe("{{camelCase this.name}}", () => {
-  test("returns only matching {{../labelPlural}}", async ({
+  test("returns only matching {{../lowerCase ../labelPlural}}", async ({
     client,
     userId,
     testClient,
   }) => {
-    // Create matching and non-matching records via direct DB insert
-    await testClient.run(async (ctx: any) => {
-      await ctx.db.insert("{{../name}}", {
+    // Create matching record via mutation
+    await client.mutation({{{apiPath ../name}}}.mutations.create, {
 {{#each ../fields}}
+{{#if this.required}}
 {{#ifEq this.type "string"}}
-        {{@key}}: "Matching",
+      {{@key}}: "Matching",
 {{/ifEq}}
 {{#ifEq this.type "text"}}
-        {{@key}}: "Matching content",
-{{/ifEq}}
-{{#ifEq this.type "boolean"}}
-        {{@key}}: false,
+      {{@key}}: "Matching content",
 {{/ifEq}}
 {{#ifEq this.type "number"}}
-        {{@key}}: 1,
+      {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+      {{@key}}: false,
 {{/ifEq}}
 {{#ifEq this.type "enum"}}
-        {{@key}}: "{{this.values.[0]}}",
+{{#unless this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/unless}}
 {{/ifEq}}
+{{/if}}
 {{/each}}
-        creatorId: userId,
-{{#if ../behaviors.assignable}}
-        assigneeId: userId,
-{{/if}}
-{{#if ../behaviors.orderable}}
-        position: 1,
-{{/if}}
-      });
     });
 
     const records = await client.query({{{apiPath ../name}}}.queries.{{camelCase this.name}}, {});
-    expect(records).toBeDefined();
-    expect(Array.isArray(records)).toBe(true);
+    expect(records.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("returns empty when unauthenticated", async ({ testClient }) => {
+  test("returns empty array when unauthenticated", async ({ testClient }) => {
     const records = await testClient.query({{{apiPath ../name}}}.queries.{{camelCase this.name}}, {});
     expect(records).toEqual([]);
   });
@@ -302,3 +322,6 @@ describe("{{camelCase this.name}}", () => {
 // @generated-end test-{{camelCase this.name}}
 {{/each}}
 {{/if}}
+
+// @custom-start tests
+// @custom-end tests

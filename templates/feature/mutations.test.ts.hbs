@@ -1,3 +1,44 @@
+// Test Matrix: {{name}} mutations
+// | # | Mutation         | State                    | What to verify                                               |
+// |---|------------------|--------------------------|--------------------------------------------------------------|
+{{#if operations.create}}
+// | 1 | create           | with defaults            | required fields, defaults, userId set                        |
+// | 2 | create           | with all optional fields | optional fields persisted                                    |
+// | 3 | create           | unauthenticated          | no record inserted                                           |
+{{/if}}
+{{#if operations.update}}
+// | 4 | update           | single field             | field changed, others untouched                              |
+// | 5 | update           | record not found         | throws "not found"                                           |
+// | 6 | update           | unauthenticated          | no change                                                    |
+{{/if}}
+{{#if operations.delete}}
+{{#if behaviors.softDelete}}
+// | 7 | remove           | existing record          | deletedAt set                                                |
+{{else}}
+// | 7 | remove           | existing record          | record deleted                                               |
+{{/if}}
+// | 8 | remove           | unauthenticated          | record not deleted                                           |
+{{/if}}
+{{#each fields}}
+{{#if this.transitions}}
+// | 9 | update{{pascalCase @key}} | valid transition         | {{@key}} changed                                    |
+// |10 | update{{pascalCase @key}} | invalid transition       | throws "Invalid status transition"                  |
+// |11 | update{{pascalCase @key}} | record not found         | throws "not found"                                  |
+// |12 | update{{pascalCase @key}} | unauthenticated          | {{@key}} unchanged                                  |
+{{/if}}
+{{/each}}
+{{#if behaviors.assignable}}
+// |13 | assign           | to another user          | assigneeId set, visibility=shared                            |
+// |14 | assign           | to creator (self)        | assigneeId set, visibility stays private                     |
+// |15 | assign           | unassign                 | assigneeId cleared, visibility=shared                        |
+// |16 | assign           | record not found         | throws "not found"                                           |
+// |17 | assign           | unauthenticated          | no change                                                    |
+{{/if}}
+{{#if behaviors.orderable}}
+// |18 | reorder          | valid position           | position updated                                             |
+// |19 | reorder          | unauthenticated          | position unchanged                                           |
+{{/if}}
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
@@ -8,8 +49,9 @@ import { test } from "../test.setup";
 // @custom-end imports
 
 // @generated-start test-create
+{{#if operations.create}}
 describe("create", () => {
-  test("creates a {{label}} with default values", async ({
+  test("creates {{lowerCase label}} with correct defaults and userId", async ({
     client,
     userId,
     testClient,
@@ -68,7 +110,7 @@ describe("create", () => {
 {{/unless}}
 {{/ifEq}}
 {{/each}}
-    expect(records[0].creatorId).toBe(userId);
+    expect(records[0].userId).toBe(userId);
 {{#if behaviors.assignable}}
     expect(records[0].assigneeId).toBe(userId);
 {{/if}}
@@ -77,7 +119,7 @@ describe("create", () => {
 {{/if}}
   });
 
-  test("creates a {{label}} with all fields specified", async ({
+  test("persists all optional fields when specified", async ({
     client,
     testClient,
   }) => {
@@ -123,7 +165,7 @@ describe("create", () => {
 {{/each}}
   });
 
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     await testClient.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
@@ -154,63 +196,13 @@ describe("create", () => {
     expect(records).toHaveLength(0);
   });
 });
+{{/if}}
 // @generated-end test-create
 
 // @generated-start test-update
+{{#if operations.update}}
 describe("update", () => {
-  test("does nothing when unauthenticated", async ({ testClient }) => {
-    const recordId = await testClient.run(async (ctx: any) => {
-      const userId = await ctx.db.insert("users", { name: "Seed" });
-      return ctx.db.insert("{{name}}", {
-{{#each fields}}
-{{#ifEq this.type "string"}}
-        {{@key}}: "Seed",
-{{/ifEq}}
-{{#ifEq this.type "text"}}
-        {{@key}}: "Seed content",
-{{/ifEq}}
-{{#ifEq this.type "boolean"}}
-        {{@key}}: false,
-{{/ifEq}}
-{{#ifEq this.type "number"}}
-        {{@key}}: 0,
-{{/ifEq}}
-{{#ifEq this.type "enum"}}
-        {{@key}}: "{{this.values.[0]}}",
-{{/ifEq}}
-{{/each}}
-        creatorId: userId,
-{{#if behaviors.assignable}}
-        assigneeId: userId,
-{{/if}}
-{{#if behaviors.orderable}}
-        position: 1,
-{{/if}}
-      });
-    });
-
-    await testClient.mutation({{{apiPath name}}}.mutations.update, {
-      {{camelCase name}}Id: recordId,
-{{#each fields}}
-{{#ifEq this.type "string"}}
-{{#if @first}}
-      {{@key}}: "Should not change",
-{{/if}}
-{{/ifEq}}
-{{/each}}
-    });
-
-    const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
-{{#each fields}}
-{{#ifEq this.type "string"}}
-{{#if @first}}
-    expect(record.{{@key}}).toBe("Seed");
-{{/if}}
-{{/ifEq}}
-{{/each}}
-  });
-
-  test("updates only specified fields", async ({
+  test("updates only specified fields, leaves others untouched", async ({
     client,
     testClient,
   }) => {
@@ -266,7 +258,10 @@ describe("update", () => {
 {{/each}}
   });
 
-  test("throws when {{label}} not found", async ({ client, testClient }) => {
+  test("throws '{{label}} not found' for deleted record", async ({
+    client,
+    testClient,
+  }) => {
     await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
@@ -309,12 +304,8 @@ describe("update", () => {
       }),
     ).rejects.toThrow("not found");
   });
-});
-// @generated-end test-update
 
-// @generated-start test-remove
-describe("remove", () => {
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const recordId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
       return ctx.db.insert("{{name}}", {
@@ -335,7 +326,7 @@ describe("remove", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
+        userId: userId,
 {{#if behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
@@ -345,14 +336,38 @@ describe("remove", () => {
       });
     });
 
-    await testClient.mutation({{{apiPath name}}}.mutations.remove, { {{camelCase name}}Id: recordId });
+    await testClient.mutation({{{apiPath name}}}.mutations.update, {
+      {{camelCase name}}Id: recordId,
+{{#each fields}}
+{{#ifEq this.type "string"}}
+{{#if @first}}
+      {{@key}}: "Should not change",
+{{/if}}
+{{/ifEq}}
+{{/each}}
+    });
 
     const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
-    expect(record).not.toBeNull();
+{{#each fields}}
+{{#ifEq this.type "string"}}
+{{#if @first}}
+    expect(record.{{@key}}).toBe("Seed");
+{{/if}}
+{{/ifEq}}
+{{/each}}
   });
+});
+{{/if}}
+// @generated-end test-update
 
+// @generated-start test-remove
+{{#if operations.delete}}
+describe("remove", () => {
 {{#if behaviors.softDelete}}
-  test("soft deletes a {{label}}", async ({ client, testClient }) => {
+  test("soft deletes {{lowerCase label}} (sets deletedAt)", async ({
+    client,
+    testClient,
+  }) => {
     await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
@@ -393,7 +408,7 @@ describe("remove", () => {
     expect(updated.deletedAt).toBeTypeOf("number");
   });
 {{else}}
-  test("deletes a {{label}}", async ({ client, testClient }) => {
+  test("deletes {{lowerCase label}}", async ({ client, testClient }) => {
     await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
 {{#if this.required}}
@@ -433,19 +448,12 @@ describe("remove", () => {
     expect(remaining).toHaveLength(0);
   });
 {{/if}}
-});
-// @generated-end test-remove
 
-{{#each fields}}
-{{#ifEq this.type "enum"}}
-{{#if this.transitions}}
-// @generated-start test-updateStatus
-describe("update{{pascalCase @key}}", () => {
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const recordId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
-      return ctx.db.insert("{{@root.name}}", {
-{{#each @root.fields}}
+      return ctx.db.insert("{{name}}", {
+{{#each fields}}
 {{#ifEq this.type "string"}}
         {{@key}}: "Seed",
 {{/ifEq}}
@@ -462,63 +470,30 @@ describe("update{{pascalCase @key}}", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
-{{#if @root.behaviors.assignable}}
+        userId: userId,
+{{#if behaviors.assignable}}
         assigneeId: userId,
 {{/if}}
-{{#if @root.behaviors.orderable}}
+{{#if behaviors.orderable}}
         position: 1,
 {{/if}}
       });
     });
 
-    await testClient.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
-      {{camelCase @root.name}}Id: recordId,
-      {{@key}}: "{{this.values.[1]}}",
-    });
+    await testClient.mutation({{{apiPath name}}}.mutations.remove, { {{camelCase name}}Id: recordId });
 
     const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
-    expect(record.{{@key}}).toBe("{{this.values.[0]}}");
+    expect(record).not.toBeNull();
   });
-
-  test("throws when {{@root.label}} not found", async ({ client, testClient }) => {
-    await client.mutation({{{apiPath @root.name}}}.mutations.create, {
-{{#each @root.fields}}
-{{#if this.required}}
-{{#ifEq this.type "string"}}
-      {{@key}}: "Temp",
-{{/ifEq}}
-{{#ifEq this.type "text"}}
-      {{@key}}: "Temp",
-{{/ifEq}}
-{{#ifEq this.type "number"}}
-      {{@key}}: 1,
-{{/ifEq}}
-{{#ifEq this.type "boolean"}}
-      {{@key}}: true,
-{{/ifEq}}
-{{#ifEq this.type "enum"}}
-{{#unless this.transitions}}
-      {{@key}}: "{{this.values.[0]}}",
-{{/unless}}
-{{/ifEq}}
+});
 {{/if}}
-{{/each}}
-    });
-    const records = await testClient.run(async (ctx: any) =>
-      ctx.db.query("{{@root.name}}").collect(),
-    );
-    const recordId = records[0]._id;
-    await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
+// @generated-end test-remove
 
-    await expect(
-      client.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
-        {{camelCase @root.name}}Id: recordId,
-        {{@key}}: "{{this.values.[1]}}",
-      }),
-    ).rejects.toThrow("not found");
-  });
-
+{{#each fields}}
+{{#ifEq this.type "enum"}}
+{{#if this.transitions}}
+// @generated-start test-updateStatus
+describe("update{{pascalCase @key}}", () => {
 {{#each this.transitions}}
   test("advances {{@key}} to {{#each this}}{{this}}{{#unless @last}} then {{/unless}}{{/each}}", async ({ client, testClient }) => {
     await client.mutation({{{apiPath @root.name}}}.mutations.create, {
@@ -602,60 +577,10 @@ describe("update{{pascalCase @key}}", () => {
       }),
     ).rejects.toThrow("Invalid status transition");
   });
-});
-// @generated-end test-updateStatus
-{{/if}}
-{{/ifEq}}
-{{/each}}
 
-{{#if behaviors.assignable}}
-// @generated-start test-assign
-describe("assign", () => {
-  test("does nothing when unauthenticated", async ({ testClient }) => {
-    const recordId = await testClient.run(async (ctx: any) => {
-      const userId = await ctx.db.insert("users", { name: "Seed" });
-      return ctx.db.insert("{{name}}", {
-{{#each fields}}
-{{#ifEq this.type "string"}}
-        {{@key}}: "Seed",
-{{/ifEq}}
-{{#ifEq this.type "text"}}
-        {{@key}}: "Seed content",
-{{/ifEq}}
-{{#ifEq this.type "boolean"}}
-        {{@key}}: false,
-{{/ifEq}}
-{{#ifEq this.type "number"}}
-        {{@key}}: 0,
-{{/ifEq}}
-{{#ifEq this.type "enum"}}
-        {{@key}}: "{{this.values.[0]}}",
-{{/ifEq}}
-{{/each}}
-        creatorId: userId,
-        assigneeId: userId,
-{{#if behaviors.orderable}}
-        position: 1,
-{{/if}}
-      });
-    });
-
-    const otherUserId = await testClient.run(async (ctx: any) =>
-      ctx.db.insert("users", { name: "Other" }),
-    );
-
-    await testClient.mutation({{{apiPath name}}}.mutations.assign, {
-      {{camelCase name}}Id: recordId,
-      assigneeId: otherUserId,
-    });
-
-    const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
-    expect(record.visibility).toBe("private");
-  });
-
-  test("throws when {{label}} not found", async ({ client, testClient }) => {
-    await client.mutation({{{apiPath name}}}.mutations.create, {
-{{#each fields}}
+  test("throws '{{@root.label}} not found' for deleted record", async ({ client, testClient }) => {
+    await client.mutation({{{apiPath @root.name}}}.mutations.create, {
+{{#each @root.fields}}
 {{#if this.required}}
 {{#ifEq this.type "string"}}
       {{@key}}: "Temp",
@@ -678,20 +603,68 @@ describe("assign", () => {
 {{/each}}
     });
     const records = await testClient.run(async (ctx: any) =>
-      ctx.db.query("{{name}}").collect(),
+      ctx.db.query("{{@root.name}}").collect(),
     );
     const recordId = records[0]._id;
     await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
 
     await expect(
-      client.mutation({{{apiPath name}}}.mutations.assign, {
-        {{camelCase name}}Id: recordId,
-        assigneeId: undefined,
+      client.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
+        {{camelCase @root.name}}Id: recordId,
+        {{@key}}: "{{this.values.[1]}}",
       }),
     ).rejects.toThrow("not found");
   });
 
-  test("auto-flips visibility to shared when assigning to another user", async ({
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
+    const recordId = await testClient.run(async (ctx: any) => {
+      const userId = await ctx.db.insert("users", { name: "Seed" });
+      return ctx.db.insert("{{@root.name}}", {
+{{#each @root.fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "Seed",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "Seed content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 0,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        userId: userId,
+{{#if @root.behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+{{#if @root.behaviors.orderable}}
+        position: 1,
+{{/if}}
+      });
+    });
+
+    await testClient.mutation({{{apiPath @root.name}}}.mutations.update{{pascalCase @key}}, {
+      {{camelCase @root.name}}Id: recordId,
+      {{@key}}: "{{this.values.[1]}}",
+    });
+
+    const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
+    expect(record.{{@key}}).toBe("{{this.values.[0]}}");
+  });
+});
+// @generated-end test-updateStatus
+{{/if}}
+{{/ifEq}}
+{{/each}}
+
+{{#if behaviors.assignable}}
+// @generated-start test-assign
+describe("assign", () => {
+  test("assigns to another user and flips visibility to shared", async ({
     client,
     testClient,
   }) => {
@@ -740,7 +713,7 @@ describe("assign", () => {
     expect(updated.visibility).toBe("shared");
   });
 
-  test("does not flip visibility when assigning to creator", async ({
+  test("keeps visibility private when assigning to creator", async ({
     client,
     userId,
     testClient,
@@ -828,14 +801,49 @@ describe("assign", () => {
     expect(updated.assigneeId).toBeUndefined();
     expect(updated.visibility).toBe("shared");
   });
-});
-// @generated-end test-assign
-{{/if}}
 
-{{#if behaviors.orderable}}
-// @generated-start test-reorder
-describe("reorder", () => {
-  test("does nothing when unauthenticated", async ({ testClient }) => {
+  test("throws '{{label}} not found' for deleted record", async ({
+    client,
+    testClient,
+  }) => {
+    await client.mutation({{{apiPath name}}}.mutations.create, {
+{{#each fields}}
+{{#if this.required}}
+{{#ifEq this.type "string"}}
+      {{@key}}: "Temp",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+      {{@key}}: "Temp",
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+      {{@key}}: 1,
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+      {{@key}}: true,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+{{#unless this.transitions}}
+      {{@key}}: "{{this.values.[0]}}",
+{{/unless}}
+{{/ifEq}}
+{{/if}}
+{{/each}}
+    });
+    const records = await testClient.run(async (ctx: any) =>
+      ctx.db.query("{{name}}").collect(),
+    );
+    const recordId = records[0]._id;
+    await testClient.run(async (ctx: any) => ctx.db.delete(recordId));
+
+    await expect(
+      client.mutation({{{apiPath name}}}.mutations.assign, {
+        {{camelCase name}}Id: recordId,
+        assigneeId: undefined,
+      }),
+    ).rejects.toThrow("not found");
+  });
+
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
     const recordId = await testClient.run(async (ctx: any) => {
       const userId = await ctx.db.insert("users", { name: "Seed" });
       return ctx.db.insert("{{name}}", {
@@ -856,23 +864,33 @@ describe("reorder", () => {
         {{@key}}: "{{this.values.[0]}}",
 {{/ifEq}}
 {{/each}}
-        creatorId: userId,
-{{#if behaviors.assignable}}
+        userId: userId,
         assigneeId: userId,
-{{/if}}
+{{#if behaviors.orderable}}
         position: 1,
+{{/if}}
       });
     });
 
-    await testClient.mutation({{{apiPath name}}}.mutations.reorder, {
+    const otherUserId = await testClient.run(async (ctx: any) =>
+      ctx.db.insert("users", { name: "Other" }),
+    );
+
+    await testClient.mutation({{{apiPath name}}}.mutations.assign, {
       {{camelCase name}}Id: recordId,
-      newPosition: 999,
+      assigneeId: otherUserId,
     });
 
     const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
-    expect(record.position).toBe(1);
+    expect(record.visibility).toBe("private");
   });
+});
+// @generated-end test-assign
+{{/if}}
 
+{{#if behaviors.orderable}}
+// @generated-start test-reorder
+describe("reorder", () => {
   test("updates position field", async ({ client, testClient }) => {
     await client.mutation({{{apiPath name}}}.mutations.create, {
 {{#each fields}}
@@ -912,6 +930,47 @@ describe("reorder", () => {
     );
     expect(updated.position).toBe(42);
   });
+
+  test("silently ignores unauthenticated call", async ({ testClient }) => {
+    const recordId = await testClient.run(async (ctx: any) => {
+      const userId = await ctx.db.insert("users", { name: "Seed" });
+      return ctx.db.insert("{{name}}", {
+{{#each fields}}
+{{#ifEq this.type "string"}}
+        {{@key}}: "Seed",
+{{/ifEq}}
+{{#ifEq this.type "text"}}
+        {{@key}}: "Seed content",
+{{/ifEq}}
+{{#ifEq this.type "boolean"}}
+        {{@key}}: false,
+{{/ifEq}}
+{{#ifEq this.type "number"}}
+        {{@key}}: 0,
+{{/ifEq}}
+{{#ifEq this.type "enum"}}
+        {{@key}}: "{{this.values.[0]}}",
+{{/ifEq}}
+{{/each}}
+        userId: userId,
+{{#if behaviors.assignable}}
+        assigneeId: userId,
+{{/if}}
+        position: 1,
+      });
+    });
+
+    await testClient.mutation({{{apiPath name}}}.mutations.reorder, {
+      {{camelCase name}}Id: recordId,
+      newPosition: 999,
+    });
+
+    const record = await testClient.run(async (ctx: any) => ctx.db.get(recordId));
+    expect(record.position).toBe(1);
+  });
 });
 // @generated-end test-reorder
 {{/if}}
+
+// @custom-start tests
+// @custom-end tests

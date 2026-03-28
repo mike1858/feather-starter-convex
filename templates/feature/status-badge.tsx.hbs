@@ -1,9 +1,11 @@
 // @generated-start imports
+{{#hasTransitions fields}}
 import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "~/convex/_generated/api";
 import { useTranslation } from "react-i18next";
 import type { Id } from "~/convex/_generated/dataModel";
+{{/hasTransitions}}
 // @generated-end imports
 // @custom-start imports
 // @custom-end imports
@@ -91,5 +93,45 @@ export function {{pascalCase ../name}}StatusBadge({
     </button>
   );
 }
+{{else}}
+{{#ifEq type "enum"}}
+/**
+ * Color palette for {{@key}} badge (display-only, no transitions).
+ */
+const {{upperSnakeCase @key}}_COLORS: Record<string, { dot: string; text: string }> = {
+  {{#each values}}
+  "{{this}}": { dot: "{{enumBadgeDot ../this this}}", text: "{{enumBadgeText ../this this}}" },
+  {{/each}}
+};
+
+const {{upperSnakeCase @key}}_LABELS: Record<string, string> = {
+  {{#each values}}
+  "{{this}}": "{{sentenceCase this}}",
+  {{/each}}
+};
+
+interface {{pascalCase ../name}}StatusBadgeProps {
+  status: string;
+}
+
+export function {{pascalCase ../name}}StatusBadge({
+  status,
+}: {{pascalCase ../name}}StatusBadgeProps) {
+  const colors = {{upperSnakeCase @key}}_COLORS[status] || { dot: "bg-gray-400", text: "text-gray-600" };
+  const label = {{upperSnakeCase @key}}_LABELS[status] || status;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ${colors.text}`}
+    >
+      <span
+        className={`h-2 w-2 rounded-full ${colors.dot}`}
+        aria-hidden="true"
+      />
+      {label}
+    </span>
+  );
+}
+{{/ifEq}}
 {{/if}}
 {{/each}}

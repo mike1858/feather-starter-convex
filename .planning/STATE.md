@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Phase complete — ready for verification
-last_updated: "2026-03-28T15:01:33.849Z"
+status: v2.0 milestone complete
+last_updated: "2026-03-28T15:39:25.927Z"
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 10
   total_plans: 30
   completed_plans: 30
@@ -18,12 +18,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 999.1 — feather-dx-architecture
+**Current focus:** Phase 03.2.1.1 — Create feather.yaml specs
 
 ## Current Position
 
-Phase: 999.1 (feather-dx-architecture) — EXECUTING
-Plan: 6 of 6
+Phase: 03.2.1.1 (create-feather-yaml-specs) — INSERTED
+
+### Roadmap Evolution
+
+- Phase 03.2.1.1 inserted after Phase 03.2.1: Create feather.yaml specs for projects, subtasks, work-logs, activity-logs (URGENT)
 
 ## Performance Metrics
 

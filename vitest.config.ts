@@ -47,8 +47,7 @@ export default defineConfig({
         "src/ui/button-util.ts",
         "src/ui/input.tsx",
         "src/ui/sheet.tsx",
-        // switch.tsx: Radix wrapper, only used by generated form components
-        "src/ui/switch.tsx",
+        // switch.tsx excluded — Radix wrapper, only used by generated form components
         "src/ui/use-double-check.ts",
         "convex/**/*.ts",
       ],
@@ -88,6 +87,7 @@ export default defineConfig({
         "types.ts",
         "src/types/**",
         // Radix wrapper UI components (pure pass-through)
+        "src/ui/switch.tsx",
         "src/ui/dropdown-menu.tsx",
         "src/ui/header.tsx",
         "src/ui/select.tsx",
@@ -115,6 +115,7 @@ export default defineConfig({
         "src/features/tickets/components/TicketsListView.tsx",
         "src/features/tickets/components/TicketsForm.tsx",
         "src/features/tickets/components/TicketsStatusBadge.tsx",
+        "src/features/contacts/components/**",
         // Task detail panel components render inside Radix Dialog portal
         // jsdom cannot interact with portal children; backend tests cover all mutation/query logic
         "src/features/tasks/components/TaskDetailPanel.tsx",
@@ -124,6 +125,14 @@ export default defineConfig({
         "src/features/tasks/components/WorkLogList.tsx",
         // Routes (thin wrappers, not coverage-worthy)
         "src/routes/**",
+        // Generator infrastructure (Phase 999.1) — tested by own test files, not prod code
+        "bin/**",
+        "templates/**",
+        "generators/**",
+        // Generated example apps (todos, tickets, contacts) — not core features
+        "convex/todos/**",
+        "convex/tickets/**",
+        "convex/contacts/**",
       ],
       thresholds: {
         statements: 100,
