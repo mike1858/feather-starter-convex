@@ -50,7 +50,7 @@ function getConvexValidator(field, fieldName, schemaImportName) {
     case "number":
       return wrapOptional("v.number()");
     case "enum":
-      return `zodToConvex(${fieldName})`;
+      return `zodToConvex(${schemaImportName}_${fieldName})`;
     default:
       return wrapOptional("v.string()");
   }
@@ -76,12 +76,12 @@ export function registerWiringActions(plop) {
 
     const addedLines = [];
 
-    // 1. Add schema import (Zod enum references)
+    // 1. Add schema import (Zod enum references — aliased to avoid cross-feature collisions)
     const enumFields = Object.entries(fields).filter(
       ([, f]) => f.type === "enum",
     );
     if (enumFields.length > 0) {
-      const imports = enumFields.map(([fieldName]) => fieldName);
+      const imports = enumFields.map(([fieldName]) => `${fieldName} as ${name}_${fieldName}`);
       const importLine = `import {\n  ${imports.join(",\n  ")},\n} from "../src/shared/schemas/${name}";`;
 
       // Insert before defineSchema
@@ -138,6 +138,18 @@ export function registerWiringActions(plop) {
     }
     if (answers.behaviors?.orderable) {
       fieldLines.push("    position: v.number(),");
+    }
+
+    // Add FK columns from belongs_to relationships (Bug #1)
+    if (answers.relationships) {
+      for (const [, rel] of Object.entries(answers.relationships)) {
+        if (rel.type === "belongs_to" && rel.column && rel.target) {
+          const validator = rel.required === true
+            ? `v.id("${rel.target}")`
+            : `v.optional(v.id("${rel.target}"))`;
+          fieldLines.push(`    ${rel.column}: ${validator},`);
+        }
+      }
     }
 
     // Build index chains

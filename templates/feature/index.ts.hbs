@@ -1,10 +1,5 @@
 // @generated-start exports
 export { {{pascalCase name}}Page } from "./components/{{pascalCase name}}Page";
-{{#if views.filteredViews}}
-{{#each views.filteredViews}}
-export { {{pascalCase ../name}}{{pascalCase name}}Page } from "./components/{{pascalCase ../name}}{{pascalCase name}}Page";
-{{/each}}
-{{/if}}
 // @generated-end exports
 // @custom-start exports
 // @custom-end exports

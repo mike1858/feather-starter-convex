@@ -2,13 +2,8 @@
 import { mutation } from "@cvx/_generated/server";
 import { auth } from "@cvx/auth";
 import { v } from "convex/values";
-import { zCustomMutation } from "convex-helpers/server/zod4";
+import { zCustomMutation, zodToConvex } from "convex-helpers/server/zod4";
 import { NoOp } from "convex-helpers/server/customFunctions";
-{{#each fields}}
-{{#ifEq this.type "enum"}}
-import { zodToConvex } from "convex-helpers/server/zod4";
-{{/ifEq}}
-{{/each}}
 import {
   create{{pascalCase name}}Input,
 {{#each fields}}
@@ -173,14 +168,17 @@ export const update{{pascalCase @key}} = mutation({
     const {{camelCase ../name}} = await ctx.db.get(args.{{camelCase ../name}}Id);
     if (!{{camelCase ../name}}) throw new Error({{{errorsPath ../name}}}.NOT_FOUND);
 
-    const currentIndex = {{upperSnakeCase @key}}_VALUES.indexOf(
-      {{camelCase ../name}}.{{@key}} as (typeof {{upperSnakeCase @key}}_VALUES)[number],
-    );
-    const newIndex = {{upperSnakeCase @key}}_VALUES.indexOf(
-      args.{{@key}} as (typeof {{upperSnakeCase @key}}_VALUES)[number],
-    );
+    const TRANSITIONS: Record<string, string[]> = {
+      {{#each this.transitions}}
+      "{{@key}}": [{{#each this}}"{{this}}"{{#unless @last}}, {{/unless}}{{/each}}],
+      {{/each}}
+    };
 
-    if (newIndex !== currentIndex + 1) {
+    const currentStatus = {{camelCase ../name}}.{{@key}} as string;
+    const newStatus = args.{{@key}} as string;
+    const allowed = TRANSITIONS[currentStatus];
+
+    if (!allowed || !allowed.includes(newStatus)) {
       throw new Error({{{errorsPath ../name}}}.INVALID_STATUS_TRANSITION);
     }
 
@@ -214,6 +212,7 @@ export const assign = mutation({
 
     const patch: Record<string, unknown> = { assigneeId: args.assigneeId };
 
+    {{#if fields.visibility}}
     // Auto-flip: assigning to another user makes {{label}} shared
     if (args.assigneeId && args.assigneeId !== {{camelCase name}}.userId) {
       patch.visibility = "shared";
@@ -222,6 +221,7 @@ export const assign = mutation({
     if (!args.assigneeId) {
       patch.visibility = "shared";
     }
+    {{/if}}
 
     await ctx.db.patch(args.{{camelCase name}}Id, patch);
 

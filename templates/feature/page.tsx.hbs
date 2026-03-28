@@ -46,8 +46,8 @@ export function {{pascalCase name}}Page() {
     : items.filter((item: any) => {
         {{#each views.filteredViews}}
         if (activeFilter === "{{name}}") {
-          {{#each filters}}
-          if (item.{{@key}} !== {{json this}}) return false;
+          {{#each filter}}
+          if (item.{{@key}} !== {{{json this}}}) return false;
           {{/each}}
           return true;
         }

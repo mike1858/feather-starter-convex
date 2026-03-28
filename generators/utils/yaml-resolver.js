@@ -81,14 +81,18 @@ export function resolveDefaults(featureConfig, defaultsPath) {
 
   merged.fields = resolvedFields;
 
-  // Compute auto-indexes
+  // Compute auto-indexes (dedup by both name AND lead column to avoid duplicates)
   const indexes = merged.indexes || [];
   const existingNames = new Set(indexes.map((idx) => idx.name));
+  const existingLeadColumns = new Set(
+    indexes.filter((idx) => idx.fields.length === 1).map((idx) => idx.fields[0]),
+  );
 
   // Always add by_userId
-  if (!existingNames.has("by_userId")) {
+  if (!existingNames.has("by_userId") && !existingLeadColumns.has("userId")) {
     indexes.push({ name: "by_userId", fields: ["userId"] });
     existingNames.add("by_userId");
+    existingLeadColumns.add("userId");
   }
 
   // Add by_{field} for filterable or enum fields
@@ -96,10 +100,12 @@ export function resolveDefaults(featureConfig, defaultsPath) {
     const indexName = `by_${fieldName}`;
     if (
       !existingNames.has(indexName) &&
+      !existingLeadColumns.has(fieldName) &&
       (fieldConfig.filterable === true || fieldConfig.type === "enum")
     ) {
       indexes.push({ name: indexName, fields: [fieldName] });
       existingNames.add(indexName);
+      existingLeadColumns.add(fieldName);
     }
   }
 
@@ -108,9 +114,10 @@ export function resolveDefaults(featureConfig, defaultsPath) {
     for (const rel of Object.values(merged.relationships)) {
       if (rel.type === "belongs_to" && rel.column) {
         const indexName = `by_${rel.column}`;
-        if (!existingNames.has(indexName)) {
+        if (!existingNames.has(indexName) && !existingLeadColumns.has(rel.column)) {
           indexes.push({ name: indexName, fields: [rel.column] });
           existingNames.add(indexName);
+          existingLeadColumns.add(rel.column);
         }
       }
     }

@@ -1,6 +1,6 @@
 {{!-- @generated-start card-view --}}
 import { useRef, useEffect, useCallback, useState } from "react";
-import { Pencil, Trash2, ImageIcon, LayoutGrid } from "lucide-react";
+import { Pencil, Trash2, ImageIcon } from "lucide-react";
 import { Button } from "@/ui/button";
 import { {{pascalCase name}}EmptyState } from "./{{pascalCase name}}EmptyState";
 import { {{pascalCase name}}StatusBadge } from "./{{pascalCase name}}StatusBadge";
@@ -120,7 +120,7 @@ export function {{pascalCase name}}CardView({
 
   // Empty state
   if (!isLoading && items.length === 0) {
-    return <{{pascalCase name}}EmptyState variant="noData" icon={LayoutGrid} />;
+    return <{{pascalCase name}}EmptyState variant="noData" />;
   }
 
   const renderCard = (item: Record<string, unknown>) => {
@@ -159,11 +159,15 @@ export function {{pascalCase name}}CardView({
               </span>
               {{#each fields}}
               {{#ifEq this.type "enum"}}
-              {{#if @first}}{{else}}
+              {{#if this.transitions}}
               <{{pascalCase ../name}}StatusBadge
                 status={item.{{@key}} as string}
                 itemId={item._id as any}
               />
+              {{else}}
+              <span className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
+                {item.{{@key}} as string}
+              </span>
               {{/if}}
               {{/ifEq}}
               {{/each}}
