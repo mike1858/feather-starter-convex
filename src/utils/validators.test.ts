@@ -1,10 +1,21 @@
+// Test Matrix: username validator
+// | # | State                  | What to verify                        |
+// |---|------------------------|---------------------------------------|
+// | 1 | valid alphanumeric     | parses and lowercases                 |
+// | 2 | whitespace             | trims before validation               |
+// | 3 | uppercase              | lowercases input                      |
+// | 4 | too short (<3)         | throws validation error               |
+// | 5 | too long (>20)         | throws validation error               |
+// | 6 | non-alphanumeric chars | throws validation error               |
+// | 7 | boundary lengths       | accepts 3 and 20 chars exactly        |
+
 import { describe, expect, it } from "vitest";
 import { username } from "./validators";
 
 describe("username validator", () => {
-  it("accepts valid alphanumeric usernames", () => {
+  it("accepts valid alphanumeric and lowercases", () => {
     expect(username.parse("alice")).toBe("alice");
-    expect(username.parse("Bob123")).toBe("bob123"); // lowercased
+    expect(username.parse("Bob123")).toBe("bob123");
   });
 
   it("trims whitespace", () => {

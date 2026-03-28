@@ -1,11 +1,18 @@
+// Test Matrix: ERRORS constant
+// | # | State              | What to verify                               |
+// |---|--------------------| ---------------------------------------------|
+// | 1 | error groups       | auth, onboarding, common groups exist        |
+// | 2 | error values       | all values are non-empty strings             |
+// | 3 | specific values    | key constants match expected strings         |
+
 import { describe, it, expect } from "vitest";
 import { ERRORS } from "./errors";
 
 describe("ERRORS", () => {
-  it("has all expected error groups", () => {
-    expect(ERRORS.auth).toBeDefined();
-    expect(ERRORS.onboarding).toBeDefined();
-    expect(ERRORS.common).toBeDefined();
+  it("has auth, onboarding, and common groups", () => {
+    expect(typeof ERRORS.auth).toBe("object");
+    expect(typeof ERRORS.onboarding).toBe("object");
+    expect(typeof ERRORS.common).toBe("object");
   });
 
   it("all error values are non-empty strings", () => {
@@ -17,10 +24,7 @@ describe("ERRORS", () => {
     }
   });
 
-  it("ERRORS is deeply frozen (as const)", () => {
-    // as const produces readonly properties; verify by checking
-    // that the type system enforces it (runtime check: Object.isFrozen
-    // doesn't apply to 'as const', but we can verify values haven't changed)
+  it("key constants match expected strings", () => {
     expect(ERRORS.auth.EMAIL_NOT_SENT).toBe("Unable to send email.");
     expect(ERRORS.common.UNKNOWN).toBe("Unknown error.");
   });

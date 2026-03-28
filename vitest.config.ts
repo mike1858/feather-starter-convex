@@ -50,7 +50,6 @@ export default defineConfig({
         // switch.tsx excluded: Radix wrapper, was only tested through billing UI (now removed)
         "src/ui/use-double-check.ts",
         "convex/**/*.ts",
-        "errors.ts",
       ],
       // ── Non-testable infra & excluded source ──────────────────────
       exclude: [

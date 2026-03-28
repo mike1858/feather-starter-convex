@@ -1,3 +1,21 @@
+// Test Matrix: time-parser
+// | # | Function       | State                  | What to verify                    |
+// |---|----------------|------------------------|-----------------------------------|
+// | 1 | parseTimeInput | '30m'                  | returns 30                        |
+// | 2 | parseTimeInput | '1h30m'                | returns 90                        |
+// | 3 | parseTimeInput | '1h 30m' (space)       | returns 90                        |
+// | 4 | parseTimeInput | '1.5h' (decimal)       | returns 90                        |
+// | 5 | parseTimeInput | '2h' (whole hours)     | returns 120                       |
+// | 6 | parseTimeInput | '90' (bare number)     | returns 90                        |
+// | 7 | parseTimeInput | empty/whitespace       | returns undefined                 |
+// | 8 | parseTimeInput | non-numeric            | returns undefined                 |
+// | 9 | parseTimeInput | zero/negative          | returns undefined                 |
+// |10 | parseTimeInput | uppercase              | case-insensitive                  |
+// |11 | formatMinutes  | minutes only           | '45m'                             |
+// |12 | formatMinutes  | exact hours            | '2h'                              |
+// |13 | formatMinutes  | hours + minutes        | '1h 30m'                          |
+// |14 | formatMinutes  | zero                   | '0m'                              |
+
 import { describe, expect, test } from "vitest";
 import { parseTimeInput, formatMinutes } from "./time-parser";
 

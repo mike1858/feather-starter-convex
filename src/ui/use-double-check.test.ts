@@ -1,3 +1,15 @@
+// Test Matrix: useDoubleCheck hook
+// | # | State                    | What to verify                               |
+// |---|--------------------------|----------------------------------------------|
+// | 1 | initial                  | doubleCheck is false                         |
+// | 2 | first click              | doubleCheck becomes true, preventDefault      |
+// | 3 | second click (confirmed) | user onClick called (not intercepted)        |
+// | 4 | blur                     | resets doubleCheck to false                   |
+// | 5 | Escape key               | resets doubleCheck to false                   |
+// | 6 | non-Escape key           | doubleCheck stays true                        |
+// | 7 | merged handlers          | user onBlur/onKeyUp called alongside hook's  |
+// | 8 | no props argument        | returns object with onClick, onBlur, onKeyUp |
+
 import { describe, expect, it, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDoubleCheck } from "./use-double-check";
