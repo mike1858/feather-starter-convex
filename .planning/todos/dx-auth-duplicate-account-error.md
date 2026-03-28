@@ -2,7 +2,7 @@
 title: "Surface auth errors in UI (duplicate account, deleted account, generic failures)"
 area: auth
 priority: P2
-status: open
+status: done
 created: 2026-03-25
 source: Phase 2+3 verify-work (multiple auth errors show nothing in UI)
 ---

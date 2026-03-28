@@ -2,7 +2,7 @@
 title: "Center login form on page instead of two-panel layout"
 area: auth
 priority: P3
-status: open
+status: done
 created: 2026-03-25
 source: Phase 2 verify-work (left panel is mostly blank, form pushed to right side)
 ---

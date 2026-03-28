@@ -2,7 +2,7 @@
 title: "Unassigning a task leaves it in limbo (not in My Tasks or Team Pool)"
 area: tasks
 priority: P1
-status: open
+status: done
 created: 2026-03-25
 source: Phase 3 verify-work (unassigned task disappeared from both views)
 ---

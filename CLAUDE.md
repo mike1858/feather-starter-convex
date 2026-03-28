@@ -1,5 +1,40 @@
 # Project Conventions
 
+## Design Principles
+
+### The Tableau Standard: Smart Defaults, Open for Power Override
+
+When designing any feature, config option, or user-facing decision: **infer from context first**, pick a sensible default that works for the common case, and **always allow power-user override**.
+
+**Before asking a design question, apply this principle:**
+1. What's the sensible default? (Infer from context — field type from data, single option = auto-select, etc.)
+2. Can the user override it? (YAML config, parameter, environment variable, etc.)
+3. If both answers are clear → **make the decision yourself**, document the default + override mechanism
+4. Only ask when the sensible default is genuinely ambiguous or the override mechanism isn't obvious
+
+**The anti-pattern (configuration death):** "Name this → pick data source → name that → configure columns → set permissions → choose layout." Every unnecessary question is friction. One config surface (YAML), no multi-step wizards, no right-click menus.
+
+**The reference:** Tableau. Drag an Excel file with one tab → auto-imports (no "which tab?" question). Double-click a dimension → bar chart. It infers from context and only asks when genuinely ambiguous.
+
+### Testing Philosophy (Universal)
+
+All tests — backend, frontend, infrastructure, generators, CLI, tooling — must follow the testing philosophy in [`feather-testing-convex/TESTING-PHILOSOPHY.md`](https://github.com/siraj-samsudeen/feather-testing-convex/blob/main/TESTING-PHILOSOPHY.md).
+
+**Core principles that apply to ALL test types:**
+- **Test behavior, not implementation** — assert outcomes and state changes, not that specific mocks were called
+- **Integration-first** — prefer tests that exercise real code paths over mocked ones. Mock only at system boundaries (external APIs, network, filesystem in unit tests)
+- **MECE test decomposition** — test cases should be Mutually Exclusive, Collectively Exhaustive. No overlapping tests, no gaps
+- **No `v8 ignore` as substitute for real tests** — if code has logic (conditionals, error paths, event handlers), it must be tested
+- **Each test independent and self-contained** — no test should depend on another test's state or execution order
+
+**For infrastructure/tooling (generators, CLI, AST wiring, YAML validation):**
+- Test the **output**, not the internal steps — e.g., generator test should verify the generated file contents, not that template engine was called
+- Use real file I/O with temp directories, not mocked filesystems — these tests verify real behavior
+- Test error cases: malformed input, missing files, invalid config
+- Test idempotency: running the same operation twice should produce the same result
+
+**Every phase plan must include an explicit task:** "Review tests against testing philosophy" — tracked, not optional.
+
 ## Architecture
 
 Feature-folder architecture. Each domain has a frontend folder and a backend folder:

@@ -29,10 +29,12 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 - [x] **Phase 3: Tasks** - Complete task management with visibility, assignment, status workflow, and core views (completed 2026-03-25)
 - [x] **Phase 03.1: Verification Bug Fixes** (INSERTED) - Fix all issues found during Phase 2+3 UAT: auth flow bugs, task unassign visibility, dev mailbox fixes, and UX polish (completed 2026-03-25)
 - [x] **Phase 03.2: CRUD Generator Upgrade** (INSERTED) - Upgrade Plop.js generators to produce fully working CRUD features; generator output is a runnable feature that agents then customize (completed 2026-03-27)
-- [ ] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship
-- [ ] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging
-- [ ] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities
-- [ ] **Phase 7: MECE Test Rewrite** - Rewrite all feature test suites: integration-first, backend-only for edge cases only, MECE state decomposition
+- [x] **Phase 03.2.1: Generator Test Philosophy Upgrade** (INSERTED) - Upgrade generator test templates to follow testing philosophy; integration-first, MECE, property-based (completed 2026-03-28)
+- [ ] **Phase 03.2.1.1: Create feather.yaml specs** (INSERTED) - Create feather.yaml specs for projects, subtasks, work-logs, activity-logs
+- [x] **Phase 4: Projects** - Project CRUD with status lifecycle and project-task relationship (completed 2026-03-28)
+- [x] **Phase 5: Subtasks & Work Logs** - Child-of-task overlays with subtask promotion and time logging (completed 2026-03-28)
+- [x] **Phase 6: Activity Logs & Search** - Auto-generated audit trail, text search, and filter controls across all entities (completed 2026-03-28)
+- [x] **Phase 7: MECE Test Rewrite** - Rewrite all feature test suites: integration-first, backend-only for edge cases only, MECE state decomposition (completed 2026-03-28)
 
 ## Phase Details
 
@@ -231,14 +233,26 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 |-------|-----------|----------------|--------|-----------|
 | 1. Architecture Modernization | v1.0 | 9/9 | Complete | 2026-03-09 |
 | 2. Auth & DX Infrastructure | v2.0 | 4/4 | Complete | 2026-03-10 |
-| 02.1 Stripe Plugin Extraction | 2/2 | Complete    | 2026-03-10 | - |
-| 3. Tasks | v2.0 | 2/2 | Complete   | 2026-03-25 |
-| 03.1 Verification Bug Fixes | v2.0 | 2/2 | Complete    | 2026-03-25 |
-| 03.2 CRUD Generator Upgrade | v2.0 | 6/6 | Complete    | 2026-03-27 |
-| 4. Projects | v2.0 | 0/2 | Planned | - |
-| 5. Subtasks & Work Logs | v2.0 | 0/? | Not started | - |
-| 6. Activity Logs & Search | v2.0 | 0/? | Not started | - |
-| 7. MECE Test Rewrite | v2.0 | 0/3 | Planned | - |
+| 02.1 Stripe Plugin Extraction | v2.0 | 2/2 | Complete | 2026-03-10 |
+| 3. Tasks | v2.0 | 2/2 | Complete | 2026-03-25 |
+| 03.1 Verification Bug Fixes | v2.0 | 2/2 | Complete | 2026-03-25 |
+| 03.2 CRUD Generator Upgrade | v2.0 | 6/6 | Complete | 2026-03-27 |
+| 03.2.1 Generator Test Philosophy | v2.0 | — | Complete (inline) | 2026-03-28 |
+| 03.2.1.1 Create feather.yaml specs | v2.0 | 0/? | Not started | - |
+| 4. Projects | v2.0 | 2/2 | Complete | 2026-03-28 |
+| 5. Subtasks & Work Logs | v2.0 | 2/2 | Complete | 2026-03-28 |
+| 6. Activity Logs & Search | v2.0 | 1/1 | Complete | 2026-03-28 |
+| 7. MECE Test Rewrite | v2.0 | 3/3 | Complete | 2026-03-28 |
+| 999.1 Feather DX Architecture | Backlog | 6/6 | Complete | 2026-03-28 |
+| 999.9 Test Quality Audit | Backlog | 0/? | Not started | - |
+| 999.2 feather start project | Backlog | 0/? | Not started | - |
+| 999.3 LLM Architect Conversation | Backlog | 0/? | Not started | - |
+| 999.4 Integration Gaps | Backlog | 0/? | Not started | - |
+| 999.5 Excel-to-System Pipeline | Backlog | 0/? | Not started | - |
+| 999.6 Bundle Distribution | Backlog | 0/? | Not started | - |
+| 999.7 Telemetry | Backlog | 0/? | Not started | - |
+| 999.8 Search | Backlog | 0/? | Not started | - |
+| 999.10 E2E, Bugs & Docs Debt | Backlog | 0/? | Not started | - |
 
 ## Backlog
 
@@ -257,6 +271,105 @@ Plans:
 - [x] 999.1-05-PLAN.md — Feather CLI: command-line interface and feather update (Wave 3)
 - [x] 999.1-06-PLAN.md — Generator bug fixes and migration validation (Wave 3)
 
+### Phase 999.9: Test Quality Audit (BACKLOG)
+**Goal:** Remove all illegitimate coverage exclusions and ensure every test follows the testing philosophy. Establishes quality baseline before any new feature work.
+**Depends on:** None (runs first)
+**Scope:**
+- Part 1: Purge coverage exclusions — audit vitest.config.ts `coverage.exclude` and all inline `/* v8 ignore */`
+- Part 2: Review all existing tests against testing philosophy (behavior-not-implementation, correct mock scope, independent tests)
+**Deliverable:** 100% coverage with real tests, not exclusions
+**Plans:** 0 (estimated 3-4)
+
+### Phase 999.2: `feather start project` — First-Run DX (BACKLOG)
+**Goal:** A developer runs one command and gets a working Feather project with branding, configured auth, and ready-to-use generator
+**Depends on:** Phase 999.9
+**Scope:**
+- `feather start project` CLI command (builds on PR #8's `create.sh` + `setup.ts`)
+- Interactive prompts: project name, branding, auth providers, initial features
+- Generates root `feather.yaml`, clones template, applies branding, provisions auth keys
+- Runs `npm install` + `npx convex dev --once` to confirm
+- Addresses todo `dx-local-auth-keys-provisioning`
+**Plans:** 0 (estimated 3-4)
+
+### Phase 999.3: LLM Architect Conversation (BACKLOG)
+**Goal:** Developer describes business domain in plain English, LLM produces validated `feather.yaml` with entities, relationships, and behavioral specs
+**Depends on:** Phase 999.2
+**Scope:**
+- 4-phase conversation: Entity Discovery → Schema + CRUD → Behavior Overlay (8 dimensions) → Validation
+- `@anthropic-ai/sdk` for streaming conversation with tool use
+- Conversation state persisted as JSON in `.feather/conversations/` (resumable)
+- Quad meta-model (Data + Layout + Actions + Reports) structures the conversation
+- Output: validated feather.yaml files ready for `feather generate`
+**Plans:** 0 (estimated 4-5)
+
+### Phase 999.4: 999.1 Integration Gaps (BACKLOG)
+**Goal:** Wire architecturally validated foundations into real code generation pipeline
+**Depends on:** Phase 999.2, Phase 999.3
+**Scope:**
+- Combined wireFeature() orchestrator
+- Plop integration: outputMode, gen:feature-from-yaml, generatedHeader helper
+- Generated/custom directory split: retarget to src/generated/ and convex/generated/
+- 5 cross-entity panel templates (related-record, table, checklist, timeline, cards)
+- Detail page template update, template-level bug fixes
+- CLI completion: package.json bin entry, init.test.ts, init command logic
+- **`feather update` CLI thorough testing:** verify generateFeature pipeline works end-to-end, uncommitted change detection, --dry-run, --force, error handling. The command exists but was never tested against real projects.
+**Plans:** 0 (estimated 3-4)
+
+### Phase 999.5: Excel-to-System Pipeline (BACKLOG)
+**Goal:** User uploads Excel file, system infers schema, user confirms, system produces feather.yaml + seed data
+**Depends on:** Phase 999.3, Phase 999.4
+**Scope:**
+- Excel reading via `xlsx` (SheetJS)
+- LLM-powered structure analysis: field type inference, entity classification, relationship detection
+- Fuzzy column rename detection (Jaro-Winkler + position + data fingerprinting)
+- Interactive confirmation UI, schema reconciliation for re-imports
+- Atomic migration with audit trail
+**Plans:** 0 (estimated 4-5)
+
+### Phase 999.6: Bundle Distribution (BACKLOG)
+**Goal:** Curated feature bundles installable in one command
+**Depends on:** Phase 999.4
+**Scope:**
+- Bundle manifest format (features, wiring, dependencies)
+- `feather add bundle <name>` command
+- Dependency resolution, bundle registry (local first, remote later)
+- Validation: all features compatible, no conflicts
+**Plans:** 0 (estimated 2-3)
+
+### Phase 999.7: Telemetry (BACKLOG)
+**Goal:** Understand what users build and surface errors proactively
+**Depends on:** Phase 999.2
+**Scope:**
+- Build-tool telemetry: generator usage counts, feature types, error rates (opt-out)
+- One-click error reporting: zero-config error boundary with context capture
+- Maintainer dashboard (simple analytics)
+**Plans:** 0 (estimated 2)
+
+### Phase 999.8: Search (BACKLOG)
+**Goal:** Users can text-search across task titles and project names with filter controls
+**Depends on:** Phase 6 (Activity Logs)
+**Requirements:** SRCH-01, SRCH-02, SRCH-03, SRCH-04, SRCH-05, SRCH-06
+**Scope:**
+- Search indexes on tasks (title, description) and projects (name, description)
+- Search box in header/nav with real-time results
+- Filter controls: status, priority, project, assignee across task lists
+- Project list filtering by status
+- Combined search results view
+**Note:** Phase 6 was "Activity Logs & Search" but search was never built. These 6 requirements (SRCH-01 to SRCH-06) are carried forward here.
+**Plans:** 0 (estimated 2-3)
+
+### Phase 999.10: E2E Verification, Bug Fixes & Docs Debt (BACKLOG)
+**Goal:** Run E2E tests against live deployment, fix outstanding bugs, and clean up stale documentation artifacts
+**Depends on:** None (independent — can run anytime)
+**Scope:**
+- **E2E test runtime:** Configure and run Playwright tests against a live Convex deployment (deferred since Phase 02)
+- **TS2589 bug:** Fix type depth error in `convex/password/ResendOTPPasswordReset.ts:21` (found in Phase 03.1 human UAT, never tracked)
+- **Docs cleanup:** Update REQUIREMENTS.md traceability table and checkboxes, archive stale CONCERNS.md, clean up old `.gen.yaml` files alongside `feather.yaml`
+- **Barrel export gaps:** Fix placeholder barrel exports in subtasks/, work-logs/, activity-logs/
+- **Phase 03.2.1.1 status:** Reconcile roadmap status with actual `feather.yaml` files that already exist
+**Note:** All original 999.10 items (6 DX/UX bugs) were fixed in Phase 03.1 — phase repurposed for remaining gaps.
+**Plans:** 0 (estimated 2-3)
+
 ---
 *Roadmap created: 2026-03-10*
-*Last updated: 2026-03-28*
+*Last updated: 2026-03-29*

@@ -2,7 +2,7 @@
 title: "Username lowercasing has no user feedback + settings form doesn't sync with server state"
 area: settings
 priority: P3
-status: open
+status: done
 created: 2026-03-25
 source: Phase 3 verify-work (user entered "Siraj", saw "siraj", tried updating in settings with no visible result)
 ---

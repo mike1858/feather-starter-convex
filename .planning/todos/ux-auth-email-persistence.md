@@ -2,7 +2,7 @@
 title: "Persist email across auth forms (sign-in → forgot password → sign-up)"
 area: auth
 priority: P3
-status: open
+status: done
 created: 2026-03-25
 source: Phase 2 verify-work (user entered email, navigated to forgot password, had to re-enter)
 ---

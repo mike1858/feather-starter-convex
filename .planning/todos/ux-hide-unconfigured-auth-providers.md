@@ -2,7 +2,7 @@
 title: "Hide or disable auth provider buttons when credentials not configured"
 area: auth
 priority: P2
-status: open
+status: done
 created: 2026-03-25
 source: Phase 2 verify-work (GitHub button sends client_id=undefined → 404 on GitHub)
 ---

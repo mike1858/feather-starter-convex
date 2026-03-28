@@ -2,7 +2,7 @@
 title: "Auto-provision JWT_PRIVATE_KEY/JWKS for local Convex backend"
 area: dx
 priority: P1
-status: open
+status: done
 created: 2026-03-25
 source: Phase 3 verify-work (auth sign-in failed on local backend)
 ---
