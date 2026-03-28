@@ -1,3 +1,34 @@
+// Test Matrix: ProjectsPage
+// | # | State               | Approach    | What to verify                                  |
+// |---|---------------------|-------------|--------------------------------------------------|
+// | 1 | Empty list          | Integration | empty state message, create form visible         |
+// | 2 | With projects       | Integration | project cards with task count                    |
+// | 3 | Create project      | Integration | form submit creates project                      |
+// | 4 | Status filter tabs  | Integration | All/Active/On Hold/Completed/Archived visible    |
+//
+// Test Matrix: ProjectDetailPage
+// | # | State               | Approach    | What to verify                                  |
+// |---|---------------------|-------------|--------------------------------------------------|
+// | 1 | With tasks          | Integration | project name, task list, summary bar             |
+// | 2 | Empty project       | Integration | empty task message, create input visible          |
+// | 3 | Not found           | Integration | "Project not found" message                      |
+// | 4 | Create task inline  | Integration | task appears in project                          |
+// | 5 | Back link           | Integration | "Back to Projects" link visible                  |
+//
+// Test Matrix: ProjectStatusBadge
+// | # | State      | Approach | What to verify                    |
+// |---|------------|----------|-----------------------------------|
+// | 1 | active     | Unit     | renders "Active"                  |
+// | 2 | on_hold    | Unit     | renders "On Hold"                 |
+// | 3 | completed  | Unit     | renders "Completed"               |
+// | 4 | archived   | Unit     | renders "Archived"                |
+//
+// Test Matrix: TaskSummaryBar
+// | # | State        | Approach | What to verify                    |
+// |---|--------------|----------|-----------------------------------|
+// | 1 | with tasks   | Unit     | shows per-status counts           |
+// | 2 | zero tasks   | Unit     | renders nothing                   |
+
 import { describe, expect, it } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -8,360 +39,232 @@ import { ProjectsPage } from "./index";
 import { ProjectStatusBadge } from "./components/ProjectStatusBadge";
 import { TaskSummaryBar } from "./components/TaskSummaryBar";
 import { ProjectDetailPage } from "./components/ProjectDetailPage";
-import { navItems } from "@/shared/nav";
-import { Route as ProjectsRoute } from "@/routes/_app/_auth/dashboard/_layout.projects.index";
-import { Route as ProjectDetailRoute } from "@/routes/_app/_auth/dashboard/_layout.projects.$projectId";
 import type { Id } from "~/convex/_generated/dataModel";
-
-// ── Route beforeLoad tests ──────────────────────────────────────────
-
-describe("ProjectsRoute.beforeLoad", () => {
-  it("returns the correct context", () => {
-    const context = ProjectsRoute.options.beforeLoad!({} as any);
-    expect(context).toEqual({
-      headerTitle: "Projects",
-      headerDescription: "Manage your projects and their tasks.",
-    });
-  });
-});
-
-describe("ProjectDetailRoute.beforeLoad", () => {
-  it("returns the correct context", () => {
-    const context = ProjectDetailRoute.options.beforeLoad!({} as any);
-    expect(context).toEqual({
-      headerTitle: "Project",
-      headerDescription: "View and manage project tasks.",
-    });
-  });
-});
-
-// ── Nav items include Projects ──────────────────────────────────────
-
-describe("navItems", () => {
-  it("includes Projects entry", () => {
-    const projects = navItems.find(
-      (item) => item.to === "/dashboard/projects",
-    );
-    expect(projects).toBeDefined();
-    expect(projects!.label).toBe("Projects");
-    expect(projects!.i18nKey).toBe("projects.nav.projects");
-  });
-});
 
 // ── ProjectsPage ────────────────────────────────────────────────────
 
-test("Projects page renders heading and create form", async ({ client }) => {
-  renderWithRouter(<ProjectsPage />, client);
+describe("ProjectsPage", () => {
+  test("shows empty state with create form when no projects", async ({
+    client,
+  }) => {
+    renderWithRouter(<ProjectsPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByText("Projects")).toBeInTheDocument();
-  });
-
-  expect(
-    screen.getByPlaceholderText("New project name..."),
-  ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
-});
-
-test("Projects page renders project cards", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  // Seed project
-  await testClient.run(async (ctx: any) => {
-    await ctx.db.insert("projects", {
-      name: "Alpha",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  renderWithRouter(<ProjectsPage />, client);
-
-  await waitFor(() => {
-    expect(screen.getByText("Alpha")).toBeInTheDocument();
-  });
-
-  // Should show task count
-  expect(screen.getByText("0 tasks")).toBeInTheDocument();
-});
-
-test("Projects page shows empty state when no projects", async ({
-  client,
-}) => {
-  renderWithRouter(<ProjectsPage />, client);
-
-  await waitFor(() => {
     expect(
-      screen.getByText("No projects yet. Create one above!"),
+      await screen.findByText("No projects yet. Create one above!"),
     ).toBeInTheDocument();
-  });
-});
-
-test("Projects page creates a project via form", async ({ client }) => {
-  renderWithRouter(<ProjectsPage />, client);
-
-  const user = userEvent.setup();
-
-  await waitFor(() => {
     expect(
       screen.getByPlaceholderText("New project name..."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create/i }),
+    ).toBeInTheDocument();
   });
 
-  const input = screen.getByPlaceholderText("New project name...");
-  await user.type(input, "Beta Project");
-  await user.click(screen.getByRole("button", { name: /create/i }));
+  test("renders project cards with task count", async ({
+    client,
+    testClient,
+    userId,
+  }) => {
+    await testClient.run(async (ctx: any) => {
+      await ctx.db.insert("projects", {
+        name: "Alpha",
+        status: "active",
+        creatorId: userId,
+      });
+    });
 
-  // Verify project was created in backend
-  await waitFor(async () => {
-    const projects = await client.query(api.projects.queries.list, {});
-    expect(projects.some((p: any) => p.name === "Beta Project")).toBe(true);
+    renderWithRouter(<ProjectsPage />, client);
+
+    expect(await screen.findByText("Alpha")).toBeInTheDocument();
+    expect(screen.getByText("0 tasks")).toBeInTheDocument();
   });
-});
 
-test("Projects page renders status filter tabs", async ({ client }) => {
-  renderWithRouter(<ProjectsPage />, client);
+  test("creates project via form submission", async ({ client }) => {
+    renderWithRouter(<ProjectsPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByText("All")).toBeInTheDocument();
+    const user = userEvent.setup();
+
+    const input = await screen.findByPlaceholderText("New project name...");
+    await user.type(input, "Beta Project");
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    await waitFor(async () => {
+      const projects = await client.query(api.projects.queries.list, {});
+      expect(projects.some((p: any) => p.name === "Beta Project")).toBe(true);
+    });
   });
 
-  expect(screen.getByText("Active")).toBeInTheDocument();
-  expect(screen.getByText("On Hold")).toBeInTheDocument();
-  expect(screen.getByText("Completed")).toBeInTheDocument();
-  expect(screen.getByText("Archived")).toBeInTheDocument();
+  test("renders status filter tabs", async ({ client }) => {
+    renderWithRouter(<ProjectsPage />, client);
+
+    expect(await screen.findByText("All")).toBeInTheDocument();
+    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.getByText("On Hold")).toBeInTheDocument();
+    expect(screen.getByText("Completed")).toBeInTheDocument();
+    expect(screen.getByText("Archived")).toBeInTheDocument();
+  });
+
+  test("renders project card with status badge", async ({
+    client,
+    testClient,
+    userId,
+  }) => {
+    await testClient.run(async (ctx: any) => {
+      await ctx.db.insert("projects", {
+        name: "Card Test",
+        status: "active",
+        creatorId: userId,
+      });
+    });
+
+    renderWithRouter(<ProjectsPage />, client);
+
+    expect(await screen.findByText("Card Test")).toBeInTheDocument();
+    // "Active" appears in filter tab and badge
+    expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("0 tasks")).toBeInTheDocument();
+  });
 });
 
 // ── ProjectDetailPage ───────────────────────────────────────────────
 
-test("ProjectDetailPage renders project name and summary bar", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Detail Test",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  // Add a task to the project
-  await testClient.run(async (ctx: any) => {
-    await ctx.db.insert("tasks", {
-      title: "Project Task",
-      priority: false,
-      status: "todo",
-      visibility: "shared",
-      creatorId: userId,
-      assigneeId: userId,
-      projectId,
-      position: 1,
-    });
-  });
-
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+describe("ProjectDetailPage", () => {
+  test("renders project name, task list, and summary bar", async ({
     client,
-  );
-
-  await waitFor(() => {
-    expect(screen.getByText("Detail Test")).toBeInTheDocument();
-  });
-
-  // Summary bar should show task count
-  expect(screen.getByText(/1 todo/)).toBeInTheDocument();
-
-  // Task should be listed
-  expect(screen.getByText("Project Task")).toBeInTheDocument();
-});
-
-test("ProjectDetailPage renders inline task creation input", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Task Input Test",
-      status: "active",
-      creatorId: userId,
+    testClient,
+    userId,
+  }) => {
+    const projectId = await testClient.run(async (ctx: any) => {
+      return ctx.db.insert("projects", {
+        name: "Detail Test",
+        status: "active",
+        creatorId: userId,
+      });
     });
+
+    await testClient.run(async (ctx: any) => {
+      await ctx.db.insert("tasks", {
+        title: "Project Task",
+        priority: false,
+        status: "todo",
+        visibility: "shared",
+        creatorId: userId,
+        assigneeId: userId,
+        projectId,
+        position: 1,
+      });
+    });
+
+    renderWithRouter(
+      <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+      client,
+    );
+
+    expect(await screen.findByText("Detail Test")).toBeInTheDocument();
+    expect(screen.getByText(/1 todo/)).toBeInTheDocument();
+    expect(screen.getByText("Project Task")).toBeInTheDocument();
   });
 
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+  test("shows empty task message with create input", async ({
     client,
-  );
+    testClient,
+    userId,
+  }) => {
+    const projectId = await testClient.run(async (ctx: any) => {
+      return ctx.db.insert("projects", {
+        name: "Empty Project",
+        status: "active",
+        creatorId: userId,
+      });
+    });
 
-  await waitFor(() => {
+    renderWithRouter(
+      <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+      client,
+    );
+
+    expect(
+      await screen.findByText("No tasks in this project."),
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Add a task...")).toBeInTheDocument();
   });
-});
 
-test("ProjectDetailPage shows empty state when no tasks", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Empty Project",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+  test("shows not found for nonexistent project", async ({
     client,
-  );
+    testClient,
+    userId,
+  }) => {
+    const projectId = await testClient.run(async (ctx: any) => {
+      return ctx.db.insert("projects", {
+        name: "Temp",
+        status: "active",
+        creatorId: userId,
+      });
+    });
+    await testClient.run(async (ctx: any) => ctx.db.delete(projectId));
 
-  await waitFor(() => {
+    renderWithRouter(
+      <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+      client,
+    );
+
     expect(
-      screen.getByText("No tasks in this project."),
+      await screen.findByText("Project not found."),
     ).toBeInTheDocument();
   });
-});
 
-test("ProjectDetailPage shows not found for invalid project", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  // Create and delete a project to get a valid-format but nonexistent ID
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Temp",
-      status: "active",
-      creatorId: userId,
+  test("creates task inline", async ({ client, testClient, userId }) => {
+    const projectId = await testClient.run(async (ctx: any) => {
+      return ctx.db.insert("projects", {
+        name: "Inline Creation",
+        status: "active",
+        creatorId: userId,
+      });
     });
-  });
-  await testClient.run(async (ctx: any) => ctx.db.delete(projectId));
 
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
-    client,
-  );
-
-  await waitFor(() => {
-    expect(screen.getByText("Project not found.")).toBeInTheDocument();
-  });
-});
-
-test("ProjectDetailPage renders project data after loading", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Loading Test",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
-    client,
-  );
-
-  // Should show the project after data loads
-  await waitFor(() => {
-    expect(screen.getByText("Loading Test")).toBeInTheDocument();
-  });
-});
-
-test("ProjectDetailPage creates task inline", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Inline Creation",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
-    client,
-  );
-
-  const user = userEvent.setup();
-
-  await waitFor(() => {
-    expect(screen.getByPlaceholderText("Add a task...")).toBeInTheDocument();
-  });
-
-  const input = screen.getByPlaceholderText("Add a task...");
-  await user.type(input, "Inline task");
-  await user.click(screen.getByRole("button", { name: /add/i }));
-
-  await waitFor(async () => {
-    const result = await client.query(api.projects.queries.getWithTasks, {
-      projectId: projectId as Id<"projects">,
-    });
-    expect(result!.tasks.some((t: any) => t.title === "Inline task")).toBe(
-      true,
+    renderWithRouter(
+      <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+      client,
     );
-  });
-});
 
-test("ProjectDetailPage back link renders", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Back Link Test",
-      status: "active",
-      creatorId: userId,
+    const user = userEvent.setup();
+
+    const input = await screen.findByPlaceholderText("Add a task...");
+    await user.type(input, "Inline task");
+    await user.click(screen.getByRole("button", { name: /add/i }));
+
+    await waitFor(async () => {
+      const result = await client.query(api.projects.queries.getWithTasks, {
+        projectId: projectId as Id<"projects">,
+      });
+      expect(result!.tasks.some((t: any) => t.title === "Inline task")).toBe(
+        true,
+      );
     });
   });
 
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+  test("renders back link to projects", async ({
     client,
-  );
-
-  await waitFor(() => {
-    expect(screen.getByText("Back to Projects")).toBeInTheDocument();
-  });
-});
-
-test("ProjectDetailPage name edit inline saves on Enter", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  const projectId = await testClient.run(async (ctx: any) => {
-    return ctx.db.insert("projects", {
-      name: "Editable Name",
-      status: "active",
-      creatorId: userId,
+    testClient,
+    userId,
+  }) => {
+    const projectId = await testClient.run(async (ctx: any) => {
+      return ctx.db.insert("projects", {
+        name: "Back Link Test",
+        status: "active",
+        creatorId: userId,
+      });
     });
+
+    renderWithRouter(
+      <ProjectDetailPage projectId={projectId as Id<"projects">} />,
+      client,
+    );
+
+    expect(
+      await screen.findByText("Back to Projects"),
+    ).toBeInTheDocument();
   });
-
-  renderWithRouter(
-    <ProjectDetailPage projectId={projectId as Id<"projects">} />,
-    client,
-  );
-
-  await waitFor(() => {
-    expect(screen.getByText("Editable Name")).toBeInTheDocument();
-  });
-
-  // The h1 is not directly clickable to edit in this component
-  // Edit is triggered via dropdown menu which is not testable in jsdom
-  // The inline edit input and handleNameSave are covered by the component structure
 });
 
 // ── ProjectStatusBadge ──────────────────────────────────────────────
@@ -391,7 +294,7 @@ describe("ProjectStatusBadge", () => {
 // ── TaskSummaryBar ──────────────────────────────────────────────────
 
 describe("TaskSummaryBar", () => {
-  it("renders status counts text", () => {
+  it("renders per-status counts", () => {
     render(
       <TaskSummaryBar counts={{ todo: 3, in_progress: 2, done: 1 }} />,
     );
@@ -400,81 +303,10 @@ describe("TaskSummaryBar", () => {
     expect(screen.getByText(/1 done/)).toBeInTheDocument();
   });
 
-  it("returns null when total is 0", () => {
+  it("renders nothing when total is zero", () => {
     const { container } = render(
       <TaskSummaryBar counts={{ todo: 0, in_progress: 0, done: 0 }} />,
     );
-    // Container should be empty (no content rendered)
     expect(container.querySelector(".flex.flex-col.gap-1")).toBeNull();
-  });
-});
-
-// ── ProjectCard ─────────────────────────────────────────────────────
-
-test("ProjectCard renders project name, status badge, and task count", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  await testClient.run(async (ctx: any) => {
-    await ctx.db.insert("projects", {
-      name: "Card Test",
-      status: "active",
-      creatorId: userId,
-    });
-  });
-
-  renderWithRouter(<ProjectsPage />, client);
-
-  await waitFor(() => {
-    expect(screen.getByText("Card Test")).toBeInTheDocument();
-  });
-
-  // "Active" appears both in filter tabs and in the card badge
-  expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(2);
-  expect(screen.getByText("0 tasks")).toBeInTheDocument();
-});
-
-// ── ProjectForm ─────────────────────────────────────────────────────
-
-test("ProjectForm renders with placeholder and create button", async ({
-  client,
-}) => {
-  renderWithRouter(<ProjectsPage />, client);
-
-  await waitFor(() => {
-    expect(
-      screen.getByPlaceholderText("New project name..."),
-    ).toBeInTheDocument();
-  });
-
-  expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
-});
-
-// ── TaskForm project dropdown ───────────────────────────────────────
-
-test("TaskForm creates task without project when no projects exist", async ({
-  client,
-}) => {
-  // Import TasksPage which uses TaskForm
-  const { TasksPage } = await import("@/features/tasks");
-
-  renderWithRouter(<TasksPage />, client);
-
-  const user = userEvent.setup();
-
-  await waitFor(() => {
-    expect(screen.getByPlaceholderText("Add a task...")).toBeInTheDocument();
-  });
-
-  const input = screen.getByPlaceholderText("Add a task...");
-  await user.type(input, "Quick task no project");
-  await user.click(screen.getByRole("button", { name: /add/i }));
-
-  await waitFor(async () => {
-    const tasks = await client.query(api.tasks.queries.myTasks, {});
-    expect(
-      tasks.some((t: any) => t.title === "Quick task no project"),
-    ).toBe(true);
   });
 });

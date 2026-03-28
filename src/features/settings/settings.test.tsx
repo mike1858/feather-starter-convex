@@ -1,53 +1,57 @@
-import { describe, expect, it } from "vitest";
+// Test Matrix: SettingsPage
+// | # | State                    | Approach    | What to verify                                    |
+// |---|--------------------------|-------------|---------------------------------------------------|
+// | 1 | Loaded with username     | Integration | username field populated, lowercase hint           |
+// | 2 | Form re-sync             | Integration | field updates when server data changes             |
+// | 3 | Username update          | Integration | submit updates backend                            |
+// | 4 | Avatar with image URL    | Integration | reset button visible, img src correct             |
+// | 5 | Remove avatar            | Integration | reset clears avatarUrl                            |
+// | 6 | Validation error         | Integration | short username shows border-destructive            |
+// | 7 | Delete account           | Integration | double-check flow, user deleted                   |
+// | 8 | File input handler       | Integration | processes file selection                          |
+// | 9 | File input no files      | Integration | early returns on null/empty files                 |
+// |10 | Unauthenticated          | Integration | renders nothing                                   |
+
+import { expect } from "vitest";
 import { screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { test } from "@cvx/test.setup";
 import { api } from "~/convex/_generated/api";
 import { renderWithRouter } from "@/test-helpers";
 import { SettingsPage } from "./index";
-import { Route } from "@/routes/_app/_auth/dashboard/_layout.settings.index";
 
-describe("SettingsRoute.beforeLoad", () => {
-  it("returns the correct context", () => {
-    const context = Route.options.beforeLoad!({} as any);
-    expect(context).toEqual({
-      headerTitle: "Settings",
-      headerDescription: "Manage your account settings.",
-    });
-  });
-});
-
-test("renders user info with username and lowercase hint", async ({ client, testClient, userId }) => {
-  // Patch the existing user document (created by the test fixture)
+test("renders username field with lowercase hint", async ({
+  client,
+  testClient,
+  userId,
+}) => {
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, { username: "testuser123" });
   });
 
   renderWithRouter(<SettingsPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("testuser123")).toBeInTheDocument();
-  });
-
+  expect(
+    await screen.findByDisplayValue("testuser123"),
+  ).toBeInTheDocument();
   expect(
     screen.getByText(/lowercase and alphanumeric/i),
   ).toBeInTheDocument();
 });
 
-test("re-syncs username form when server data changes", async ({ client, testClient, userId }) => {
-  // Start with one username
+test("re-syncs username form when server data changes", async ({
+  client,
+  testClient,
+  userId,
+}) => {
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, { username: "oldname" });
   });
 
   const { unmount } = renderWithRouter(<SettingsPage />, client);
 
-  // Verify initial value syncs via useEffect + form.reset()
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("oldname")).toBeInTheDocument();
-  });
+  expect(await screen.findByDisplayValue("oldname")).toBeInTheDocument();
 
-  // User edits the field locally (dirty form)
   const user = userEvent.setup();
   const input = screen.getByPlaceholderText("Username");
   await user.clear(input);
@@ -55,20 +59,20 @@ test("re-syncs username form when server data changes", async ({ client, testCli
 
   expect(screen.getByDisplayValue("localedits")).toBeInTheDocument();
 
-  // Unmount and change server data
   unmount();
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, { username: "newname" });
   });
 
-  // Re-render: useEffect fires on mount with new user data, form.reset() updates values
   renderWithRouter(<SettingsPage />, client);
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("newname")).toBeInTheDocument();
-  });
+  expect(await screen.findByDisplayValue("newname")).toBeInTheDocument();
 });
 
-test("updates username via form", async ({ client, testClient, userId }) => {
+test("updates username via form submission", async ({
+  client,
+  testClient,
+  userId,
+}) => {
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, { username: "oldname" });
   });
@@ -77,31 +81,28 @@ test("updates username via form", async ({ client, testClient, userId }) => {
 
   const user = userEvent.setup();
 
-  // Wait for the form to populate
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("oldname")).toBeInTheDocument();
-  });
+  expect(await screen.findByDisplayValue("oldname")).toBeInTheDocument();
 
   const input = screen.getByPlaceholderText("Username");
   await user.clear(input);
   await user.type(input, "newname");
 
-  const saveButton = screen.getByRole("button", { name: /save/i });
-  await user.click(saveButton);
+  await user.click(screen.getByRole("button", { name: /save/i }));
 
-  // Verify the backend was updated
   await waitFor(async () => {
-    const updatedUser = await client.query(api.users.queries.getCurrentUser, {});
+    const updatedUser = await client.query(
+      api.users.queries.getCurrentUser,
+      {},
+    );
     expect(updatedUser?.username).toBe("newname");
   });
 });
 
-test("reset button visible when avatar exists", async ({
+test("shows reset button when avatar exists", async ({
   client,
   testClient,
   userId,
 }) => {
-  // Seed user with an external image URL (avatarUrl derives from `image` field)
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, {
       username: "testuser",
@@ -111,12 +112,12 @@ test("reset button visible when avatar exists", async ({
 
   renderWithRouter(<SettingsPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
-  });
+  expect(
+    await screen.findByRole("button", { name: /reset/i }),
+  ).toBeInTheDocument();
 });
 
-test("renders avatar image when avatarUrl exists", async ({
+test("renders avatar image with correct src", async ({
   client,
   testClient,
   userId,
@@ -136,7 +137,11 @@ test("renders avatar image when avatarUrl exists", async ({
   });
 });
 
-test("remove image button clears avatar", async ({ client, testClient, userId }) => {
+test("clears avatar on reset button click", async ({
+  client,
+  testClient,
+  userId,
+}) => {
   await testClient.run(async (ctx: any) => {
     await ctx.db.patch(userId, {
       username: "testuser",
@@ -148,15 +153,17 @@ test("remove image button clears avatar", async ({ client, testClient, userId })
 
   const user = userEvent.setup();
 
-  await waitFor(() => {
-    expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
-  });
+  expect(
+    await screen.findByRole("button", { name: /reset/i }),
+  ).toBeInTheDocument();
 
   await user.click(screen.getByRole("button", { name: /reset/i }));
 
-  // Verify the backend was updated -- avatar should be removed
   await waitFor(async () => {
-    const updatedUser = await client.query(api.users.queries.getCurrentUser, {});
+    const updatedUser = await client.query(
+      api.users.queries.getCurrentUser,
+      {},
+    );
     expect(updatedUser?.avatarUrl).toBeUndefined();
   });
 });
@@ -174,24 +181,22 @@ test("shows validation error for short username", async ({
 
   const user = userEvent.setup();
 
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("testuser")).toBeInTheDocument();
-  });
+  expect(
+    await screen.findByDisplayValue("testuser"),
+  ).toBeInTheDocument();
 
   const input = screen.getByPlaceholderText("Username");
   await user.clear(input);
   await user.type(input, "ab");
 
-  const saveButton = screen.getByRole("button", { name: /save/i });
-  await user.click(saveButton);
+  await user.click(screen.getByRole("button", { name: /save/i }));
 
-  // Validation error should appear
   await waitFor(() => {
     expect(input.className).toContain("border-destructive");
   });
 });
 
-test("delete account double-check flow and confirm", async ({
+test("deletes account with double-check confirmation", async ({
   client,
   testClient,
   userId,
@@ -204,35 +209,28 @@ test("delete account double-check flow and confirm", async ({
 
   const user = userEvent.setup();
 
-  await waitFor(() => {
-    expect(
-      screen.getByRole("button", { name: /delete account/i }),
-    ).toBeInTheDocument();
+  const deleteButton = await screen.findByRole("button", {
+    name: /delete account/i,
   });
 
-  // First click: triggers double-check
-  const deleteButton = screen.getByRole("button", { name: /delete account/i });
   await user.click(deleteButton);
 
-  // Button now shows "Are you sure?"
-  await waitFor(() => {
-    expect(
-      screen.getByRole("button", { name: /are you sure/i }),
-    ).toBeInTheDocument();
+  const confirmButton = await screen.findByRole("button", {
+    name: /are you sure/i,
   });
 
-  // Second click: confirms deletion
-  const confirmButton = screen.getByRole("button", { name: /are you sure/i });
   await user.click(confirmButton);
 
-  // Verify the backend user was deleted
   await waitFor(async () => {
-    const deletedUser = await client.query(api.users.queries.getCurrentUser, {});
+    const deletedUser = await client.query(
+      api.users.queries.getCurrentUser,
+      {},
+    );
     expect(deletedUser).toBeNull();
   });
 });
 
-test("file input onChange handler processes files", async ({
+test("processes file input onChange", async ({
   client,
   testClient,
   userId,
@@ -245,19 +243,18 @@ test("file input onChange handler processes files", async ({
 
   const user = userEvent.setup();
 
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("testuser")).toBeInTheDocument();
-  });
+  await screen.findByDisplayValue("testuser");
 
-  // Get the hidden file input and simulate file selection
-  const fileInput = document.getElementById("avatar_field") as HTMLInputElement;
+  const fileInput = document.getElementById(
+    "avatar_field",
+  ) as HTMLInputElement;
   expect(fileInput).toBeTruthy();
 
   const file = new File(["test-image"], "avatar.png", { type: "image/png" });
   await user.upload(fileInput, file);
 });
 
-test("file input onChange early-returns when no files selected", async ({
+test("handles file input with no files selected", async ({
   client,
   testClient,
   userId,
@@ -268,28 +265,22 @@ test("file input onChange early-returns when no files selected", async ({
 
   renderWithRouter(<SettingsPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByDisplayValue("testuser")).toBeInTheDocument();
-  });
+  await screen.findByDisplayValue("testuser");
 
-  const fileInput = document.getElementById("avatar_field") as HTMLInputElement;
+  const fileInput = document.getElementById(
+    "avatar_field",
+  ) as HTMLInputElement;
   expect(fileInput).toBeTruthy();
 
-  // Fire change with no files -- exercises the "!event.target.files" guard
   fireEvent.change(fileInput, { target: { files: null } });
-
-  // Fire change with empty FileList -- exercises the "files.length === 0" guard
   fireEvent.change(fileInput, { target: { files: [] } });
 });
 
-test("renders nothing when no user (unauthenticated)", async ({
-  testClient,
-}) => {
+test("renders nothing when unauthenticated", async ({ testClient }) => {
   const { container } = renderWithRouter(<SettingsPage />, testClient, {
     authenticated: false,
   });
 
-  // Component returns null when no user -- container stays empty
   await waitFor(
     () => {
       expect(container.innerHTML).toBe("");

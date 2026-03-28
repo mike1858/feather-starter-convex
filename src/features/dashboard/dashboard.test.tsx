@@ -1,5 +1,10 @@
+// Test Matrix: DashboardPage
+// | # | State  | Approach    | What to verify                                |
+// |---|--------|-------------|-----------------------------------------------|
+// | 1 | Loaded | Integration | get started heading and description visible   |
+
 import { expect } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { test } from "@cvx/test.setup";
 import { renderWithRouter } from "@/test-helpers";
 import { DashboardPage } from "./index";
@@ -9,10 +14,7 @@ test("renders dashboard page with get started content", async ({
 }) => {
   renderWithRouter(<DashboardPage />, client);
 
-  await waitFor(() => {
-    expect(screen.getByText("Get Started")).toBeInTheDocument();
-  });
-
+  expect(await screen.findByText("Get Started")).toBeInTheDocument();
   expect(
     screen.getByText(
       "Explore the Dashboard and get started with your first app.",

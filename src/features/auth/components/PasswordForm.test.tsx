@@ -1,3 +1,23 @@
+// Test Matrix: PasswordForm
+// | # | State                | Approach | What to verify                                 |
+// |---|----------------------|----------|------------------------------------------------|
+// | 1 | Sign-in mode         | Mock     | email + password fields, sign in button        |
+// | 2 | Mode toggle          | Mock     | switches signIn <-> signUp and back            |
+// | 3 | Email validation     | Mock     | border-destructive on invalid email            |
+// | 4 | Password validation  | Mock     | border-destructive on short password            |
+// | 5 | Sign-in submit       | Mock     | signIn called with correct params              |
+// | 6 | Sign-up submit       | Mock     | signIn called with signUp flow                 |
+// | 7 | Forgot password      | Mock     | calls onForgotPassword handler                 |
+// | 8 | Default email        | Mock     | prefills email field                           |
+// | 9 | Email change callback| Mock     | calls onEmailChange                            |
+// |10 | Error clear on toggle| Mock     | error disappears when mode switches            |
+// |11 | Duplicate account err| Mock     | "already exists" error message                 |
+// |12 | No account error     | Mock     | "no account found" error message               |
+// |13 | Generic error        | Mock     | "something went wrong" message                 |
+// |14 | Non-Error throwable  | Mock     | "something went wrong" for string error        |
+// |15 | Success callback     | Mock     | calls onSuccess after signIn                   |
+// |16 | Loading spinner      | Mock     | button text hidden during submission           |
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -34,16 +54,12 @@ describe("PasswordForm", () => {
 
     // Toggle to signUp
     await user.click(screen.getByRole("button", { name: /create an account/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole("button", { name: /sign up/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /already have an account/i })).toBeInTheDocument();
 
     // Toggle back to signIn
     await user.click(screen.getByRole("button", { name: /already have an account/i }));
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole("button", { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /create an account/i })).toBeInTheDocument();
   });
 
@@ -100,9 +116,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Email"), "new@example.com");
     await user.type(screen.getByPlaceholderText("Password"), "newpassword123");
 
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /sign up/i })).toBeInTheDocument();
-    });
+    await screen.findByRole("button", { name: /sign up/i });
     await user.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
@@ -146,9 +160,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/already exists/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/already exists/i)).toBeInTheDocument();
 
     // Toggle mode should clear error
     await user.click(screen.getByRole("button", { name: /create an account/i }));
@@ -166,9 +178,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/already exists.*try signing in/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/already exists.*try signing in/i)).toBeInTheDocument();
   });
 
   it("shows 'no account found' error on InvalidAccountId", async () => {
@@ -180,9 +190,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/no account found.*try signing up/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/no account found.*try signing up/i)).toBeInTheDocument();
   });
 
   it("shows generic error for unknown errors", async () => {
@@ -194,9 +202,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
   });
 
   it("handles non-Error throwable in catch", async () => {
@@ -208,9 +214,7 @@ describe("PasswordForm", () => {
     await user.type(screen.getByPlaceholderText("Password"), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
   });
 
   it("calls onSuccess after successful signIn", async () => {
@@ -245,8 +249,6 @@ describe("PasswordForm", () => {
     });
 
     resolveSignIn();
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
-    });
+    expect(await screen.findByRole("button", { name: /sign in/i })).toBeInTheDocument();
   });
 });

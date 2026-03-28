@@ -1,3 +1,17 @@
+// Test Matrix: PasswordResetForm
+// | # | State                     | Approach | What to verify                              |
+// |---|---------------------------|----------|---------------------------------------------|
+// | 1 | Forgot step initial       | Mock     | email field, send button, back button       |
+// | 2 | Forgot step validation    | Mock     | border-destructive on invalid email         |
+// | 3 | Forgot step submit        | Mock     | signIn called with reset flow, transitions  |
+// | 4 | Verify step fields        | Mock     | code + new password fields, email shown     |
+// | 5 | Verify step code valid.   | Mock     | border-destructive on short code            |
+// | 6 | Verify step pwd valid.    | Mock     | border-destructive on short password        |
+// | 7 | Verify step submit        | Mock     | signIn called with reset-verification flow  |
+// | 8 | Default email             | Mock     | prefills email field                        |
+// | 9 | Back button (forgot)      | Mock     | calls onBack                                |
+// |10 | Back button (verify)      | Mock     | calls onBack                                |
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -66,15 +80,9 @@ describe("PasswordResetForm", () => {
     });
 
     // Should transition to verify step
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("New Password"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /reset password/i }),
-      ).toBeInTheDocument();
-    });
+    expect(await screen.findByPlaceholderText("8-digit reset code")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("New Password")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reset password/i })).toBeInTheDocument();
   });
 
   it("renders verify step with code and new password fields", async () => {
@@ -90,9 +98,7 @@ describe("PasswordResetForm", () => {
       screen.getByRole("button", { name: /send reset code/i }),
     );
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-    });
+    await screen.findByPlaceholderText("8-digit reset code");
 
     expect(screen.getByPlaceholderText("New Password")).toBeInTheDocument();
     expect(
@@ -113,9 +119,7 @@ describe("PasswordResetForm", () => {
       screen.getByRole("button", { name: /send reset code/i }),
     );
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-    });
+    await screen.findByPlaceholderText("8-digit reset code");
 
     // Reset mock to track only the verify step calls
     mockSignIn.mockClear();
@@ -150,9 +154,7 @@ describe("PasswordResetForm", () => {
       screen.getByRole("button", { name: /send reset code/i }),
     );
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-    });
+    await screen.findByPlaceholderText("8-digit reset code");
 
     mockSignIn.mockClear();
 
@@ -186,9 +188,7 @@ describe("PasswordResetForm", () => {
       screen.getByRole("button", { name: /send reset code/i }),
     );
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-    });
+    await screen.findByPlaceholderText("8-digit reset code");
 
     mockSignIn.mockClear();
 
@@ -242,9 +242,7 @@ describe("PasswordResetForm", () => {
       screen.getByRole("button", { name: /send reset code/i }),
     );
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("8-digit reset code")).toBeInTheDocument();
-    });
+    await screen.findByPlaceholderText("8-digit reset code");
 
     await user.click(
       screen.getByRole("button", { name: /back to sign in/i }),
