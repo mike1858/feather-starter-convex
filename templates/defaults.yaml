@@ -33,6 +33,10 @@ access:
     update: owner
     delete: owner
   sharing: false
+  ownerField: creatorId
+
+identity:
+  type: auto-increment
 
 views:
   default:

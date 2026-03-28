@@ -1,0 +1,15 @@
+name: feather-starter-convex
+version: 2.0.0
+branding:
+  appName: CalmDo
+features:
+  - tasks
+  - projects
+  - subtasks
+  - workLogs
+  - activityLogs
+settings:
+  i18n:
+    languages: [en, es]
+  auth:
+    providers: [password, otp]

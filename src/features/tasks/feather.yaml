@@ -1,0 +1,103 @@
+name: tasks
+label: Task
+labelPlural: Tasks
+
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+  description:
+    type: text
+    max: 5000
+  status:
+    type: enum
+    values: [todo, in_progress, done]
+    default: todo
+    filterable: true
+    transitions:
+      todo: [in_progress]
+      in_progress: [done]
+  visibility:
+    type: enum
+    values: [private, shared]
+    default: private
+    filterable: true
+  priority:
+    type: boolean
+    default: false
+
+timestamps: false
+
+identity:
+  type: auto-increment
+
+behaviors:
+  assignable: true
+  orderable: true
+  softDelete: false
+  auditTrail: false
+
+access:
+  scope: custom
+  permissions:
+    create: authenticated
+    read: custom
+    update: owner
+    delete: owner
+
+views:
+  defaultView: list
+  enabledViews: [list]
+  filteredViews:
+    - name: my-tasks
+      label: My Tasks
+      filter: { assigneeId: $currentUser }
+      navEntry: true
+    - name: team-pool
+      label: Team Pool
+      filter: { visibility: shared, assigneeId: null }
+      navEntry: true
+
+relationships:
+  project:
+    type: belongs_to
+    target: projects
+    required: false
+    column: projectId
+
+detailView:
+  layout: panels
+  relatedRecords:
+    - source: subtasks
+      display: checklist
+      inline: true
+    - source: workLogs
+      display: timeline
+      inline: true
+    - source: activityLogs
+      display: timeline
+      readonly: true
+
+derivedData:
+  subtaskCount:
+    type: count
+    source: subtasks
+  totalTimeLogged:
+    type: sum
+    source: workLogs
+    field: minutes
+
+hooks:
+  afterSave: custom/tasks/hooks/afterSave
+  onStatusChange: custom/tasks/hooks/onStatusChange
+
+indexes:
+  - name: by_assignee
+    fields: [assigneeId]
+  - name: by_visibility
+    fields: [visibility]
+  - name: by_creator
+    fields: [creatorId]
+  - name: by_assignee_status
+    fields: [assigneeId, status]
