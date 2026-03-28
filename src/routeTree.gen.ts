@@ -19,11 +19,12 @@ import { Route as AppAuthOnboardingLayoutRouteImport } from './routes/_app/_auth
 import { Route as AppAuthDashboardLayoutRouteImport } from './routes/_app/_auth/dashboard/_layout'
 import { Route as AppAuthDashboardLayoutIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.index'
 import { Route as AppAuthOnboardingLayoutUsernameRouteImport } from './routes/_app/_auth/onboarding/_layout.username'
+import { Route as AppAuthDashboardLayoutTodosRouteImport } from './routes/_app/_auth/dashboard/_layout.todos'
+import { Route as AppAuthDashboardLayoutTicketsRouteImport } from './routes/_app/_auth/dashboard/_layout.tickets'
 import { Route as AppAuthDashboardLayoutTeamPoolRouteImport } from './routes/_app/_auth/dashboard/_layout.team-pool'
 import { Route as AppAuthDashboardLayoutTasksRouteImport } from './routes/_app/_auth/dashboard/_layout.tasks'
-import { Route as AppAuthDashboardLayoutTicketsRouteImport } from './routes/_app/_auth/dashboard/_layout.tickets'
-import { Route as AppAuthDashboardLayoutTodosRouteImport } from './routes/_app/_auth/dashboard/_layout.todos'
 import { Route as AppAuthDashboardLayoutSettingsRouteImport } from './routes/_app/_auth/dashboard/_layout.settings'
+import { Route as AppAuthDashboardLayoutContactsRouteImport } from './routes/_app/_auth/dashboard/_layout.contacts'
 import { Route as AppAuthDashboardLayoutSettingsIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.settings.index'
 import { Route as AppAuthDashboardLayoutProjectsIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.projects.index'
 import { Route as AppAuthDashboardLayoutProjectsProjectIdRouteImport } from './routes/_app/_auth/dashboard/_layout.projects.$projectId'
@@ -78,6 +79,18 @@ const AppAuthOnboardingLayoutUsernameRoute =
     path: '/username',
     getParentRoute: () => AppAuthOnboardingLayoutRoute,
   } as any)
+const AppAuthDashboardLayoutTodosRoute =
+  AppAuthDashboardLayoutTodosRouteImport.update({
+    id: '/todos',
+    path: '/todos',
+    getParentRoute: () => AppAuthDashboardLayoutRoute,
+  } as any)
+const AppAuthDashboardLayoutTicketsRoute =
+  AppAuthDashboardLayoutTicketsRouteImport.update({
+    id: '/tickets',
+    path: '/tickets',
+    getParentRoute: () => AppAuthDashboardLayoutRoute,
+  } as any)
 const AppAuthDashboardLayoutTeamPoolRoute =
   AppAuthDashboardLayoutTeamPoolRouteImport.update({
     id: '/team-pool',
@@ -90,22 +103,16 @@ const AppAuthDashboardLayoutTasksRoute =
     path: '/tasks',
     getParentRoute: () => AppAuthDashboardLayoutRoute,
   } as any)
-const AppAuthDashboardLayoutTicketsRoute =
-  AppAuthDashboardLayoutTicketsRouteImport.update({
-    id: '/tickets',
-    path: '/tickets',
-    getParentRoute: () => AppAuthDashboardLayoutRoute,
-  } as any)
-const AppAuthDashboardLayoutTodosRoute =
-  AppAuthDashboardLayoutTodosRouteImport.update({
-    id: '/todos',
-    path: '/todos',
-    getParentRoute: () => AppAuthDashboardLayoutRoute,
-  } as any)
 const AppAuthDashboardLayoutSettingsRoute =
   AppAuthDashboardLayoutSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AppAuthDashboardLayoutRoute,
+  } as any)
+const AppAuthDashboardLayoutContactsRoute =
+  AppAuthDashboardLayoutContactsRouteImport.update({
+    id: '/contacts',
+    path: '/contacts',
     getParentRoute: () => AppAuthDashboardLayoutRoute,
   } as any)
 const AppAuthDashboardLayoutSettingsIndexRoute =
@@ -134,11 +141,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppAuthDashboardLayoutRouteWithChildren
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login/': typeof AppLoginLayoutIndexRoute
+  '/dashboard/contacts': typeof AppAuthDashboardLayoutContactsRoute
   '/dashboard/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   '/dashboard/tasks': typeof AppAuthDashboardLayoutTasksRoute
+  '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/dashboard/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/dashboard/todos': typeof AppAuthDashboardLayoutTodosRoute
-  '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/onboarding/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/dashboard/': typeof AppAuthDashboardLayoutIndexRoute
   '/dashboard/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -150,10 +158,11 @@ export interface FileRoutesByTo {
   '/dev/mailbox': typeof AppDevMailboxRoute
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login': typeof AppLoginLayoutIndexRoute
+  '/dashboard/contacts': typeof AppAuthDashboardLayoutContactsRoute
   '/dashboard/tasks': typeof AppAuthDashboardLayoutTasksRoute
+  '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/dashboard/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/dashboard/todos': typeof AppAuthDashboardLayoutTodosRoute
-  '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/onboarding/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/dashboard': typeof AppAuthDashboardLayoutIndexRoute
   '/dashboard/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -170,11 +179,12 @@ export interface FileRoutesById {
   '/_app/_auth/dashboard/_layout': typeof AppAuthDashboardLayoutRouteWithChildren
   '/_app/_auth/onboarding/_layout': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/_app/login/_layout/': typeof AppLoginLayoutIndexRoute
+  '/_app/_auth/dashboard/_layout/contacts': typeof AppAuthDashboardLayoutContactsRoute
   '/_app/_auth/dashboard/_layout/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   '/_app/_auth/dashboard/_layout/tasks': typeof AppAuthDashboardLayoutTasksRoute
+  '/_app/_auth/dashboard/_layout/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/_app/_auth/dashboard/_layout/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/_app/_auth/dashboard/_layout/todos': typeof AppAuthDashboardLayoutTodosRoute
-  '/_app/_auth/dashboard/_layout/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/_app/_auth/onboarding/_layout/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/_app/_auth/dashboard/_layout/': typeof AppAuthDashboardLayoutIndexRoute
   '/_app/_auth/dashboard/_layout/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -190,11 +200,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/login/'
+    | '/dashboard/contacts'
     | '/dashboard/settings'
     | '/dashboard/tasks'
+    | '/dashboard/team-pool'
     | '/dashboard/tickets'
     | '/dashboard/todos'
-    | '/dashboard/team-pool'
     | '/onboarding/username'
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
@@ -206,10 +217,11 @@ export interface FileRouteTypes {
     | '/dev/mailbox'
     | '/onboarding'
     | '/login'
+    | '/dashboard/contacts'
     | '/dashboard/tasks'
+    | '/dashboard/team-pool'
     | '/dashboard/tickets'
     | '/dashboard/todos'
-    | '/dashboard/team-pool'
     | '/onboarding/username'
     | '/dashboard'
     | '/dashboard/projects/$projectId'
@@ -225,11 +237,12 @@ export interface FileRouteTypes {
     | '/_app/_auth/dashboard/_layout'
     | '/_app/_auth/onboarding/_layout'
     | '/_app/login/_layout/'
+    | '/_app/_auth/dashboard/_layout/contacts'
     | '/_app/_auth/dashboard/_layout/settings'
     | '/_app/_auth/dashboard/_layout/tasks'
+    | '/_app/_auth/dashboard/_layout/team-pool'
     | '/_app/_auth/dashboard/_layout/tickets'
     | '/_app/_auth/dashboard/_layout/todos'
-    | '/_app/_auth/dashboard/_layout/team-pool'
     | '/_app/_auth/onboarding/_layout/username'
     | '/_app/_auth/dashboard/_layout/'
     | '/_app/_auth/dashboard/_layout/projects/$projectId'
@@ -314,6 +327,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthOnboardingLayoutUsernameRouteImport
       parentRoute: typeof AppAuthOnboardingLayoutRoute
     }
+    '/_app/_auth/dashboard/_layout/todos': {
+      id: '/_app/_auth/dashboard/_layout/todos'
+      path: '/todos'
+      fullPath: '/dashboard/todos'
+      preLoaderRoute: typeof AppAuthDashboardLayoutTodosRouteImport
+      parentRoute: typeof AppAuthDashboardLayoutRoute
+    }
+    '/_app/_auth/dashboard/_layout/tickets': {
+      id: '/_app/_auth/dashboard/_layout/tickets'
+      path: '/tickets'
+      fullPath: '/dashboard/tickets'
+      preLoaderRoute: typeof AppAuthDashboardLayoutTicketsRouteImport
+      parentRoute: typeof AppAuthDashboardLayoutRoute
+    }
     '/_app/_auth/dashboard/_layout/team-pool': {
       id: '/_app/_auth/dashboard/_layout/team-pool'
       path: '/team-pool'
@@ -328,25 +355,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthDashboardLayoutTasksRouteImport
       parentRoute: typeof AppAuthDashboardLayoutRoute
     }
-    '/_app/_auth/dashboard/_layout/tickets': {
-      id: '/_app/_auth/dashboard/_layout/tickets'
-      path: '/tickets'
-      fullPath: '/dashboard/tickets'
-      preLoaderRoute: typeof AppAuthDashboardLayoutTicketsRouteImport
-      parentRoute: typeof AppAuthDashboardLayoutRoute
-    }
-    '/_app/_auth/dashboard/_layout/todos': {
-      id: '/_app/_auth/dashboard/_layout/todos'
-      path: '/todos'
-      fullPath: '/dashboard/todos'
-      preLoaderRoute: typeof AppAuthDashboardLayoutTodosRouteImport
-      parentRoute: typeof AppAuthDashboardLayoutRoute
-    }
     '/_app/_auth/dashboard/_layout/settings': {
       id: '/_app/_auth/dashboard/_layout/settings'
       path: '/settings'
       fullPath: '/dashboard/settings'
       preLoaderRoute: typeof AppAuthDashboardLayoutSettingsRouteImport
+      parentRoute: typeof AppAuthDashboardLayoutRoute
+    }
+    '/_app/_auth/dashboard/_layout/contacts': {
+      id: '/_app/_auth/dashboard/_layout/contacts'
+      path: '/contacts'
+      fullPath: '/dashboard/contacts'
+      preLoaderRoute: typeof AppAuthDashboardLayoutContactsRouteImport
       parentRoute: typeof AppAuthDashboardLayoutRoute
     }
     '/_app/_auth/dashboard/_layout/settings/': {
@@ -389,11 +409,12 @@ const AppAuthDashboardLayoutSettingsRouteWithChildren =
   )
 
 interface AppAuthDashboardLayoutRouteChildren {
+  AppAuthDashboardLayoutContactsRoute: typeof AppAuthDashboardLayoutContactsRoute
   AppAuthDashboardLayoutSettingsRoute: typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   AppAuthDashboardLayoutTasksRoute: typeof AppAuthDashboardLayoutTasksRoute
+  AppAuthDashboardLayoutTeamPoolRoute: typeof AppAuthDashboardLayoutTeamPoolRoute
   AppAuthDashboardLayoutTicketsRoute: typeof AppAuthDashboardLayoutTicketsRoute
   AppAuthDashboardLayoutTodosRoute: typeof AppAuthDashboardLayoutTodosRoute
-  AppAuthDashboardLayoutTeamPoolRoute: typeof AppAuthDashboardLayoutTeamPoolRoute
   AppAuthDashboardLayoutIndexRoute: typeof AppAuthDashboardLayoutIndexRoute
   AppAuthDashboardLayoutProjectsProjectIdRoute: typeof AppAuthDashboardLayoutProjectsProjectIdRoute
   AppAuthDashboardLayoutProjectsIndexRoute: typeof AppAuthDashboardLayoutProjectsIndexRoute
@@ -401,12 +422,13 @@ interface AppAuthDashboardLayoutRouteChildren {
 
 const AppAuthDashboardLayoutRouteChildren: AppAuthDashboardLayoutRouteChildren =
   {
+    AppAuthDashboardLayoutContactsRoute: AppAuthDashboardLayoutContactsRoute,
     AppAuthDashboardLayoutSettingsRoute:
       AppAuthDashboardLayoutSettingsRouteWithChildren,
     AppAuthDashboardLayoutTasksRoute: AppAuthDashboardLayoutTasksRoute,
+    AppAuthDashboardLayoutTeamPoolRoute: AppAuthDashboardLayoutTeamPoolRoute,
     AppAuthDashboardLayoutTicketsRoute: AppAuthDashboardLayoutTicketsRoute,
     AppAuthDashboardLayoutTodosRoute: AppAuthDashboardLayoutTodosRoute,
-    AppAuthDashboardLayoutTeamPoolRoute: AppAuthDashboardLayoutTeamPoolRoute,
     AppAuthDashboardLayoutIndexRoute: AppAuthDashboardLayoutIndexRoute,
     AppAuthDashboardLayoutProjectsProjectIdRoute:
       AppAuthDashboardLayoutProjectsProjectIdRoute,

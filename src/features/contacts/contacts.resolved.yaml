@@ -1,0 +1,115 @@
+timestamps: both
+behaviors:
+  softDelete: false
+  auditTrail: false
+  immutable: false
+  assignable: false
+  orderable: false
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+  sharing: false
+views:
+  default:
+    defaultView: list
+    enabledViews:
+      - list
+      - table
+  table:
+    design: minimal
+    pageSize: 20
+  card:
+    size: default
+    orientation: grid
+    imageStyle: none
+  list:
+    density: comfortable
+  detail:
+    display: page
+  pagination:
+    table:
+      mode: offset
+      pageSize: 20
+    list:
+      mode: infinite
+    card:
+      mode: infinite
+    cover:
+      mode: infinite
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+search: false
+searchFields:
+  - title
+  - description
+i18n:
+  languages:
+    - en
+    - es
+name: contacts
+label: Contact
+labelPlural: Contacts
+fields:
+  name:
+    type: string
+    required: true
+    max: 200
+    showOn: all
+    hideOn: &a1 []
+    filterable: false
+    sortable: true
+  email:
+    type: string
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: true
+  company:
+    type: string
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: true
+  status:
+    type: enum
+    required: false
+    max: 200
+    showOn: all
+    hideOn: *a1
+    filterable: true
+    sortable: true
+    values:
+      - lead
+      - active
+      - inactive
+    default: lead
+    colors:
+      lead: 0
+      active: 1
+      inactive: 2
+  phone:
+    type: string
+    required: false
+    max: 50
+    showOn: all
+    hideOn: *a1
+    filterable: false
+    sortable: true
+indexes:
+  - name: by_userId
+    fields:
+      - userId
+  - name: by_status
+    fields:
+      - status

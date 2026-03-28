@@ -18,6 +18,10 @@ import {
   priority as tickets_priority,
 } from "../src/shared/schemas/tickets";
 
+import {
+  status as contacts_status,
+} from "../src/shared/schemas/contacts";
+
 const schema = defineSchema({
   ...authTables,
   users: defineTable({
@@ -107,6 +111,17 @@ const schema = defineSchema({
     .index("by_userId", ["userId"])
     .index("by_status", ["status"])
     .index("by_priority", ["priority"]),
+
+  contacts: defineTable({
+    name: v.string(),
+    email: v.optional(v.string()),
+    company: v.optional(v.string()),
+    status: zodToConvex(contacts_status),
+    phone: v.optional(v.string()),
+    userId: v.id("users"),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"]),
 
 });
 

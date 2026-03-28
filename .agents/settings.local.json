@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"channels\")",
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"remote-control\")",
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"platforms\")",
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"plugin-marketplaces\")",
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"fast-mode\")",
+      "Bash(~/.claude-code-docs/claude-docs-helper.sh \"changelog\")"
+    ]
+  }
+}

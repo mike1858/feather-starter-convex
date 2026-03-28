@@ -43,4 +43,8 @@ export const ERRORS = {
     NOT_FOUND: "Ticket not found.",
     INVALID_STATUS_TRANSITION: "Invalid status transition.",
   },
+  contacts: {
+    NOT_FOUND: "Contact not found.",
+    INVALID_STATUS_TRANSITION: "Invalid status transition.",
+  },
 } as const;

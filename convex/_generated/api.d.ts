@@ -13,6 +13,8 @@ import type * as activityLogs_queries from "../activityLogs/queries.js";
 import type * as auth from "../auth.js";
 import type * as auth_queries from "../auth/queries.js";
 import type * as config from "../config.js";
+import type * as contacts_mutations from "../contacts/mutations.js";
+import type * as contacts_queries from "../contacts/queries.js";
 import type * as devEmails_mutations from "../devEmails/mutations.js";
 import type * as devEmails_queries from "../devEmails/queries.js";
 import type * as email_index from "../email/index.js";
@@ -53,6 +55,8 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "auth/queries": typeof auth_queries;
   config: typeof config;
+  "contacts/mutations": typeof contacts_mutations;
+  "contacts/queries": typeof contacts_queries;
   "devEmails/mutations": typeof devEmails_mutations;
   "devEmails/queries": typeof devEmails_queries;
   "email/index": typeof email_index;

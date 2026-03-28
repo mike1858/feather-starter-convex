@@ -1,0 +1,43 @@
+name: contacts
+label: Contact
+labelPlural: Contacts
+
+fields:
+  name:
+    type: string
+    required: true
+    max: 200
+  email:
+    type: string
+    max: 200
+  company:
+    type: string
+    max: 200
+  status:
+    type: enum
+    values: [lead, active, inactive]
+    default: lead
+    filterable: true
+  phone:
+    type: string
+    max: 50
+
+behaviors:
+  orderable: false
+  assignable: false
+  softDelete: false
+  auditTrail: false
+  immutable: false
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+
+views:
+  default:
+    defaultView: list
+    enabledViews: [list, table]

@@ -1,0 +1,60 @@
+{
+  "nav": {
+    "contacts": "Contacts"
+  },
+  "page": {
+    "title": "Contacts",
+    "description": "Administra tus contacts."
+  },
+  "form": {
+    "addInline": "Agregar contact...",
+    "submit": "Agregar",
+    "create": "Crear Contact",
+    "save": "Guardar cambios",
+    "edit": "Editar",
+    "discard": "Descartar",
+    "discardChanges": "Descartar cambios",
+    "close": "Cerrar"
+  },
+  "empty": {
+    "title": "Aun no hay contacts",
+    "description": "Crea tu primer contact para comenzar.",
+    "cta": "Crear Contact",
+    "noResults": "Sin resultados",
+    "noResultsDescription": "No hay contacts que coincidan con el filtro actual. Intenta ajustar tus filtros."
+  },
+  "error": {
+    "notFound": "Contact no encontrado.",
+    "invalidTransition": "Transicion de estado invalida.",
+    "authRequired": "Inicio de sesion requerido.",
+    "loadFailedTitle": "Algo salio mal",
+    "loadFailedDescription": "No pudimos cargar tus contacts. Por favor intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "delete": {
+    "confirm": "Eliminar?"
+  },
+  "table": {
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}",
+    "rowsPerPage": "Filas por pagina"
+  },
+  "filter": {
+    "all": "Todos"
+  },
+  "search": {
+    "placeholder": "Buscar contacts..."
+  },
+  "detail": {
+    "editing": "Editando {{recordTitle}}",
+    "notSet": "No definido"
+  },
+  "priority": {
+    "high": "Alta prioridad",
+    "normal": "Normal"
+  },
+  "status": {
+    "lead": "Lead",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}
