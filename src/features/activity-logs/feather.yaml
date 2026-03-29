@@ -2,6 +2,8 @@ name: activityLogs
 label: Activity Log
 labelPlural: Activity Logs
 
+kind: system  # Generator produces schema + read-only timeline view, skips CRUD forms/mutations
+
 fields:
   entityType:
     type: enum
@@ -10,12 +12,10 @@ fields:
   entityId:
     type: string
     required: true
+    # Polymorphic reference — points to tasks, projects, or subtasks table
   action:
     type: enum
     values: [created, status_changed, assigned, unassigned, edited, deleted, completed, promoted]
-    required: true
-  actor:
-    type: string
     required: true
   metadata:
     type: text
@@ -23,6 +23,9 @@ fields:
     max: 5000
 
 timestamps: false
+
+identity:
+  type: auto-increment
 
 behaviors:
   assignable: false
@@ -33,7 +36,7 @@ behaviors:
 access:
   scope: custom
   permissions:
-    create: custom
+    create: custom  # System-only writes
     read: authenticated
     update: custom
     delete: custom
@@ -47,6 +50,17 @@ operations:
 views:
   defaultView: list
   enabledViews: [list]
+
+relationships:
+  actor:
+    type: belongs_to
+    target: users
+    column: actor
+    required: true
+
+detailView:  # TODO: generator pending
+  layout: timeline
+  groupBy: date
 
 indexes:
   - name: by_entity
