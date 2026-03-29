@@ -2,24 +2,39 @@ name: projects
 label: Project
 labelPlural: Projects
 
+kind: standard
+
 fields:
   name:
     type: string
     required: true
     max: 100
+  description:
+    type: text
+    max: 5000
+    # TODO: not yet in convex/schema.ts — add when generator catches up
   status:
     type: enum
     values: [active, on_hold, completed, archived]
     default: active
     filterable: true
+    transitions:  # TODO: generator pending
+      active: [on_hold, completed, archived]
+      on_hold: [active, archived]
+      completed: [archived]
+      # archived is terminal — no transitions out
 
 timestamps: false
+
+identity:
+  type: auto-increment
 
 behaviors:
   assignable: false
   orderable: false
   softDelete: false
   auditTrail: true
+  immutable: false
 
 access:
   scope: owner
@@ -38,6 +53,12 @@ views:
       filter: { status: $param }
       navEntry: false
 
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+
 relationships:
   tasks:
     type: has_many
@@ -45,7 +66,7 @@ relationships:
     foreignKey: projectId
     cascade: true
 
-detailView:
+detailView:  # TODO: generator pending
   layout: panels
   relatedRecords:
     - source: tasks
@@ -53,10 +74,14 @@ detailView:
       inline: true
       filters: [status, priority, assignee]
 
-derivedData:
+derivedData:  # TODO: generator pending
   taskCount:
     type: count
     source: tasks
+
+hooks:  # TODO: generator pending
+  onStatusChange: custom/projects/hooks/onStatusChange
+  beforeDelete: custom/projects/hooks/beforeDelete
 
 indexes:
   - name: by_status
