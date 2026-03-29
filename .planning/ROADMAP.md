@@ -245,7 +245,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 6. Activity Logs & Search | v2.0 | 1/1 | Complete | 2026-03-28 |
 | 7. MECE Test Rewrite | v2.0 | 3/3 | Complete | 2026-03-28 |
 | 999.1 Feather DX Architecture | Backlog | 6/6 | Complete | 2026-03-28 |
-| 999.9 Test Quality Audit | Backlog | 0/? | Not started | - |
+| 999.9 Test Quality Audit | Backlog | 0/3 | Planned | - |
 | 999.2 feather start project | Backlog | 0/? | Not started | - |
 | 999.3 LLM Architect Conversation | Backlog | 0/? | Not started | - |
 | 999.4 Integration Gaps | Backlog | 0/? | Not started | - |
@@ -279,7 +279,12 @@ Plans:
 - Part 1: Purge coverage exclusions — audit vitest.config.ts `coverage.exclude` and all inline `/* v8 ignore */`
 - Part 2: Review all existing tests against testing philosophy (behavior-not-implementation, correct mock scope, independent tests)
 **Deliverable:** 100% coverage with real tests, not exclusions
-**Plans:** 0 (estimated 3-4)
+**Plans:** 3
+
+Plans:
+- [ ] 999.9-01-PLAN.md — Catalogue pass: audit exclusions, v8 ignores, and test quality (findings report)
+- [ ] 999.9-02-PLAN.md — v8 ignore purge + coverage exclusion trim + write tests for exposed code
+- [ ] 999.9-03-PLAN.md — Test philosophy re-audit: fix violations across all test files
 
 ### Phase 999.2: `feather start project` — First-Run DX (BACKLOG)
 **Goal:** A developer runs one command and gets a working Feather project with branding, configured auth, and ready-to-use generator
