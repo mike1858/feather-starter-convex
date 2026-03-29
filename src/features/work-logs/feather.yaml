@@ -2,6 +2,8 @@ name: workLogs
 label: Work Log
 labelPlural: Work Logs
 
+kind: standard
+
 fields:
   body:
     type: text
@@ -10,13 +12,23 @@ fields:
   timeMinutes:
     type: number
     required: false
+  creatorId:
+    type: reference
+    target: users
+    required: true
+    # Auto-set to current user on creation
 
 timestamps: false
+
+identity:
+  type: auto-increment
 
 behaviors:
   assignable: false
   orderable: false
   softDelete: false
+  auditTrail: true
+  immutable: false
 
 access:
   scope: owner
@@ -30,12 +42,26 @@ views:
   defaultView: list
   enabledViews: [list]
 
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+
 relationships:
   task:
     type: belongs_to
     target: tasks
     required: true
     column: taskId
+
+detailView:  # TODO: generator pending
+  layout: inline
+  parentContext: task
+  display: timeline
+
+hooks:  # TODO: generator pending
+  afterSave: custom/work-logs/hooks/afterSave
 
 indexes:
   - name: by_task
