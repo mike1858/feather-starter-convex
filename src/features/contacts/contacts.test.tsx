@@ -1,3 +1,12 @@
+// Test Matrix: ContactsPage
+// | # | State               | Approach    | What to verify                                |
+// |---|---------------------|-------------|-----------------------------------------------|
+// | 1 | Page renders        | Integration | component mounts without errors               |
+// | 2 | Empty list          | Integration | empty state present                           |
+// | 3 | With contacts       | Integration | contact data in database                      |
+// | 4 | Create contact      | Integration | API creates contact                           |
+// | 5 | Delete contact      | Integration | mutation removes contact                      |
+
 // @generated-start imports
 import { expect } from "vitest";
 import { waitFor } from "@testing-library/react";

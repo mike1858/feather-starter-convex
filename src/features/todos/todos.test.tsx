@@ -1,3 +1,12 @@
+// Test Matrix: TodosPage
+// | # | State               | Approach    | What to verify                                |
+// |---|---------------------|-------------|-----------------------------------------------|
+// | 1 | Heading             | Integration | page title rendered                           |
+// | 2 | Empty list          | Integration | empty state message                           |
+// | 3 | With todos          | Integration | todo items rendered                           |
+// | 4 | Create todo         | Integration | form submit creates todo                      |
+// | 5 | Delete todo         | Integration | double-check pattern, then todo removed       |
+
 // @generated-start imports
 import { expect } from "vitest";
 import { screen, waitFor } from "@testing-library/react";

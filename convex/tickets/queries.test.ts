@@ -1,3 +1,13 @@
+// Test Matrix: tickets queries
+// | # | Query | State              | What to verify                        |
+// |---|-------|--------------------|---------------------------------------|
+// | 1 | list  | with tickets       | returns all user's tickets            |
+// | 2 | list  | empty              | returns empty array                   |
+// | 3 | list  | unauthenticated    | returns empty array                   |
+// | 4 | list  | ordering           | sorted by position ascending          |
+// | 5 | get   | existing ticket    | returns full ticket object            |
+// | 6 | get   | unauthenticated    | returns null                          |
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";

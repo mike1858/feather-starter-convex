@@ -1,3 +1,18 @@
+// Test Matrix: todos mutations
+// | # | Mutation | State               | What to verify                       |
+// |---|---------|----------------------|--------------------------------------|
+// | 1 | create  | with defaults        | title, completed=false, userId       |
+// | 2 | create  | with all fields      | completed=true                       |
+// | 3 | create  | unauthenticated      | no todo inserted                     |
+// | 4 | update  | unauthenticated      | no change to todo                    |
+// | 5 | update  | title only           | title changed, completed untouched   |
+// | 6 | update  | completed only       | completed changed, title untouched   |
+// | 7 | update  | not found            | throws "not found"                   |
+// | 8 | remove  | unauthenticated      | todo not deleted                     |
+// | 9 | remove  | existing todo        | todo deleted                         |
+// |10 | reorder | unauthenticated      | position unchanged                   |
+// |11 | reorder | valid position       | position updated                     |
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";

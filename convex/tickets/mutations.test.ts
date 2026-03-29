@@ -1,3 +1,22 @@
+// Test Matrix: tickets mutations
+// | # | Mutation | State               | What to verify                       |
+// |---|---------|----------------------|--------------------------------------|
+// | 1 | create  | with defaults        | title, userId, assigneeId, position  |
+// | 2 | create  | with all fields      | description, status, priority        |
+// | 3 | create  | unauthenticated      | no ticket inserted                   |
+// | 4 | update  | unauthenticated      | no change to ticket                  |
+// | 5 | update  | title only           | title changed, description untouched |
+// | 6 | update  | description only     | description changed, title untouched |
+// | 7 | update  | not found            | throws "not found"                   |
+// | 8 | remove  | unauthenticated      | ticket not deleted                   |
+// | 9 | remove  | existing ticket      | ticket deleted                       |
+// |10 | assign  | unauthenticated      | no change                            |
+// |11 | assign  | not found            | throws "not found"                   |
+// |12 | assign  | to another user      | assigneeId updated                   |
+// |13 | assign  | unassign             | assigneeId cleared                   |
+// |14 | reorder | unauthenticated      | position unchanged                   |
+// |15 | reorder | valid position       | position updated                     |
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";

@@ -1,3 +1,15 @@
+// Test Matrix: contacts mutations
+// | # | Mutation | State              | What to verify                        |
+// |---|---------|---------------------|---------------------------------------|
+// | 1 | create  | with defaults       | name, userId persisted                |
+// | 2 | create  | with all fields     | email, company, phone, status         |
+// | 3 | create  | unauthenticated     | no contact inserted                   |
+// | 4 | update  | unauthenticated     | no change to contact                  |
+// | 5 | update  | specified fields    | only changed fields updated           |
+// | 6 | update  | not found           | throws "not found"                    |
+// | 7 | remove  | unauthenticated     | contact not deleted                   |
+// | 8 | remove  | existing contact    | contact deleted                       |
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";

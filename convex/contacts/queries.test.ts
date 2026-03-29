@@ -1,3 +1,12 @@
+// Test Matrix: contacts queries
+// | # | Query | State              | What to verify                        |
+// |---|-------|--------------------|---------------------------------------|
+// | 1 | list  | with contacts      | returns all user's contacts           |
+// | 2 | list  | empty              | returns empty array                   |
+// | 3 | list  | unauthenticated    | returns empty array                   |
+// | 4 | get   | existing contact   | returns full contact object           |
+// | 5 | get   | unauthenticated    | returns null                          |
+
 // @generated-start imports
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";

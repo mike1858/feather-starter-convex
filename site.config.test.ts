@@ -1,9 +1,14 @@
-import { describe, expect, it } from "vitest";
+// Test Matrix: site.config
+// | # | State           | What to verify                                    |
+// |---|-----------------|---------------------------------------------------|
+// | 1 | config object   | all required fields present with correct types    |
+
+import { describe, expect, test } from "vitest";
 import siteConfig from "./site.config";
 
 describe("site.config", () => {
-  it("exports a configuration object with required fields", () => {
-    expect(siteConfig).toBeDefined();
+  test("exports configuration object with all required fields", () => {
+    expect(typeof siteConfig).toBe("object");
     expect(siteConfig.siteTitle).toBe("Feather Starter");
     expect(typeof siteConfig.siteDescription).toBe("string");
     expect(siteConfig).toHaveProperty("siteUrl");

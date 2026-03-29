@@ -1,3 +1,14 @@
+// Test Matrix: TicketsPage
+// | # | State               | Approach    | What to verify                                |
+// |---|---------------------|-------------|-----------------------------------------------|
+// | 1 | Heading             | Integration | page title rendered                           |
+// | 2 | Empty list          | Integration | empty state message                           |
+// | 3 | With tickets        | Integration | ticket items rendered                         |
+// | 4 | Create ticket       | Integration | form submit creates ticket                    |
+// | 5 | Delete ticket       | Integration | double-check pattern, then ticket removed     |
+// | 6 | Filter by status    | Integration | clicking filter shows matching tickets only   |
+// | 7 | No-matches filter   | Integration | filter with no results shows empty state      |
+
 // @generated-start imports
 import { expect } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
