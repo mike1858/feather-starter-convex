@@ -248,7 +248,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 999.9 Test Quality Audit | Backlog | 3/3 | Complete    | 2026-03-29 |
 | 999.2 feather start project | Backlog | 0/4 | Planned | - |
 | 999.3 LLM Architect Conversation | Backlog | 0/4 | Planned | - |
-| 999.4 Integration Gaps | Backlog | 0/? | Not started | - |
+| 999.4 Integration Gaps | Backlog | 0/4 | Planned | - |
 | 999.5 Excel-to-System Pipeline | Backlog | 0/? | Not started | - |
 | 999.6 Bundle Distribution | Backlog | 0/? | Not started | - |
 | 999.7 Telemetry | Backlog | 0/? | Not started | - |
@@ -332,7 +332,13 @@ Plans:
 - Detail page template update, template-level bug fixes
 - CLI completion: package.json bin entry, init.test.ts, init command logic
 - **`feather update` CLI thorough testing:** verify generateFeature pipeline works end-to-end, uncommitted change detection, --dry-run, --force, error handling. The command exists but was never tested against real projects.
-**Plans:** 0 (estimated 3-4)
+**Plans:** 4
+
+Plans:
+- [ ] 999.4-01-PLAN.md — Pipeline template integration: replace stubs with Handlebars rendering + CLI bin entry (Wave 1)
+- [ ] 999.4-02-PLAN.md — Cross-entity panel templates (checklist, timeline, table, cards) + detail page update (Wave 2)
+- [ ] 999.4-03-PLAN.md — CalmDo migration to generated/custom directory split (Wave 3)
+- [ ] 999.4-04-PLAN.md — feather update CLI thorough testing + Plop unification (Wave 3)
 
 ### Phase 999.5: Excel-to-System Pipeline (BACKLOG)
 **Goal:** User uploads Excel file, system infers schema, user confirms, system produces feather.yaml + seed data
