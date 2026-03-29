@@ -13,14 +13,10 @@ export function TeamPoolPage() {
   const { data: currentUser } = useQuery(
     convexQuery(api.users.queries.getCurrentUser, {}),
   );
-
-  /* v8 ignore start -- selectedTaskId state drives TaskDetailPanel which renders inside Radix Dialog portal; not testable in jsdom */
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(
     null,
   );
   const handleTaskClick = (taskId: Id<"tasks">) => setSelectedTaskId(taskId);
-  /* v8 ignore stop */
-
   return (
     <div className="flex h-full w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -36,7 +32,7 @@ export function TeamPoolPage() {
         onTaskClick={handleTaskClick}
       />
 
-      {/* v8 ignore start -- TaskDetailPanel opens via task click; Radix Dialog portal not testable in jsdom */}
+      {}
       <TaskDetailPanel
         taskId={selectedTaskId}
         open={!!selectedTaskId}
@@ -44,7 +40,7 @@ export function TeamPoolPage() {
           if (!open) setSelectedTaskId(null);
         }}
       />
-      {/* v8 ignore stop */}
+      {}
     </div>
   );
 }

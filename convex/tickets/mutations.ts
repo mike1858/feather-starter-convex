@@ -58,11 +58,9 @@ export const update = mutation({
     const tickets = await ctx.db.get(args.ticketsId);
     if (!tickets) throw new Error(ERRORS.tickets.NOT_FOUND);
 
-    /* v8 ignore start -- field-forwarding branches, not all combos tested */
     const patch: { title?: string; description?: string } = {};
     if (args.title !== undefined) patch.title = args.title;
     if (args.description !== undefined) patch.description = args.description;
-    /* v8 ignore stop */
 
     await ctx.db.patch(args.ticketsId, patch);
 

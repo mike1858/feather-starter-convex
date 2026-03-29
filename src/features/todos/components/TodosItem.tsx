@@ -38,7 +38,7 @@ export function TodosItem({
 
   return (
     <div className="group flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-4 shadow-card hover:shadow-card-hover hover:border-border/80 transition-all duration-200 ease-out cursor-pointer">
-      {/* v8 ignore start -- drag handle only rendered when sortable context provides props */}
+      {}
       {dragHandleProps && (
         <button
           type="button"
@@ -48,7 +48,7 @@ export function TodosItem({
           <GripVertical className="h-4 w-4" />
         </button>
       )}
-      {/* v8 ignore stop */}
+      {}
 
 
       {/* Title section */}

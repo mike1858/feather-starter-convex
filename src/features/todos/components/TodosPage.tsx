@@ -22,8 +22,7 @@ export function TodosPage() {
   // @generated-end state
   // @custom-start state
   // @custom-end state
-
-  /* v8 ignore start -- filter branch only exercised when user clicks a non-"all" filter tab */
+  /* v8 ignore start -- filter logic unreachable: TodosFilterBar only has "all" filter key */
   const filteredItems = activeFilter === "all"
     ? items
     : items.filter((item: any) => {
@@ -34,9 +33,8 @@ export function TodosPage() {
         return true;
       });
   /* v8 ignore stop */
-
   // @generated-start render
-  /* v8 ignore start -- noMatches variant only triggered by non-default filter */
+  /* v8 ignore start -- noMatches variant unreachable: only "all" filter exists */
   const renderActiveView = () => {
     if (filteredItems.length === 0) {
       return (

@@ -38,7 +38,6 @@ export function PasswordForm({
         });
         onSuccess?.();
       } catch (e) {
-        /* v8 ignore start -- error depends on server response */
         const msg = e instanceof Error ? e.message : String(e);
         if (msg.includes("already exists")) {
           setError("An account with this email already exists. Try signing in.");
@@ -47,7 +46,6 @@ export function PasswordForm({
         } else {
           setError("Something went wrong. Please try again.");
         }
-        /* v8 ignore stop */
       } finally {
         setIsSubmitting(false);
       }
@@ -89,10 +87,9 @@ export function PasswordForm({
                   onEmailChange?.(e.target.value);
                 }}
                 className={`bg-transparent ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing: branch exercised by validation tests but v8 can't trace it */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -118,10 +115,9 @@ export function PasswordForm({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className={`bg-transparent ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing: branch exercised by validation tests but v8 can't trace it */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -129,33 +125,27 @@ export function PasswordForm({
         </div>
 
         <div className="flex w-full flex-col">
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.email?.errors?.length ?? 0) > 0 && (
+          {/* v8 ignore start -- TanStack Form re-render timing: error display depends on internal re-render cycle */}
+          {(form.state.fieldMeta.email?.errors?.length ?? 0) > 0 && (
             <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.email?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.password?.errors?.length ?? 0) > 0 && (
+          )}
+          {(form.state.fieldMeta.password?.errors?.length ?? 0) > 0 && (
             <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.password?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
-          {/* v8 ignore start -- error depends on server response */
-          error && (
+          )}
+          {/* v8 ignore stop */}
+          {error && (
             <p className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {error}
             </p>
-          )
-          /* v8 ignore stop */}
+          )}
         </div>
 
         <Button type="submit" className="w-full">
-          {/* v8 ignore start -- spinner only visible during brief signIn round-trip */
-          isSubmitting ? <Loader2 className="animate-spin" /> : submitLabel
-          /* v8 ignore stop */}
+          {isSubmitting ? <Loader2 className="animate-spin" /> : submitLabel}
         </Button>
       </form>
 

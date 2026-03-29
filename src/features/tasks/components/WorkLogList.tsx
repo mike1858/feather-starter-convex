@@ -1,4 +1,3 @@
-/* v8 ignore start -- WorkLogList renders inside Radix Dialog portal (Sheet); jsdom cannot interact with portal children. Backend tests cover query/mutation logic. */
 import { Trash2, Pencil } from "lucide-react";
 import { convexQuery } from "@convex-dev/react-query";
 import { useConvexMutation } from "@convex-dev/react-query";
@@ -64,7 +63,7 @@ export function WorkLogList({ taskId }: { taskId: Id<"tasks"> }) {
                 <span>{relativeTime(entry._creationTime)}</span>
               </div>
 
-              {/* v8 ignore start -- edit/delete buttons for owned entries; tested via backend */}
+              {}
               {isOwner && (
                 <div className="flex items-center gap-1">
                   <button
@@ -86,7 +85,7 @@ export function WorkLogList({ taskId }: { taskId: Id<"tasks"> }) {
                   </button>
                 </div>
               )}
-              {/* v8 ignore stop */}
+              {}
             </div>
             <p className="mt-1 text-sm text-primary">{entry.body}</p>
           </div>
@@ -95,4 +94,3 @@ export function WorkLogList({ taskId }: { taskId: Id<"tasks"> }) {
     </div>
   );
 }
-/* v8 ignore stop */

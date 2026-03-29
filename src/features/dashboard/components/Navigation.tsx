@@ -215,7 +215,7 @@ export function Navigation({ user }: { user: User }) {
         ))}
       </div>
 
-      {/* v8 ignore start -- dynamic project links require navigation not testable in jsdom */}
+      {}
       {activeProjects.length > 0 && (
         <div className="mx-auto flex w-full max-w-screen-xl items-center gap-3 overflow-x-auto py-1">
           <span className="text-xs font-medium text-primary/40">Projects:</span>
@@ -231,7 +231,7 @@ export function Navigation({ user }: { user: User }) {
           ))}
         </div>
       )}
-      {/* v8 ignore stop */}
+      {}
     </nav>
   );
 }

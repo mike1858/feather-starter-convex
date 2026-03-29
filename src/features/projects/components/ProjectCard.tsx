@@ -36,8 +36,6 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
   });
 
   const { doubleCheck, getButtonProps } = useDoubleCheck();
-
-  /* v8 ignore start -- name edit triggered via dropdown menu, navigation requires portal/browser not testable in jsdom */
   const handleNameSave = async () => {
     const trimmed = editName.trim();
     if (trimmed && trimmed !== project.name) {
@@ -56,23 +54,19 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
     setEditName(project.name);
     setIsEditing(true);
   };
-  /* v8 ignore stop */
-
   return (
     <div
       className="flex cursor-pointer flex-col gap-3 rounded-lg border border-border bg-card p-4 transition hover:shadow-sm"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      /* v8 ignore start -- keyboard navigation requires real browser */
       onKeyDown={(e) => {
         if (e.key === "Enter") handleCardClick();
       }}
-      /* v8 ignore stop */
     >
       {/* Top row: name + menu */}
       <div className="flex items-start justify-between gap-2">
-        {/* v8 ignore start -- edit mode only reachable via dropdown menu (portal not testable in jsdom) */}
+        {}
         {isEditing ? (
           <input
             className="flex-1 rounded border border-input bg-transparent px-2 py-1 text-base font-medium"
@@ -87,11 +81,10 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
             autoFocus
           />
         ) : (
-        /* v8 ignore stop */
           <h3 className="text-base font-medium text-primary">{project.name}</h3>
         )}
 
-        {/* v8 ignore start -- Radix dropdown portal interactions not testable in jsdom */}
+        {}
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -121,7 +114,7 @@ export function ProjectCard({ project }: { project: ProjectWithCounts }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {/* v8 ignore stop */}
+        {}
       </div>
 
       {/* Bottom row: status badge + task count */}

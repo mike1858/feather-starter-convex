@@ -5,6 +5,7 @@
 // | 2 | required fields      | each item has label, i18nKey, to as strings      |
 // | 3 | unique paths         | no duplicate 'to' values                         |
 // | 4 | path format          | all 'to' values start with /                     |
+// | 5 | dev mode             | includes Dev Mailbox                             |
 
 import { describe, it, expect } from "vitest";
 import { navItems } from "./nav";
@@ -36,5 +37,11 @@ describe("navItems", () => {
     for (const item of navItems) {
       expect(item.to.startsWith("/")).toBe(true);
     }
+  });
+
+  it("includes Dev Mailbox in dev mode", () => {
+    const devMailbox = navItems.find((item) => item.label === "Dev Mailbox");
+    expect(devMailbox).toBeTruthy();
+    expect(devMailbox!.to).toBe("/dev/mailbox");
   });
 });

@@ -31,7 +31,7 @@ export function TasksPage() {
         onTaskClick={(taskId) => setSelectedTaskId(taskId)}
       />
 
-      {/* v8 ignore start -- TaskDetailPanel opens via task click; Radix Dialog portal not testable in jsdom */}
+      {}
       <TaskDetailPanel
         taskId={selectedTaskId}
         open={!!selectedTaskId}
@@ -39,7 +39,7 @@ export function TasksPage() {
           if (!open) setSelectedTaskId(null);
         }}
       />
-      {/* v8 ignore stop */}
+      {}
     </div>
   );
 }

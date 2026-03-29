@@ -29,7 +29,7 @@ export function TicketsFilterBar({
 
   return (
     <div className="flex items-center gap-0.5 border-b border-border">
-      {/* v8 ignore start -- filter tab click handlers not tested in unit tests */}
+      {}
       {FILTERS.map((filter) => (
         <button
           key={filter.key}
@@ -47,7 +47,7 @@ export function TicketsFilterBar({
           )}
         </button>
       ))}
-      {/* v8 ignore stop */}
+      {}
     </div>
   );
 }

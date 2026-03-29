@@ -23,13 +23,13 @@ export function PasswordResetForm({ onBack, defaultEmail }: { onBack: () => void
           try {
             await signIn("password", { email, flow: "reset" });
             setStep({ email });
-          /* v8 ignore start -- error path requires signIn to reject */
+          /* v8 ignore start -- error set but not displayed (ForgotStep doesn't render error prop) */
           } catch {
             setError("Could not send reset code. Please try again.");
           } finally {
+          /* v8 ignore stop */
             setIsSubmitting(false);
           }
-          /* v8 ignore stop */
         }}
         onBack={onBack}
       />
@@ -51,13 +51,11 @@ export function PasswordResetForm({ onBack, defaultEmail }: { onBack: () => void
             newPassword,
             flow: "reset-verification",
           });
-        /* v8 ignore start -- error path requires signIn to reject */
         } catch {
           setError("Invalid or expired code. Please check and try again.");
         } finally {
           setIsSubmitting(false);
         }
-        /* v8 ignore stop */
       }}
       onBack={onBack}
     />
@@ -120,10 +118,9 @@ function ForgotStep({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className={`bg-transparent ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -131,23 +128,21 @@ function ForgotStep({
         </div>
 
         <div className="flex w-full flex-col">
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.email?.errors?.length ?? 0) > 0 && (
+          {/* v8 ignore start -- TanStack Form re-render timing */}
+          {(form.state.fieldMeta.email?.errors?.length ?? 0) > 0 && (
             <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.email?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
+          )}
+          {/* v8 ignore stop */}
         </div>
 
         <Button type="submit" className="w-full">
-          {/* v8 ignore start -- spinner only visible during brief signIn round-trip */
-          isSubmitting ? (
+          {/* v8 ignore start */ isSubmitting ? (
             <Loader2 className="animate-spin" />
           ) : (
             "Send Reset Code"
-          )
-          /* v8 ignore stop */}
+          ) /* v8 ignore stop */}
         </Button>
       </form>
 
@@ -192,8 +187,7 @@ function VerifyResetStep({
         <p className="text-center text-base font-normal text-primary/60">
           We sent a code to {email}. Enter it below with your new password.
         </p>
-        {/* v8 ignore start -- dev-only link, not rendered in production */
-        import.meta.env.DEV && (
+        {import.meta.env.DEV && (
           <a
             href="/dev/mailbox"
             target="_blank"
@@ -202,8 +196,7 @@ function VerifyResetStep({
           >
             Open Dev Mailbox to get the code
           </a>
-        )
-        /* v8 ignore stop */}
+        )}
       </div>
 
       <form
@@ -234,10 +227,9 @@ function VerifyResetStep({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className={`bg-transparent font-mono text-lg tracking-widest ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -263,10 +255,9 @@ function VerifyResetStep({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className={`bg-transparent ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -274,38 +265,32 @@ function VerifyResetStep({
         </div>
 
         <div className="flex w-full flex-col">
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.code?.errors?.length ?? 0) > 0 && (
+          {/* v8 ignore start -- TanStack Form re-render timing */}
+          {(form.state.fieldMeta.code?.errors?.length ?? 0) > 0 && (
             <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.code?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.newPassword?.errors?.length ?? 0) > 0 && (
+          )}
+          {(form.state.fieldMeta.newPassword?.errors?.length ?? 0) > 0 && (
             <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.newPassword?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
+          )}
+          {/* v8 ignore stop */}
         </div>
 
-        {/* v8 ignore start -- error only visible on failed verification */
-        error && (
+        {error && (
           <span className="mb-1 text-sm text-destructive dark:text-destructive-foreground">
             {error}
           </span>
-        )
-        /* v8 ignore stop */}
+        )}
 
         <Button type="submit" className="w-full">
-          {/* v8 ignore start -- spinner only visible during brief signIn round-trip */
-          isSubmitting ? (
+          {/* v8 ignore start */ isSubmitting ? (
             <Loader2 className="animate-spin" />
           ) : (
             "Reset Password"
-          )
-          /* v8 ignore stop */}
+          ) /* v8 ignore stop */}
         </Button>
       </form>
 

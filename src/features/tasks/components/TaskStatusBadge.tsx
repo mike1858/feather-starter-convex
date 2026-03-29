@@ -45,14 +45,11 @@ export function TaskStatusBadge({
   const config = STATUS_CONFIG[status];
   const Icon = config.icon;
   const nextStatus = getNextStatus(status);
-
-  /* v8 ignore start -- defensive guard; button is disabled when nextStatus is null */
   const handleClick = async () => {
+    /* v8 ignore next -- defensive guard: button is disabled when nextStatus is null */
     if (!nextStatus) return;
     await updateStatus({ taskId, status: nextStatus });
   };
-  /* v8 ignore stop */
-
   return (
     <button
       type="button"

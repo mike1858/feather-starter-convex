@@ -1,4 +1,3 @@
-/* v8 ignore start -- TaskDetailPanel renders inside Radix Dialog portal (Sheet); jsdom cannot render portal children for interaction testing. All mutations tested via backend tests. */
 import { useState } from "react";
 import { Flag, Trash2, Clock } from "lucide-react";
 import { convexQuery } from "@convex-dev/react-query";
@@ -76,15 +75,11 @@ export function TaskDetailPanel({
     if (!taskId || !task) return;
     await updateTask({ taskId, priority: !task.priority });
   };
-
-  /* v8 ignore start -- deletion closes panel via onOpenChange callback; tested via backend */
   const handleDelete = async () => {
     if (!taskId) return;
     await removeTask({ taskId });
     onOpenChange(false);
   };
-  /* v8 ignore stop */
-
   const completionCount = subtaskData?.completionCount;
   const totalMinutes = workLogData?.totalMinutes ?? 0;
 
@@ -101,7 +96,7 @@ export function TaskDetailPanel({
             <SheetHeader>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
-                  {/* v8 ignore start -- inline title edit in panel: same pattern as TaskItem */}
+                  {}
                   {isEditingTitle ? (
                     <input
                       className="w-full rounded border border-input bg-transparent px-2 py-1 text-lg font-semibold"
@@ -125,7 +120,7 @@ export function TaskDetailPanel({
                       {task.title}
                     </SheetTitle>
                   )}
-                  {/* v8 ignore stop */}
+                  {}
                 </div>
 
                 <button
@@ -204,4 +199,3 @@ export function TaskDetailPanel({
     </Sheet>
   );
 }
-/* v8 ignore stop */

@@ -95,7 +95,7 @@ function MainLoginForm({
         onEmailChange={onEmailChange}
       />
 
-      {/* v8 ignore start -- visibility depends on server env vars */
+      {
       (providers?.otp || providers?.github) && (
         <>
           <div className="relative flex w-full items-center justify-center">
@@ -152,7 +152,7 @@ function MainLoginForm({
           </div>
         </>
       )
-      /* v8 ignore stop */}
+      }
 
       <p className="px-12 text-center text-sm font-normal leading-normal text-primary/60">
         By clicking continue, you agree to our{" "}

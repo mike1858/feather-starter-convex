@@ -85,12 +85,13 @@ describe("update", () => {
     expect(record.title).toBe("Seed");
   });
 
-  test("updates only specified fields", async ({
+  test("updates only title when title provided", async ({
     client,
     testClient,
   }) => {
     await client.mutation(api.tickets.mutations.create, {
       title: "Original title",
+      description: "Original desc",
     });
 
     const records = await testClient.run(async (ctx: any) =>
@@ -107,6 +108,33 @@ describe("update", () => {
       ctx.db.get(recordId),
     );
     expect(updated.title).toBe("Updated title");
+    expect(updated.description).toBe("Original desc");
+  });
+
+  test("updates only description when description provided", async ({
+    client,
+    testClient,
+  }) => {
+    await client.mutation(api.tickets.mutations.create, {
+      title: "Keep this title",
+      description: "Old desc",
+    });
+
+    const records = await testClient.run(async (ctx: any) =>
+      ctx.db.query("tickets").collect(),
+    );
+    const recordId = records[0]._id;
+
+    await client.mutation(api.tickets.mutations.update, {
+      ticketsId: recordId,
+      description: "New desc",
+    });
+
+    const updated = await testClient.run(async (ctx: any) =>
+      ctx.db.get(recordId),
+    );
+    expect(updated.title).toBe("Keep this title");
+    expect(updated.description).toBe("New desc");
   });
 
   test("throws when Ticket not found", async ({ client, testClient }) => {

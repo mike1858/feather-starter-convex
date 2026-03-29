@@ -73,10 +73,9 @@ export function UsernamePage() {
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 className={`bg-transparent ${
-                  /* v8 ignore start -- branch depends on TanStack Form re-render timing */
+                  /* v8 ignore next -- TanStack Form re-render timing */
                   (field.state.meta?.errors?.length ?? 0) > 0 &&
                   "border-destructive focus-visible:ring-destructive"
-                  /* v8 ignore stop */
                 }`}
               />
             )}
@@ -86,21 +85,19 @@ export function UsernamePage() {
           </p>
         </div>
 
+        {/* v8 ignore start -- TanStack Form re-render timing */}
         <div className="flex flex-col">
-          {/* v8 ignore start -- branch depends on TanStack Form re-render timing */
-          (form.state.fieldMeta.username?.errors?.length ?? 0) > 0 && (
+          {(form.state.fieldMeta.username?.errors?.length ?? 0) > 0 && (
             <span className="mb-2 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.username?.errors.join(" ")}
             </span>
-          )
-          /* v8 ignore stop */}
+          )}
         </div>
 
         <Button type="submit" size="sm" className="w-full">
-          {/* v8 ignore start -- spinner only visible during brief mutation round-trip */
-          isSubmitting ? <Loader2 className="animate-spin" /> : "Continue"
-          /* v8 ignore stop */}
+          {isSubmitting ? <Loader2 className="animate-spin" /> : "Continue"}
         </Button>
+        {/* v8 ignore stop */}
       </form>
 
       <p className="px-6 text-center text-sm font-normal leading-normal text-primary/60">

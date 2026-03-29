@@ -69,8 +69,6 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
       </div>
     );
   }
-
-  /* v8 ignore start -- name edit and status change triggered via dropdown/select portal not testable in jsdom */
   const handleNameSave = async () => {
     const trimmed = editName.trim();
     if (trimmed && trimmed !== project.name) {
@@ -89,12 +87,7 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
     setEditName(project.name);
     setIsEditingName(true);
   };
-  /* v8 ignore stop */
-
-  /* v8 ignore start -- defensive fallback; getWithTasks always returns tasks array */
   const tasks = project.tasks ?? [];
-  /* v8 ignore stop */
-
   return (
     <div className="flex h-full w-full flex-col gap-6">
       {/* Back link */}
@@ -109,7 +102,7 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
-          {/* v8 ignore start -- edit mode only reachable via dropdown menu (portal not testable in jsdom) */}
+          {}
           {isEditingName ? (
             <input
               className="rounded border border-input bg-transparent px-2 py-1 text-2xl font-semibold"
@@ -123,13 +116,12 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
               autoFocus
             />
           ) : (
-          /* v8 ignore stop */
             <h1 className="text-2xl font-semibold text-primary">
               {project.name}
             </h1>
           )}
 
-          {/* v8 ignore start -- Radix Select portal interactions not testable in jsdom */}
+          {}
           <Select
             value={project.status}
             onValueChange={handleStatusChange}
@@ -145,10 +137,10 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
               ))}
             </SelectContent>
           </Select>
-          {/* v8 ignore stop */}
+          {}
         </div>
 
-        {/* v8 ignore start -- Radix dropdown portal interactions not testable in jsdom */}
+        {}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -175,7 +167,7 @@ export function ProjectDetailPage({ projectId }: { projectId: Id<"projects"> }) 
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {/* v8 ignore stop */}
+        {}
       </div>
 
       {/* Summary bar */}

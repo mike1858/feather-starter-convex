@@ -22,8 +22,6 @@ export function TicketsPage() {
   // @generated-end state
   // @custom-start state
   // @custom-end state
-
-  /* v8 ignore start -- filter branch only exercised when user clicks a non-"all" filter tab */
   const filteredItems = activeFilter === "all"
     ? items
     : items.filter((item: any) => {
@@ -31,12 +29,10 @@ export function TicketsPage() {
           const [field, value] = activeFilter.split(":");
           return item[field] === value;
         }
+        /* v8 ignore next -- fallback for non-colon filter keys; all current filters use colon syntax */
         return true;
       });
-  /* v8 ignore stop */
-
   // @generated-start render
-  /* v8 ignore start -- noMatches variant only triggered by non-default filter */
   const renderActiveView = () => {
     if (filteredItems.length === 0) {
       return (
@@ -48,7 +44,6 @@ export function TicketsPage() {
 
     return <TicketsListView items={filteredItems} />;
   };
-  /* v8 ignore stop */
   // @generated-end render
 
   return (

@@ -1,4 +1,3 @@
-/* v8 ignore start -- WorkLogForm renders inside Radix Dialog portal (Sheet); jsdom cannot interact with portal children. Backend tests cover mutation logic. */
 import { useState } from "react";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
@@ -54,4 +53,3 @@ export function WorkLogForm({ taskId }: { taskId: Id<"tasks"> }) {
     </div>
   );
 }
-/* v8 ignore stop */

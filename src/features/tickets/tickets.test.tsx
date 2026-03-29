@@ -127,5 +127,81 @@ test("delete button removes ticket", async ({
   });
 });
 
+// -- Filter ------------------------------------------------------------------
+
+test("filters tickets by status when filter tab clicked", async ({
+  client,
+  testClient,
+  userId,
+}) => {
+  await testClient.run(async (ctx: any) => {
+    await ctx.db.insert("tickets", {
+      title: "Open Ticket",
+      description: "",
+      status: "open",
+      priority: "low",
+      userId,
+      position: 1000,
+    });
+    await ctx.db.insert("tickets", {
+      title: "Closed Ticket",
+      description: "",
+      status: "closed",
+      priority: "low",
+      userId,
+      position: 2000,
+    });
+  });
+
+  renderWithRouter(<TicketsPage />, client);
+
+  const user = userEvent.setup();
+
+  await waitFor(() => {
+    expect(screen.getByText("Open Ticket")).toBeInTheDocument();
+  });
+
+  // Click the "status:open" filter tab (i18n key rendered as-is)
+  await user.click(screen.getByText("status.open"));
+
+  await waitFor(() => {
+    expect(screen.getByText("Open Ticket")).toBeInTheDocument();
+    expect(screen.queryByText("Closed Ticket")).not.toBeInTheDocument();
+  });
+});
+
+test("shows no-matches empty state when filter has no results", async ({
+  client,
+  testClient,
+  userId,
+}) => {
+  await testClient.run(async (ctx: any) => {
+    await ctx.db.insert("tickets", {
+      title: "Open Only",
+      description: "",
+      status: "open",
+      priority: "low",
+      userId,
+      position: 1000,
+    });
+  });
+
+  renderWithRouter(<TicketsPage />, client);
+
+  const user = userEvent.setup();
+
+  await waitFor(() => {
+    expect(screen.getByText("Open Only")).toBeInTheDocument();
+  });
+
+  // Click "status:closed" filter — no tickets have this status
+  await user.click(screen.getByText("status.closed"));
+
+  await waitFor(() => {
+    // The empty state should show with noMatches variant
+    expect(screen.queryByText("Open Only")).not.toBeInTheDocument();
+  });
+});
+
 // @custom-start tests
 // @custom-end tests

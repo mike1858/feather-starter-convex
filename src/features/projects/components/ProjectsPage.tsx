@@ -48,7 +48,7 @@ export function ProjectsPage() {
                 ? "border-b-2 border-primary text-primary"
                 : "text-primary/60 hover:text-primary"
             }`}
-            /* v8 ignore start -- navigation requires real router */
+            /* v8 ignore start -- navigation requires URL search params not available in jsdom catch-all route */
             onClick={() =>
               navigate({
                 search: (tab.value ? { status: tab.value } : {}) as any,
@@ -64,11 +64,11 @@ export function ProjectsPage() {
       {/* Project card grid */}
       {projects.length === 0 ? (
         <p className="py-8 text-center text-sm text-primary/50">
-          {/* v8 ignore start -- filterStatus branch requires URL search params not available in jsdom catch-all route */}
+          {}
           {filterStatus
             ? `No ${filterStatus === "on_hold" ? "on hold" : filterStatus} projects.`
             : "No projects yet. Create one above!"}
-          {/* v8 ignore stop */}
+          {}
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

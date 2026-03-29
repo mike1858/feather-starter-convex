@@ -51,7 +51,7 @@ export const navItems: NavItem[] = [
     i18nKey: "dashboard.nav.settings",
     to: "/dashboard/settings",
   },
-  /* v8 ignore start -- import.meta.env.DEV is always true in test; production branch untestable */
+  /* v8 ignore next -- import.meta.env.DEV is compile-time true in Vite test mode; production branch unreachable */
   ...(import.meta.env.DEV
     ? [
         {
@@ -61,5 +61,4 @@ export const navItems: NavItem[] = [
         },
       ]
     : []),
-  /* v8 ignore stop */
 ];

@@ -55,11 +55,9 @@ export const update = mutation({
     const todos = await ctx.db.get(args.todosId);
     if (!todos) throw new Error(ERRORS.todos.NOT_FOUND);
 
-    /* v8 ignore start -- field-forwarding branches, not all combos tested */
     const patch: { title?: string; completed?: boolean } = {};
     if (args.title !== undefined) patch.title = args.title;
     if (args.completed !== undefined) patch.completed = args.completed;
-    /* v8 ignore stop */
 
     await ctx.db.patch(args.todosId, patch);
 

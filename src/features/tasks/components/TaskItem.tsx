@@ -71,8 +71,6 @@ export function TaskItem({
   const handlePriorityToggle = async () => {
     await updateTask({ taskId: task._id, priority: !task.priority });
   };
-
-  /* v8 ignore start -- Radix Select onValueChange and grab button require portal interaction not testable in jsdom */
   const handleAssign = async (userId: string) => {
     const assigneeId =
       userId === "unassign" ? undefined : (userId as Id<"users">);
@@ -84,8 +82,6 @@ export function TaskItem({
       await assignTask({ taskId: task._id, assigneeId: currentUserId });
     }
   };
-  /* v8 ignore stop */
-
   const assignee = users.find((u) => u._id === task.assigneeId);
 
   return (
@@ -94,9 +90,7 @@ export function TaskItem({
       onClick={() => onTaskClick?.(task._id)}
       role="button"
       tabIndex={0}
-      /* v8 ignore start -- keyboard row click */
       onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) onTaskClick?.(task._id); }}
-      /* v8 ignore stop */
     >
       {/* Drag handle */}
       {dragHandleProps && (
@@ -139,14 +133,12 @@ export function TaskItem({
           }}
           role="button"
           tabIndex={0}
-          /* v8 ignore start -- v8 coverage misattributes this branch despite test coverage */
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               setEditTitle(task.title);
               setIsEditingTitle(true);
             }
           }}
-          /* v8 ignore stop */
         >
           {task.title}
         </span>
@@ -164,16 +156,16 @@ export function TaskItem({
         <Flag className="h-4 w-4" />
       </button>
 
-      {/* v8 ignore start -- Grab button click handler tested via backend mutation test */}
+      {}
       {showGrab && (
         <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleGrab(); }}>
           Grab
         </Button>
       )}
-      {/* v8 ignore stop */}
+      {}
 
       {/* Assignee selector */}
-      {/* v8 ignore start -- Radix Select portal interactions not testable in jsdom */}
+      {}
       {!showGrab && (
         <Select
           value={task.assigneeId ?? "unassign"}
@@ -198,7 +190,7 @@ export function TaskItem({
           </SelectContent>
         </Select>
       )}
-      {/* v8 ignore stop */}
+      {}
 
       {/* Delete button */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}

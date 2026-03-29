@@ -1,4 +1,3 @@
-/* v8 ignore start -- SubtaskItem renders inside Radix Dialog portal (Sheet); jsdom cannot render portal children for interaction testing. Backend tests cover all mutation logic. */
 import { useState } from "react";
 import {
   Trash2,
@@ -53,8 +52,6 @@ export function SubtaskItem({
     }
     setIsEditing(false);
   };
-
-  /* v8 ignore start -- checkbox change and promote are covered by backend tests + integration */
   const handleToggle = async () => {
     if (isPromoted) return;
     await toggleDone({ subtaskId: subtask._id });
@@ -63,8 +60,6 @@ export function SubtaskItem({
   const handlePromote = async () => {
     await promoteSubtask({ subtaskId: subtask._id });
   };
-  /* v8 ignore stop */
-
   return (
     <div className="flex items-center gap-2 rounded px-2 py-1 hover:bg-primary/[0.02]">
       {/* Drag handle */}
@@ -121,14 +116,12 @@ export function SubtaskItem({
           }}
           role="button"
           tabIndex={0}
-          /* v8 ignore start -- keyboard-triggered edit mode */
           onKeyDown={(e) => {
             if (e.key === "Enter" && !isPromoted) {
               setEditTitle(subtask.title);
               setIsEditing(true);
             }
           }}
-          /* v8 ignore stop */
         >
           {subtask.title}
         </span>
@@ -163,4 +156,3 @@ export function SubtaskItem({
     </div>
   );
 }
-/* v8 ignore stop */

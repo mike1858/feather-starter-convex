@@ -80,7 +80,7 @@ describe("update", () => {
     expect(record.title).toBe("Seed");
   });
 
-  test("updates only specified fields", async ({
+  test("updates only title when title provided", async ({
     client,
     testClient,
   }) => {
@@ -102,6 +102,32 @@ describe("update", () => {
       ctx.db.get(recordId),
     );
     expect(updated.title).toBe("Updated title");
+    expect(updated.completed).toBe(false);
+  });
+
+  test("updates only completed when completed provided", async ({
+    client,
+    testClient,
+  }) => {
+    await client.mutation(api.todos.mutations.create, {
+      title: "Keep this title",
+    });
+
+    const records = await testClient.run(async (ctx: any) =>
+      ctx.db.query("todos").collect(),
+    );
+    const recordId = records[0]._id;
+
+    await client.mutation(api.todos.mutations.update, {
+      todosId: recordId,
+      completed: true,
+    });
+
+    const updated = await testClient.run(async (ctx: any) =>
+      ctx.db.get(recordId),
+    );
+    expect(updated.title).toBe("Keep this title");
+    expect(updated.completed).toBe(true);
   });
 
   test("throws when Todo not found", async ({ client, testClient }) => {

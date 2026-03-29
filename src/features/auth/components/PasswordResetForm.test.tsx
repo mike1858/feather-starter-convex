@@ -214,6 +214,25 @@ describe("PasswordResetForm", () => {
     });
   });
 
+  it("shows error when verify step signIn rejects", async () => {
+    render(<PasswordResetForm onBack={mockOnBack} />);
+    const user = userEvent.setup();
+
+    // Navigate to verify step
+    await user.type(screen.getByPlaceholderText("Email"), "test@example.com");
+    await user.click(screen.getByRole("button", { name: /send reset code/i }));
+    await screen.findByPlaceholderText("8-digit reset code");
+
+    // Now make signIn reject for the verification step
+    mockSignIn.mockRejectedValue(new Error("Invalid code"));
+
+    await user.type(screen.getByPlaceholderText("8-digit reset code"), "12345678");
+    await user.type(screen.getByPlaceholderText("New Password"), "newpassword123");
+    await user.click(screen.getByRole("button", { name: /reset password/i }));
+
+    expect(await screen.findByText(/invalid or expired code/i)).toBeInTheDocument();
+  });
+
   it("uses defaultEmail when provided", () => {
     render(<PasswordResetForm onBack={mockOnBack} defaultEmail="prefilled@example.com" />);
     expect(screen.getByPlaceholderText("Email")).toHaveValue("prefilled@example.com");

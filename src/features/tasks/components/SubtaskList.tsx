@@ -46,7 +46,6 @@ function SortableSubtaskItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    /* v8 ignore next -- isDragging requires pointer simulation */
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -56,8 +55,6 @@ function SortableSubtaskItem({
     </div>
   );
 }
-
-/* v8 ignore start -- SubtaskList renders inside Radix Dialog portal (Sheet); jsdom cannot interact with portal children. Backend tests cover query/mutation logic. */
 export function SubtaskList({ taskId }: { taskId: Id<"tasks"> }) {
   const { data } = useQuery(
     convexQuery(api.subtasks.queries.listByTask, { taskId }),
@@ -88,8 +85,6 @@ export function SubtaskList({ taskId }: { taskId: Id<"tasks"> }) {
     await createSubtask({ taskId, title: trimmed });
     setNewTitle("");
   };
-
-  /* v8 ignore start -- dnd-kit drag events require pointer simulation not available in jsdom */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -119,8 +114,6 @@ export function SubtaskList({ taskId }: { taskId: Id<"tasks"> }) {
       newPosition,
     });
   };
-  /* v8 ignore stop */
-
   return (
     <div>
       {/* Completion count */}
@@ -168,4 +161,3 @@ export function SubtaskList({ taskId }: { taskId: Id<"tasks"> }) {
     </div>
   );
 }
-/* v8 ignore stop */

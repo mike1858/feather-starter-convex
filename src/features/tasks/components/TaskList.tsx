@@ -56,7 +56,6 @@ function SortableTaskItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    /* v8 ignore next -- isDragging requires pointer simulation */
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -98,8 +97,6 @@ export function TaskList({
   );
 
   const sorted = [...tasks].sort((a, b) => a.position - b.position);
-
-  /* v8 ignore start -- dnd-kit drag events require pointer simulation not available in jsdom */
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -128,8 +125,6 @@ export function TaskList({
       newPosition,
     });
   };
-  /* v8 ignore stop */
-
   if (sorted.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-primary/50">

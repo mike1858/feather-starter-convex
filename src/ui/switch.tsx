@@ -1,4 +1,3 @@
-/* v8 ignore start -- Radix wrapper component, tested through form components */
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { cn } from "@/utils/misc";
@@ -23,6 +22,4 @@ const Switch = React.forwardRef<
   </SwitchPrimitives.Root>
 ));
 Switch.displayName = SwitchPrimitives.Root.displayName;
-/* v8 ignore stop */
-
 export { Switch };
