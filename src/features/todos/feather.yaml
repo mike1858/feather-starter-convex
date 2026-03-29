@@ -1,0 +1,60 @@
+name: todos
+label: Todo
+labelPlural: Todos
+
+kind: standard
+
+fields:
+  title:
+    type: string
+    required: true
+    max: 200
+  completed:
+    type: boolean
+    default: false
+    filterable: true
+
+timestamps: false
+
+identity:
+  type: auto-increment
+
+behaviors:
+  assignable: false
+  orderable: true
+  softDelete: false
+  auditTrail: false
+  immutable: false
+
+access:
+  scope: owner
+  permissions:
+    create: authenticated
+    read: owner
+    update: owner
+    delete: owner
+
+views:
+  defaultView: list
+  enabledViews: [list]
+  filteredViews:
+    - name: active
+      label: Active
+      filter: { completed: false }
+      navEntry: false
+    - name: completed
+      label: Completed
+      filter: { completed: true }
+      navEntry: false
+
+operations:
+  create: true
+  read: true
+  update: true
+  delete: true
+
+indexes:
+  - name: by_userId
+    fields: [userId]
+  - name: by_completed
+    fields: [completed]
