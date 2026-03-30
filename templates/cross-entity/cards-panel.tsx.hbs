@@ -1,0 +1,134 @@
+{{!-- @generated-start cards-panel --}}
+import { useQuery } from "convex/react";
+import { api } from "@cvx/_generated/api";
+{{#if inline}}{{#unless readonly}}import { Plus } from "lucide-react";{{/unless}}{{/if}}
+import { Button } from "@/ui/button";
+import type { Id } from "@cvx/_generated/dataModel";
+
+interface {{sourcePascal}}CardsPanelProps {
+  parentId: Id<"{{foreignKey}}">;
+}
+
+export function {{sourcePascal}}CardsPanel({
+  parentId,
+}: {{sourcePascal}}CardsPanelProps) {
+  const items = useQuery(api.{{source}}.queries.listByParent, { parentId });
+
+  return (
+    <div className="rounded-lg border border-border bg-card shadow-card">
+      {/* Panel header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h3 className="text-sm font-semibold text-primary">{{sourcePlural}}</h3>
+        {{#unless readonly}}
+        {{#if inline}}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-primary"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add
+        </Button>
+        {{/if}}
+        {{/unless}}
+      </div>
+
+      <div className="p-4">
+        {/* Loading skeleton */}
+        {items === undefined && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-lg border border-border p-4">
+                <div className="h-4 w-3/4 rounded bg-muted mb-3 animate-pulse" />
+                <div className="h-3 w-full rounded bg-muted mb-1.5 animate-pulse" />
+                <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {items?.length === 0 && (
+          <div className="py-6 text-center">
+            <p className="text-sm text-muted-foreground">No {{sourcePlural}} yet</p>
+            {{#unless readonly}}
+            {{#if inline}}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2 text-xs gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add the first one
+            </Button>
+            {{/if}}
+            {{/unless}}
+          </div>
+        )}
+
+        {/* Cards grid */}
+        {items && items.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => {
+              const record = item as Record<string, unknown>;
+              const fields = Object.entries(record).filter(
+                ([k]) => !["_id", "_creationTime", "{{foreignKey}}"].includes(k),
+              );
+              const [titleKey, titleVal] = fields[0] ?? ["id", item._id];
+              const bodyFields = fields.slice(1, 4);
+
+              return (
+                <div
+                  key={item._id}
+                  className="group rounded-lg border border-border bg-card p-4 shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200 ease-out cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                >
+                  {/* Card title */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <span className="text-sm font-semibold text-primary line-clamp-2">
+                      {String(titleVal ?? "")}
+                    </span>
+                    {/* Status badge if entity has status field */}
+                    {record.status !== undefined && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {String(record.status)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Body fields as label-value pairs */}
+                  {bodyFields.length > 0 && (
+                    <div className="flex flex-col gap-1.5 mb-3">
+                      {bodyFields.map(([k, v]) => (
+                        v != null && v !== "" ? (
+                          <div key={k} className="flex items-baseline gap-2">
+                            <span className="text-xs text-muted-foreground capitalize min-w-0 shrink-0">
+                              {k.replace(/([A-Z])/g, " $1").replace(/^\s+/, "")}:
+                            </span>
+                            <span className="text-xs text-primary truncate">
+                              {typeof v === "boolean" ? (v ? "Yes" : "No") : String(v)}
+                            </span>
+                          </div>
+                        ) : null
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(item._creationTime).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+{{!-- @generated-end cards-panel --}}
