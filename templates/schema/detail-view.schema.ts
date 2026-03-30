@@ -9,7 +9,7 @@ const relatedRecordSchema = z.object({
 });
 
 export const detailViewSchema = z.object({
-  layout: z.enum(["tabs", "panels", "accordion"]).default("panels"),
+  layout: z.enum(["tabs", "panels", "accordion", "inline", "timeline"]).default("panels"),
   relatedRecords: z.array(relatedRecordSchema).default([]),
 });
 

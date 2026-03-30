@@ -56,6 +56,8 @@ export default defineConfig({
       exclude: [
         // --- Auto-generated code ---
         "convex/_generated/**",
+        "convex/generated/**",
+        "src/generated/**",
         "src/routeTree.gen.ts",
 
         // --- Test infrastructure ---

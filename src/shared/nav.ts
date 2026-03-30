@@ -46,7 +46,22 @@ export const navItems: NavItem[] = [
     i18nKey: "contacts.nav.contacts",
     to: "/dashboard/contacts",
   },
-  {
+    {
+        label: "Subtasks",
+        i18nKey: "subtasks.nav.subtasks",
+        to: "/dashboard/subtasks",
+      },
+    {
+        label: "Work Logs",
+        i18nKey: "workLogs.nav.workLogs",
+        to: "/dashboard/workLogs",
+      },
+    {
+        label: "Activity Logs",
+        i18nKey: "activityLogs.nav.activityLogs",
+        to: "/dashboard/activityLogs",
+      },
+    {
     label: "Settings",
     i18nKey: "dashboard.nav.settings",
     to: "/dashboard/settings",
