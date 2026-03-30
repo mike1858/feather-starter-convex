@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 999.2 — feather-start-project-first-run-dx-backlog
+**Current focus:** Phase 999.2 complete — feather start project first-run DX
 
 ## Current Position
 
-Phase: 999.9
-Plan: Not started
+Phase: 999.2 (feather-start-project-first-run-dx-backlog) — COMPLETE
+All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
 
 ### Roadmap Evolution
 
