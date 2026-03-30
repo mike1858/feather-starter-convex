@@ -26,3 +26,4 @@ coverage/
 
 # Feather conversation state (developer-local)
 .feather/
+test-results/
