@@ -85,7 +85,7 @@ export async function updateAction(
     }
 
     // Delete existing generated/ directory (skip in dry run)
-    if (!options.dryRun && !options.force) {
+    if (!options.dryRun) {
       const generatedFrontend = path.join(
         projectRoot,
         "src",
