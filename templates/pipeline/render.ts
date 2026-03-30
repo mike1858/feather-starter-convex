@@ -10,6 +10,7 @@ import {
   sentenceCase,
 } from "change-case";
 import type { FeatureYaml } from "../schema/feather-yaml.schema";
+import { resolveDetailPage } from "../cross-entity/resolver";
 
 // ── Enum color palette ───────────────────────────────────────────────────────
 
@@ -728,6 +729,55 @@ export function renderFeatureTemplates(
   for (const entry of entries) {
     const rendered = renderTemplate(entry.templateFile, data);
     result.set(entry.outputKey, rendered);
+  }
+
+  return result;
+}
+
+/**
+ * Render cross-entity panel templates for a feature with detailView.relatedRecords.
+ *
+ * @param config - Validated + defaults-merged FeatureYaml (must have detailView)
+ * @param relatedYamls - Map of source entity name → FeatureYaml for each related entity
+ * @param crossEntityTemplateDir - Absolute path to `templates/cross-entity/` directory
+ * @returns Map from relative output key (e.g. "components/subtasks-checklist-panel.tsx")
+ *          to rendered content. Empty map if no detailView or no relatedRecords.
+ */
+export function renderCrossEntityPanels(
+  config: FeatureYaml,
+  relatedYamls: Map<string, FeatureYaml>,
+  crossEntityTemplateDir: string,
+): Map<string, string> {
+  if (!config.detailView) {
+    return new Map();
+  }
+
+  ensureHelpers();
+
+  const context = resolveDetailPage(config, relatedYamls);
+  const result = new Map<string, string>();
+
+  const f = (file: string) => path.join(crossEntityTemplateDir, file);
+
+  // Render per-panel templates for each related record
+  for (const record of context.relatedRecords) {
+    const templateFile = f(`${record.display}-panel.tsx.hbs`);
+    if (!fs.existsSync(templateFile)) continue;
+
+    const rendered = renderTemplate(templateFile, record as unknown as Record<string, unknown>);
+    result.set(`components/${record.source}-${record.display}-panel.tsx`, rendered);
+  }
+
+  // Render the panel-renderer (aggregator component)
+  const rendererTemplate = f("panel-renderer.tsx.hbs");
+  if (fs.existsSync(rendererTemplate)) {
+    const parentPascal = pascalCase(config.name);
+    const rendererContext = {
+      ...context,
+      parentPascal,
+    };
+    const rendered = renderTemplate(rendererTemplate, rendererContext as unknown as Record<string, unknown>);
+    result.set(`components/${config.name}-panels.tsx`, rendered);
   }
 
   return result;

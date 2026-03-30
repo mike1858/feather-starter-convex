@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { pascalCase } from "change-case";
 import type { FeatureYaml } from "../schema/feather-yaml.schema";
-import { renderFeatureTemplates } from "./render";
+import { renderFeatureTemplates, renderCrossEntityPanels } from "./render";
 
 // ── Scaffold types ───────────────────────────────────────────────────────────
 
@@ -10,6 +10,8 @@ export interface ScaffoldOptions {
   projectRoot: string;
   outputMode: "generated" | "legacy";
   dryRun: boolean;
+  /** Map of source entity name → FeatureYaml for cross-entity panel rendering */
+  relatedYamls?: Map<string, FeatureYaml>;
 }
 
 export interface ScaffoldResult {
@@ -122,9 +124,26 @@ export async function scaffoldFeature(
     "..",
     "feature",
   );
+  const crossEntityTemplateDir = path.resolve(
+    path.dirname(new URL(import.meta.url).pathname),
+    "..",
+    "cross-entity",
+  );
 
   // Render all templates
   const rendered = renderFeatureTemplates(config, templateDir);
+
+  // Render cross-entity panel templates if feature has detailView
+  if (config.detailView) {
+    const panelRendered = renderCrossEntityPanels(
+      config,
+      options.relatedYamls ?? new Map(),
+      crossEntityTemplateDir,
+    );
+    for (const [key, content] of panelRendered) {
+      rendered.set(key, content);
+    }
+  }
 
   // Build file list with absolute paths
   const files: Array<{ path: string; content: string }> = [];

@@ -1,5 +1,8 @@
 {{!-- @generated-start detail-page --}}
 import { useState, useEffect } from "react";
+{{#if detailView.relatedRecords}}
+import { {{pascalCase name}}Panels } from "./{{name}}-panels";
+{{/if}}
 import {
   Pencil,
   Trash2,
@@ -356,12 +359,24 @@ export function {{pascalCase name}}DetailPage({
     </div>
   );
 
+  {{#if detailView.relatedRecords}}
+  // Related panels section
+  const panelsSection = (
+    <div className="px-6 pb-6">
+      <{{pascalCase name}}Panels parentId={item._id as any} />
+    </div>
+  );
+  {{/if}}
+
   {{#ifEq views.detail.display "page"}}
   {/* Full page mode */}
   return (
     <div className="flex flex-col h-full">
       {actionBar}
       {detailContent}
+      {{#if detailView.relatedRecords}}
+      {panelsSection}
+      {{/if}}
     </div>
   );
   {{/ifEq}}

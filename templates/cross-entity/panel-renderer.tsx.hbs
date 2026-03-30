@@ -1,0 +1,42 @@
+{{!-- @generated-start panel-renderer --}}
+{{#each relatedRecords}}
+{{#ifEq display "checklist"}}
+import { {{sourcePascal}}ChecklistPanel } from "./{{source}}-checklist-panel";
+{{/ifEq}}
+{{#ifEq display "timeline"}}
+import { {{sourcePascal}}TimelinePanel } from "./{{source}}-timeline-panel";
+{{/ifEq}}
+{{#ifEq display "table"}}
+import { {{sourcePascal}}TablePanel } from "./{{source}}-table-panel";
+{{/ifEq}}
+{{#ifEq display "cards"}}
+import { {{sourcePascal}}CardsPanel } from "./{{source}}-cards-panel";
+{{/ifEq}}
+{{/each}}
+import type { Id } from "@cvx/_generated/dataModel";
+
+interface {{parentPascal}}PanelsProps {
+  parentId: Id<"{{parentEntity}}">;
+}
+
+export function {{parentPascal}}Panels({ parentId }: {{parentPascal}}PanelsProps) {
+  return (
+    <div className="space-y-6">
+      {{#each relatedRecords}}
+      {{#ifEq display "checklist"}}
+      <{{sourcePascal}}ChecklistPanel parentId={parentId} />
+      {{/ifEq}}
+      {{#ifEq display "timeline"}}
+      <{{sourcePascal}}TimelinePanel parentId={parentId} />
+      {{/ifEq}}
+      {{#ifEq display "table"}}
+      <{{sourcePascal}}TablePanel parentId={parentId} />
+      {{/ifEq}}
+      {{#ifEq display "cards"}}
+      <{{sourcePascal}}CardsPanel parentId={parentId} />
+      {{/ifEq}}
+      {{/each}}
+    </div>
+  );
+}
+{{!-- @generated-end panel-renderer --}}
