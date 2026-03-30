@@ -64,12 +64,12 @@ Requirements for CalmDo Core milestone. Each maps to roadmap phases.
 
 ### Search & Filters
 
-- [ ] **SRCH-01**: User can filter tasks by status (todo/in_progress/done)
-- [ ] **SRCH-02**: User can filter tasks by priority (high priority only)
-- [ ] **SRCH-03**: User can filter tasks by project
-- [ ] **SRCH-04**: User can filter tasks by assignee (me/unassigned/specific person)
-- [ ] **SRCH-05**: User can filter projects by status
-- [ ] **SRCH-06**: User can text-search across task titles and project names from a search box in the header
+- [x] **SRCH-01**: User can filter tasks by status (todo/in_progress/done)
+- [x] **SRCH-02**: User can filter tasks by priority (high priority only)
+- [x] **SRCH-03**: User can filter tasks by project
+- [x] **SRCH-04**: User can filter tasks by assignee (me/unassigned/specific person)
+- [x] **SRCH-05**: User can filter projects by status
+- [x] **SRCH-06**: User can text-search across task titles and project names from a search box in the header
 
 ### Views
 
