@@ -4,6 +4,7 @@ Feather Starter is a lightweight, production-ready starter template for building
 
 ## Guides
 
+- [Feather Starter — Maintainer Guide](./FEATHER-STARTER-GUIDE.md) — what the repo is, how to use it, conventions (built incrementally).
 - [Introduction](./guide/01-introduction.md)
 - [Production Deployment](./guide/09-deployment.md)
 
