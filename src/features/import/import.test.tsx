@@ -76,6 +76,12 @@ function makeEntity(overrides: Partial<InferredEntity> = {}): InferredEntity {
         required: false,
         confidence: 80,
       },
+      notes: {
+        name: "notes",
+        type: "text",
+        required: false,
+        confidence: 60,
+      },
     },
     sourceSheet: "Customers",
     ...overrides,
@@ -288,20 +294,101 @@ describe("DropZone", () => {
 
     expect(onFileSelected).toHaveBeenCalledWith(file);
   });
+
+  test("calls onFileSelected for valid .xls file", () => {
+    const onFileSelected = vi.fn();
+    render(<DropZone onFileSelected={onFileSelected} isAnalyzing={false} />);
+
+    const input = screen.getByTestId("file-input");
+    const file = new File(["data"], "test.xls", {
+      type: "application/vnd.ms-excel",
+    });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    expect(onFileSelected).toHaveBeenCalledWith(file);
+  });
+
+  test("handles drag over and drag leave events", () => {
+    render(<DropZone onFileSelected={vi.fn()} isAnalyzing={false} />);
+
+    const dropZone = screen.getByRole("button", {
+      name: "Upload Excel file",
+    });
+
+    // Drag over should add visual feedback (no error thrown)
+    fireEvent.dragOver(dropZone, { preventDefault: vi.fn() });
+    // Drag leave should remove visual feedback
+    fireEvent.dragLeave(dropZone);
+  });
+
+  test("handles drop event with valid file", () => {
+    const onFileSelected = vi.fn();
+    render(<DropZone onFileSelected={onFileSelected} isAnalyzing={false} />);
+
+    const dropZone = screen.getByRole("button", {
+      name: "Upload Excel file",
+    });
+    const file = new File(["data"], "report.xlsx", {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    fireEvent.drop(dropZone, {
+      dataTransfer: { files: [file] },
+    });
+
+    expect(onFileSelected).toHaveBeenCalledWith(file);
+  });
+
+  test("handles drop event with invalid file", () => {
+    const onFileSelected = vi.fn();
+    render(<DropZone onFileSelected={onFileSelected} isAnalyzing={false} />);
+
+    const dropZone = screen.getByRole("button", {
+      name: "Upload Excel file",
+    });
+    const file = new File(["data"], "image.png", { type: "image/png" });
+
+    fireEvent.drop(dropZone, {
+      dataTransfer: { files: [file] },
+    });
+
+    expect(onFileSelected).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Please upload an .xlsx or .xls file"),
+    ).toBeInTheDocument();
+  });
+
+  test("click triggers file input", () => {
+    render(<DropZone onFileSelected={vi.fn()} isAnalyzing={false} />);
+
+    const dropZone = screen.getByRole("button", {
+      name: "Upload Excel file",
+    });
+    // Click the drop zone - should open file dialog (input.click())
+    fireEvent.click(dropZone);
+    // No error = click handler works
+  });
 });
 
 // ── Step component tests ─────────────────────────────────────────────────────
 
 describe("Step1Entities", () => {
-  test("renders entities with confidence badges and editable labels", () => {
+  test("renders entities with green, yellow, and red confidence badges", () => {
     const onUpdate = vi.fn();
     const entities = [
-      makeEntity({ confidence: 90 }),
+      makeEntity({ confidence: 90 }), // green (>=85)
+      makeEntity({
+        name: "products",
+        label: "Products",
+        entityType: "reference",
+        confidence: 75, // yellow (70-84)
+        sourceSheet: "Products",
+      }),
       makeEntity({
         name: "orders",
         label: "Orders",
         entityType: "transaction",
-        confidence: 60,
+        confidence: 60, // red (<70)
         sourceSheet: "Orders",
       }),
     ];
@@ -312,10 +399,13 @@ describe("Step1Entities", () => {
 
     expect(screen.getByText("Step 1: Review Entities")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Customers")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Products")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Orders")).toBeInTheDocument();
     expect(screen.getByText("90%")).toBeInTheDocument();
+    expect(screen.getByText("75%")).toBeInTheDocument();
     expect(screen.getByText("60%")).toBeInTheDocument();
     expect(screen.getByText("master")).toBeInTheDocument();
+    expect(screen.getByText("reference")).toBeInTheDocument();
     expect(screen.getByText("transaction")).toBeInTheDocument();
   });
 
@@ -419,6 +509,146 @@ describe("Step3Relationships", () => {
       screen.getByText("No relationships detected."),
     ).toBeInTheDocument();
   });
+
+  test("shows add relationship button and form when onAddRelationship is provided", () => {
+    const onAdd = vi.fn();
+    const entities = [
+      makeEntity(),
+      makeEntity({ name: "orders", label: "Orders" }),
+    ];
+
+    render(
+      <Step3Relationships
+        entities={entities}
+        relationships={[]}
+        onAddRelationship={onAdd}
+      />,
+    );
+
+    // Click "+ Add relationship"
+    fireEvent.click(screen.getByText("+ Add relationship"));
+
+    // Form should appear with Source Entity, Target Entity, Source Field, Type selects
+    expect(screen.getByText("Source Entity")).toBeInTheDocument();
+    expect(screen.getByText("Target Entity")).toBeInTheDocument();
+    expect(screen.getByText("Source Field")).toBeInTheDocument();
+  });
+
+  test("add relationship form submits valid relationship", () => {
+    const onAdd = vi.fn();
+    const entities = [
+      makeEntity(),
+      makeEntity({ name: "orders", label: "Orders" }),
+    ];
+
+    render(
+      <Step3Relationships
+        entities={entities}
+        relationships={[]}
+        onAddRelationship={onAdd}
+      />,
+    );
+
+    // Open form
+    fireEvent.click(screen.getByText("+ Add relationship"));
+
+    // Fill form
+    const selects = screen.getAllByRole("combobox");
+    // Source Entity
+    fireEvent.change(selects[0], { target: { value: "orders" } });
+    // Target Entity
+    fireEvent.change(selects[1], { target: { value: "customers" } });
+    // Source Field
+    fireEvent.change(screen.getByPlaceholderText("e.g. customerId"), {
+      target: { value: "customerId" },
+    });
+    // Type
+    fireEvent.change(selects[2], { target: { value: "has_many" } });
+
+    // Submit
+    fireEvent.click(screen.getByText("Add"));
+
+    expect(onAdd).toHaveBeenCalledWith({
+      sourceEntity: "orders",
+      targetEntity: "customers",
+      sourceField: "customerId",
+      confidence: 50,
+      type: "has_many",
+    });
+  });
+
+  test("cancel button hides add relationship form", () => {
+    render(
+      <Step3Relationships
+        entities={[makeEntity()]}
+        relationships={[]}
+        onAddRelationship={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("+ Add relationship"));
+    expect(screen.getByText("Source Entity")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Cancel"));
+    expect(screen.queryByText("Source Entity")).not.toBeInTheDocument();
+  });
+
+  test("does not show add button when onAddRelationship is not provided", () => {
+    render(
+      <Step3Relationships
+        entities={[makeEntity()]}
+        relationships={[]}
+      />,
+    );
+
+    expect(screen.queryByText("+ Add relationship")).not.toBeInTheDocument();
+  });
+
+  test("does not show remove button when onRemoveRelationship is not provided", () => {
+    render(
+      <Step3Relationships
+        entities={[makeEntity()]}
+        relationships={[makeRelationship()]}
+      />,
+    );
+
+    expect(screen.queryByText("Remove")).not.toBeInTheDocument();
+  });
+
+  test("shows green, yellow, and red badges for different confidence levels", () => {
+    const relationships = [
+      makeRelationship({ confidence: 90, sourceField: "field1" }),
+      makeRelationship({ sourceField: "field2", confidence: 75 }),
+      makeRelationship({ sourceField: "field3", confidence: 50 }),
+    ];
+
+    render(
+      <Step3Relationships
+        entities={[makeEntity()]}
+        relationships={relationships}
+      />,
+    );
+
+    expect(screen.getByText("90%")).toBeInTheDocument();
+    expect(screen.getByText("75%")).toBeInTheDocument();
+    expect(screen.getByText("50%")).toBeInTheDocument();
+  });
+
+  test("add button does nothing when form fields are empty", () => {
+    const onAdd = vi.fn();
+    render(
+      <Step3Relationships
+        entities={[makeEntity()]}
+        relationships={[]}
+        onAddRelationship={onAdd}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("+ Add relationship"));
+    // Click Add without filling any fields
+    fireEvent.click(screen.getByText("Add"));
+    expect(onAdd).not.toHaveBeenCalled();
+  });
 });
 
 describe("SampleDataPreview", () => {
@@ -459,6 +689,44 @@ describe("SampleDataPreview", () => {
     );
     expect(container.innerHTML).toBe("");
   });
+
+  test("handles null values in sample rows (compact mode)", () => {
+    render(
+      <SampleDataPreview
+        columns={["Name", "Email"]}
+        sampleRows={[[null, "alice@example.com"], ["Bob", null]]}
+        compact={true}
+      />,
+    );
+
+    // null values should be rendered as empty strings
+    expect(screen.getByText("Name:")).toBeInTheDocument();
+    expect(screen.getByText("Email:")).toBeInTheDocument();
+  });
+
+  test("handles null values in sample rows (full mode)", () => {
+    render(
+      <SampleDataPreview
+        columns={["Name", "Email"]}
+        sampleRows={[[null, "alice@example.com"]]}
+        compact={false}
+      />,
+    );
+
+    expect(screen.getByText("alice@example.com")).toBeInTheDocument();
+  });
+
+  test("defaults to compact mode when compact prop is not provided", () => {
+    render(
+      <SampleDataPreview
+        columns={["Name"]}
+        sampleRows={[["Alice"]]}
+      />,
+    );
+
+    // Compact mode shows "Name:" label inline
+    expect(screen.getByText("Name:")).toBeInTheDocument();
+  });
 });
 
 describe("DashboardReview", () => {
@@ -482,8 +750,8 @@ describe("DashboardReview", () => {
       screen.getByRole("button", { name: /Confirm & Generate/i }),
     ).toBeInTheDocument();
     // Entity tabs
-    expect(screen.getByText("Customers (3)")).toBeInTheDocument();
-    expect(screen.getByText("Orders (3)")).toBeInTheDocument();
+    expect(screen.getByText("Customers (4)")).toBeInTheDocument();
+    expect(screen.getByText("Orders (4)")).toBeInTheDocument();
   });
 
   test("calls onConfirm when confirm button is clicked", () => {
@@ -512,6 +780,73 @@ describe("DashboardReview", () => {
     );
 
     expect(screen.getByText("Relationships")).toBeInTheDocument();
+  });
+
+  test("switches tab when another entity tab is clicked", () => {
+    const entities = [
+      makeEntity(),
+      makeEntity({
+        name: "orders",
+        label: "Orders",
+        entityType: "transaction",
+        sourceSheet: "Orders",
+        fields: {
+          orderId: { name: "orderId", type: "string", required: true, confidence: 90 },
+        },
+      }),
+    ];
+
+    render(
+      <DashboardReview
+        entities={entities}
+        relationships={[]}
+        onUpdateField={vi.fn()}
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    // Initially shows first entity fields
+    expect(screen.getByText("name")).toBeInTheDocument();
+    expect(screen.getByText("master")).toBeInTheDocument();
+
+    // Click Orders tab
+    fireEvent.click(screen.getByText("Orders (1)"));
+    expect(screen.getByText("orderId")).toBeInTheDocument();
+    expect(screen.getByText("transaction")).toBeInTheDocument();
+  });
+
+  test("calls onUpdateField when field type dropdown changes", () => {
+    const onUpdateField = vi.fn();
+    render(
+      <DashboardReview
+        entities={[makeEntity()]}
+        relationships={[]}
+        onUpdateField={onUpdateField}
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    // Find the first field type dropdown (there are 4 fields)
+    const selects = screen.getAllByLabelText("Field type");
+    fireEvent.change(selects[0], { target: { value: "text" } });
+    expect(onUpdateField).toHaveBeenCalledWith(0, "name", { type: "text" });
+  });
+
+  test("calls onUpdateField when required checkbox changes", () => {
+    const onUpdateField = vi.fn();
+    render(
+      <DashboardReview
+        entities={[makeEntity()]}
+        relationships={[]}
+        onUpdateField={onUpdateField}
+        onConfirm={vi.fn()}
+      />,
+    );
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    // Toggle the first field's required (currently true -> false)
+    fireEvent.click(checkboxes[0]);
+    expect(onUpdateField).toHaveBeenCalledWith(0, "name", { required: false });
   });
 });
 
@@ -562,6 +897,147 @@ describe("ColumnGroupAccordion", () => {
       "true",
     );
   });
+
+  test("high-confidence groups are collapsed by default", () => {
+    const fields: Record<string, InferredField> = {
+      email: { name: "email", type: "email", required: true, confidence: 95 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={vi.fn()}
+        sampleRows={[]}
+        columns={[]}
+      />,
+    );
+
+    const groupButton = screen.getByText(/Personal Info/);
+    expect(groupButton.closest("button")).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  test("clicking group header toggles expanded state", () => {
+    const fields: Record<string, InferredField> = {
+      unknownField: { name: "unknownField", type: "string", required: false, confidence: 50 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={vi.fn()}
+        sampleRows={[]}
+        columns={[]}
+      />,
+    );
+
+    const groupButton = screen.getByText(/Other/).closest("button")!;
+    expect(groupButton).toHaveAttribute("aria-expanded", "true");
+
+    // Click to collapse
+    fireEvent.click(groupButton);
+    expect(groupButton).toHaveAttribute("aria-expanded", "false");
+
+    // Click to expand again
+    fireEvent.click(groupButton);
+    expect(groupButton).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("calls onUpdateField when field type is changed", () => {
+    const onUpdate = vi.fn();
+    const fields: Record<string, InferredField> = {
+      unknownField: { name: "unknownField", type: "string", required: false, confidence: 50 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={onUpdate}
+        sampleRows={[]}
+        columns={[]}
+      />,
+    );
+
+    // Group is expanded (low confidence), so field type dropdown is visible
+    const select = screen.getByRole("combobox");
+    fireEvent.change(select, { target: { value: "number" } });
+    expect(onUpdate).toHaveBeenCalledWith("unknownField", { type: "number" });
+  });
+
+  test("calls onUpdateField when required checkbox is toggled", () => {
+    const onUpdate = vi.fn();
+    const fields: Record<string, InferredField> = {
+      unknownField: { name: "unknownField", type: "string", required: false, confidence: 50 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={onUpdate}
+        sampleRows={[]}
+        columns={[]}
+      />,
+    );
+
+    const checkbox = screen.getByRole("checkbox");
+    fireEvent.click(checkbox);
+    expect(onUpdate).toHaveBeenCalledWith("unknownField", { required: true });
+  });
+
+  test("shows sample values when column index matches", () => {
+    const fields: Record<string, InferredField> = {
+      name: { name: "name", type: "string", required: true, confidence: 50 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={vi.fn()}
+        sampleRows={[["Alice"], ["Bob"], ["Charlie"]]}
+        columns={["name"]}
+      />,
+    );
+
+    // Should display sample values
+    expect(screen.getByText("Alice, Bob, Charlie")).toBeInTheDocument();
+  });
+
+  test("categorizes reference fields into References group", () => {
+    const fields: Record<string, InferredField> = {
+      customerId: { name: "customerId", type: "reference", required: true, confidence: 70 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={vi.fn()}
+        sampleRows={[]}
+        columns={[]}
+      />,
+    );
+
+    expect(screen.getByText(/References/)).toBeInTheDocument();
+  });
+
+  test("handles null values in sample rows", () => {
+    const fields: Record<string, InferredField> = {
+      name: { name: "name", type: "string", required: true, confidence: 50 },
+    };
+
+    render(
+      <ColumnGroupAccordion
+        fields={fields}
+        onUpdateField={vi.fn()}
+        sampleRows={[[null], ["Bob"]]}
+        columns={["name"]}
+      />,
+    );
+
+    // null should be rendered as empty string via ?? ""
+    expect(screen.getByText(", Bob")).toBeInTheDocument();
+  });
 });
 
 describe("Step2Fields", () => {
@@ -577,8 +1053,8 @@ describe("Step2Fields", () => {
 
     expect(screen.getByText("Step 2: Review Fields")).toBeInTheDocument();
     // Entity tabs
-    expect(screen.getByText("Customers (3)")).toBeInTheDocument();
-    expect(screen.getByText("Orders (3)")).toBeInTheDocument();
+    expect(screen.getByText("Customers (4)")).toBeInTheDocument();
+    expect(screen.getByText("Orders (4)")).toBeInTheDocument();
     // Fields from first entity (use getAllByText since "email" also appears as a dropdown option)
     expect(screen.getByText("name")).toBeInTheDocument();
     expect(screen.getAllByText("email").length).toBeGreaterThanOrEqual(1);
@@ -611,5 +1087,121 @@ describe("Step2Fields", () => {
     // Click "Orders" tab
     fireEvent.click(screen.getByText("Orders (1)"));
     expect(screen.getByText("orderId")).toBeInTheDocument();
+  });
+
+  test("calls onUpdateField when field type dropdown changes", () => {
+    const onUpdateField = vi.fn();
+    render(
+      <Step2Fields entities={[makeEntity()]} onUpdateField={onUpdateField} />,
+    );
+
+    // Find the first field type dropdown
+    const selects = screen.getAllByLabelText("Field type");
+    fireEvent.change(selects[0], { target: { value: "text" } });
+    expect(onUpdateField).toHaveBeenCalledWith(0, "name", { type: "text" });
+  });
+
+  test("calls onUpdateField when required checkbox is toggled", () => {
+    const onUpdateField = vi.fn();
+    render(
+      <Step2Fields entities={[makeEntity()]} onUpdateField={onUpdateField} />,
+    );
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    // Toggle first field's required
+    fireEvent.click(checkboxes[0]);
+    expect(onUpdateField).toHaveBeenCalledWith(0, "name", { required: false });
+  });
+
+  test("uses ColumnGroupAccordion for entities with 30+ fields", () => {
+    // Create entity with 30+ fields
+    const fields: Record<string, InferredField> = {};
+    for (let i = 0; i < 31; i++) {
+      fields[`field${i}`] = {
+        name: `field${i}`,
+        type: "string",
+        required: false,
+        confidence: 75,
+      };
+    }
+    const entity = makeEntity({ fields });
+
+    render(
+      <Step2Fields entities={[entity]} onUpdateField={vi.fn()} />,
+    );
+
+    // Should show grouped accordion (has group headers with expand/collapse)
+    // ColumnGroupAccordion groups into categories; "Other" would contain all generic fields
+    expect(screen.getByText(/Other/)).toBeInTheDocument();
+  });
+
+  test("shows sample data toggle when sampleData is provided", () => {
+    render(
+      <Step2Fields
+        entities={[makeEntity()]}
+        onUpdateField={vi.fn()}
+        sampleData={{
+          customers: {
+            columns: ["Name", "Email"],
+            rows: [["Alice", "alice@example.com"]],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Sample Data")).toBeInTheDocument();
+    // Toggle exists
+    expect(screen.getByText("Show full rows")).toBeInTheDocument();
+  });
+
+  test("toggles between compact and full sample data", () => {
+    render(
+      <Step2Fields
+        entities={[makeEntity()]}
+        onUpdateField={vi.fn()}
+        sampleData={{
+          customers: {
+            columns: ["Name", "Email"],
+            rows: [["Alice", "alice@example.com"]],
+          },
+        }}
+      />,
+    );
+
+    // Initially compact
+    fireEvent.click(screen.getByText("Show full rows"));
+    expect(screen.getByText("Show compact")).toBeInTheDocument();
+  });
+
+  test("returns null when entities array is empty", () => {
+    const { container } = render(
+      <Step2Fields entities={[]} onUpdateField={vi.fn()} />,
+    );
+    expect(container.innerHTML).toBe("");
+  });
+
+  test("field update flows through ColumnGroupAccordion for large entities", () => {
+    const onUpdateField = vi.fn();
+    // Create entity with 30+ fields where at least one group has low confidence (auto-expanded)
+    const fields: Record<string, InferredField> = {};
+    for (let i = 0; i < 31; i++) {
+      fields[`field${i}`] = {
+        name: `field${i}`,
+        type: "string",
+        required: false,
+        confidence: 50, // Low confidence => groups auto-expand
+      };
+    }
+    const entity = makeEntity({ fields });
+
+    render(
+      <Step2Fields entities={[entity]} onUpdateField={onUpdateField} />,
+    );
+
+    // ColumnGroupAccordion is rendered; "Other" group should be expanded (low confidence)
+    // Change the first field's type
+    const selects = screen.getAllByRole("combobox");
+    fireEvent.change(selects[0], { target: { value: "number" } });
+    expect(onUpdateField).toHaveBeenCalledWith(0, expect.any(String), { type: "number" });
   });
 });

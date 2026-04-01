@@ -15,7 +15,13 @@ export function Step3Relationships({
   onAddRelationship,
 }: Step3RelationshipsProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newRel, setNewRel] = useState<Partial<DetectedRelationship>>({
+  const [newRel, setNewRel] = useState<{
+    sourceEntity?: string;
+    targetEntity?: string;
+    sourceField?: string;
+    type: DetectedRelationship["type"];
+    confidence: number;
+  }>({
     type: "belongs_to",
     confidence: 50,
   });
@@ -33,8 +39,8 @@ export function Step3Relationships({
         sourceEntity: newRel.sourceEntity,
         targetEntity: newRel.targetEntity,
         sourceField: newRel.sourceField,
-        confidence: newRel.confidence ?? 50,
-        type: newRel.type ?? "belongs_to",
+        confidence: newRel.confidence,
+        type: newRel.type,
       });
       setNewRel({ type: "belongs_to", confidence: 50 });
       setShowAddForm(false);
@@ -166,7 +172,7 @@ export function Step3Relationships({
                 <div>
                   <label className="text-xs text-muted-foreground">Type</label>
                   <select
-                    value={newRel.type ?? "belongs_to"}
+                    value={newRel.type}
                     onChange={(e) =>
                       setNewRel((p) => ({
                         ...p,

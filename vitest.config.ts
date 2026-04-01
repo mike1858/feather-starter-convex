@@ -159,6 +159,12 @@ export default defineConfig({
         "src/features/tickets/components/TicketsItem.tsx",
         "src/features/tickets/components/TicketsFilterBar.tsx",
 
+        // --- Import wizard: Convex-dependent container + analysis hook (Plan 03) ---
+        // ImportWizard orchestrates Convex useMutation/useAction hooks; useSchemaAnalysis
+        // calls parseExcelWorkbook + Convex mutations. Tested via E2E.
+        "src/features/import/components/ImportWizard.tsx",
+        "src/features/import/hooks/useSchemaAnalysis.ts",
+
         // --- Generator infrastructure (Phase 999.1 scope) ---
         "bin/**",
         "templates/**",
