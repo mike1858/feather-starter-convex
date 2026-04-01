@@ -105,6 +105,9 @@ export default defineConfig({
         "src/ui/language-switcher.tsx",
         "src/ui/theme-switcher.tsx",
 
+        // --- Dev tool UI (mirrors devMailbox exclusion — dashboard-only, no logic) ---
+        "src/features/dev-errors/components/DevErrorsDashboard.tsx",
+
         // --- Pure re-exports (barrel files, no logic) ---
         "errors.ts",
         "src/features/**/index.ts",

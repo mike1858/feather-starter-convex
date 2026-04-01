@@ -55,4 +55,7 @@ export const ERRORS = {
     NO_SHEETS: "No data sheets found in the uploaded file.",
     EMPTY_SHEET: "Sheet contains no data rows.",
   },
+  devErrors: {
+    CAPTURE_FAILED: "Failed to capture error.",
+  },
 } as const;
