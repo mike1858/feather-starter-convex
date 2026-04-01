@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to execute
-last_updated: "2026-04-01T09:42:00.412Z"
+last_updated: "2026-04-01T10:14:30.005Z"
 progress:
   total_phases: 21
   completed_phases: 18
-  total_plans: 59
-  completed_plans: 58
+  total_plans: 62
+  completed_plans: 60
 ---
 
 # Project State
@@ -18,13 +18,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 999.6 — bundle-distribution-backlog
+**Current focus:** Phase 999.7 — telemetry-backlog
 
 ## Current Position
 
-Phase: 999.6 (bundle-distribution-backlog) — EXECUTING
+Phase: 999.7 (telemetry-backlog) — EXECUTING
 Plan: 3 of 3
-All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
+Plan 01 complete: CLI telemetry infrastructure and feather stats command
 
 ### Roadmap Evolution
 
@@ -75,6 +75,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.5 P04 | 30min | 5 tasks | 15 files |
 | Phase 999.6 P02 | 5min | 2 tasks | 7 files |
 | Phase 999.6 P03 | 5min | 2 tasks | 7 files |
+| Phase 999.7 P02 | 6min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,9 @@ Recent:
 - [Phase 999.6]: addAction changed from sync to async for registry fetch fallback
 - [Phase 999.6]: Registry fetch caches manifests to templates/ for offline resolve()
 - [Phase 999.6]: syncRegistry uses project feather.yaml lists (no separate registry index)
+- [Phase 999.7]: Public mutations for devErrors (no auth guard) -- same pattern as devEmails
+- [Phase 999.7]: Error capture is fire-and-forget (void mutation) to avoid blocking error handlers
+- [Phase 999.7]: DevErrorsDashboard excluded from coverage (dev tool UI, same as devMailbox)
 
 ### Pending Todos
 
