@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
 import { generateFeature } from "../../templates/pipeline/generate";
+import { getRegistryConfig, syncRegistry } from "../lib/registry";
 
 // ── Find feature YAMLs ──────────────────────────────────────────────────────
 
@@ -54,16 +55,27 @@ export async function updateAction(
   options: UpdateActionOptions,
   projectRoot: string,
 ): Promise<{ success: boolean; message: string }> {
+  const lines: string[] = [];
+
+  // Registry sync (per D-08): sync from remote before regenerating
+  const registryConfig = getRegistryConfig(projectRoot);
+  if (registryConfig) {
+    const syncResult = await syncRegistry(registryConfig, projectRoot);
+    lines.push(`Registry: ${syncResult.message}\n`);
+  }
+
   const yamls = findFeatureYamls(projectRoot);
 
   if (yamls.length === 0) {
     return {
       success: true,
-      message: "No feature YAML files found. Nothing to update.",
+      message: lines.length > 0
+        ? lines.join("\n") + "\nNo feature YAML files found. Nothing to update."
+        : "No feature YAML files found. Nothing to update.",
     };
   }
 
-  const lines: string[] = ["Updating generated code...\n"];
+  lines.push("Updating generated code...\n");
   lines.push(`Found ${yamls.length} feature(s):\n`);
 
   let totalFiles = 0;

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -141,8 +141,8 @@ function createMinimalProjectWithTemplates(root: string): void {
 }
 
 describe("addAction", () => {
-  test("should install feature files to correct locations", () => {
-    const result = addAction("todos", {}, tmpDir);
+  test("should install feature files to correct locations", async () => {
+    const result = await addAction("todos", {}, tmpDir);
 
     expect(result.success).toBe(true);
     expect(
@@ -158,16 +158,16 @@ describe("addAction", () => {
     ).toBe(true);
   });
 
-  test("should copy schema file to shared schemas", () => {
-    addAction("todos", {}, tmpDir);
+  test("should copy schema file to shared schemas", async () => {
+    await addAction("todos", {}, tmpDir);
 
     expect(
       fs.existsSync(path.join(tmpDir, "src/shared/schemas/todos.ts")),
     ).toBe(true);
   });
 
-  test("should copy route file to dashboard routes", () => {
-    addAction("todos", {}, tmpDir);
+  test("should copy route file to dashboard routes", async () => {
+    await addAction("todos", {}, tmpDir);
 
     expect(
       fs.existsSync(
@@ -179,8 +179,8 @@ describe("addAction", () => {
     ).toBe(true);
   });
 
-  test("should copy locale files", () => {
-    addAction("todos", {}, tmpDir);
+  test("should copy locale files", async () => {
+    await addAction("todos", {}, tmpDir);
 
     expect(
       fs.existsSync(path.join(tmpDir, "public/locales/en/todos.json")),
@@ -190,36 +190,36 @@ describe("addAction", () => {
     ).toBe(true);
   });
 
-  test("should fail if feature already exists without --force", () => {
+  test("should fail if feature already exists without --force", async () => {
     // First install
-    addAction("todos", {}, tmpDir);
+    await addAction("todos", {}, tmpDir);
 
     // Second install without force
-    const result = addAction("todos", {}, tmpDir);
+    const result = await addAction("todos", {}, tmpDir);
 
     expect(result.success).toBe(false);
     expect(result.message).toContain("already exists");
   });
 
-  test("should overwrite with --force flag", () => {
+  test("should overwrite with --force flag", async () => {
     // First install
-    addAction("todos", {}, tmpDir);
+    await addAction("todos", {}, tmpDir);
 
     // Second install with force
-    const result = addAction("todos", { force: true }, tmpDir);
+    const result = await addAction("todos", { force: true }, tmpDir);
 
     expect(result.success).toBe(true);
   });
 
-  test("should fail for unknown feature name", () => {
-    const result = addAction("nonexistent", {}, tmpDir);
+  test("should fail for unknown feature name", async () => {
+    const result = await addAction("nonexistent", {}, tmpDir);
 
     expect(result.success).toBe(false);
     expect(result.message).toContain("not found");
   });
 
-  test("should return list of created file paths", () => {
-    const result = addAction("todos", {}, tmpDir);
+  test("should return list of created file paths", async () => {
+    const result = await addAction("todos", {}, tmpDir);
 
     expect(result.filesCreated.length).toBeGreaterThan(0);
     expect(result.filesCreated).toContain("src/features/todos/");
@@ -228,12 +228,12 @@ describe("addAction", () => {
 });
 
 describe("addAction — bundle support", () => {
-  test("should install all features in a bundle in dependency order", () => {
+  test("should install all features in a bundle in dependency order", async () => {
     // Create features: widgets depends on todos
     createFeatureTemplate(tmpDir, "widgets", { belongsTo: "todos" });
     createBundleTemplate(tmpDir, "test-bundle", ["todos", "widgets"]);
 
-    const result = addAction("test-bundle", {}, tmpDir);
+    const result = await addAction("test-bundle", {}, tmpDir);
 
     expect(result.success).toBe(true);
     // Both features installed
@@ -247,8 +247,8 @@ describe("addAction — bundle support", () => {
     expect(result.filesCreated.length).toBeGreaterThan(2);
   });
 
-  test("should still work for single feature (backward compat)", () => {
-    const result = addAction("todos", {}, tmpDir);
+  test("should still work for single feature (backward compat)", async () => {
+    const result = await addAction("todos", {}, tmpDir);
 
     expect(result.success).toBe(true);
     expect(
@@ -256,16 +256,16 @@ describe("addAction — bundle support", () => {
     ).toBe(true);
   });
 
-  test("should update already-installed features in a bundle (per D-10)", () => {
+  test("should update already-installed features in a bundle (per D-10)", async () => {
     // Install todos first
-    addAction("todos", {}, tmpDir);
+    await addAction("todos", {}, tmpDir);
 
     // Create widgets and bundle
     createFeatureTemplate(tmpDir, "widgets");
     createBundleTemplate(tmpDir, "test-bundle", ["todos", "widgets"]);
 
     // Install bundle — todos already exists, should be updated (not skipped)
-    const result = addAction("test-bundle", {}, tmpDir);
+    const result = await addAction("test-bundle", {}, tmpDir);
 
     expect(result.success).toBe(true);
     // Both features should be installed/updated
@@ -277,26 +277,26 @@ describe("addAction — bundle support", () => {
     ).toBe(true);
   });
 
-  test("should error when bundle references dependency not in bundle and not installed (per D-11)", () => {
+  test("should error when bundle references dependency not in bundle and not installed (per D-11)", async () => {
     // Create widgets that depends on "tasks" (not in bundle, not installed)
     createFeatureTemplate(tmpDir, "widgets", { belongsTo: "tasks" });
     createBundleTemplate(tmpDir, "test-bundle", ["widgets"]);
 
-    const result = addAction("test-bundle", {}, tmpDir);
+    const result = await addAction("test-bundle", {}, tmpDir);
 
     expect(result.success).toBe(false);
     expect(result.message).toContain("not installed and not in this bundle");
   });
 
-  test("should succeed when dependency IS already installed", () => {
+  test("should succeed when dependency IS already installed", async () => {
     // Install todos first (it's the dependency)
-    addAction("todos", {}, tmpDir);
+    await addAction("todos", {}, tmpDir);
 
     // Create widgets that depends on todos
     createFeatureTemplate(tmpDir, "widgets", { belongsTo: "todos" });
     createBundleTemplate(tmpDir, "dep-bundle", ["widgets"]);
 
-    const result = addAction("dep-bundle", {}, tmpDir);
+    const result = await addAction("dep-bundle", {}, tmpDir);
 
     expect(result.success).toBe(true);
     expect(
@@ -304,11 +304,11 @@ describe("addAction — bundle support", () => {
     ).toBe(true);
   });
 
-  test("should aggregate filesCreated across all features in bundle", () => {
+  test("should aggregate filesCreated across all features in bundle", async () => {
     createFeatureTemplate(tmpDir, "widgets");
     createBundleTemplate(tmpDir, "test-bundle", ["todos", "widgets"]);
 
-    const result = addAction("test-bundle", {}, tmpDir);
+    const result = await addAction("test-bundle", {}, tmpDir);
 
     expect(result.success).toBe(true);
     // Should contain files from both features
@@ -318,12 +318,100 @@ describe("addAction — bundle support", () => {
     expect(result.filesCreated).toContain("convex/widgets/");
   });
 
-  test("should show available bundles in not-found error message", () => {
+  test("should show available bundles in not-found error message", async () => {
     createBundleTemplate(tmpDir, "test-bundle", ["todos"]);
 
-    const result = addAction("nonexistent", {}, tmpDir);
+    const result = await addAction("nonexistent", {}, tmpDir);
 
     expect(result.success).toBe(false);
     expect(result.message).toContain("test-bundle");
+  });
+});
+
+describe("addAction — remote registry fallback", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test("falls back to registry when name not found locally and registry configured", async () => {
+    // Write feather.yaml with registry config
+    fs.writeFileSync(
+      path.join(tmpDir, "feather.yaml"),
+      "name: test\nregistry:\n  url: https://raw.githubusercontent.com/org/repo/main/templates\n",
+    );
+
+    const todoManifest = {
+      name: "remote-feature",
+      label: "Remote Feature",
+      description: "A remote feature",
+      complexity: "simple",
+      files: {
+        frontend: "src/features/remote-feature/",
+        backend: "convex/remote-feature/",
+        schema: "src/shared/schemas/remote-feature.ts",
+        route: "src/routes/_app/_auth/dashboard/_layout.remote-feature.tsx",
+        locales: ["public/locales/en/remote-feature.json"],
+      },
+      wiring: {
+        schemaTable: "remote-feature",
+        navEntry: { label: "Remote", i18nKey: "rf.nav", to: "/dashboard/rf" },
+        i18nNamespace: "remote-feature",
+      },
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("bundles/remote-feature/bundle.json")) {
+          return { ok: false, status: 404, json: async () => ({}) } as Response;
+        }
+        if (url.includes("features/remote-feature/manifest.json")) {
+          return { ok: true, status: 200, json: async () => todoManifest } as Response;
+        }
+        return { ok: false, status: 404, json: async () => ({}) } as Response;
+      }),
+    );
+
+    // "remote-feature" does not exist locally
+    const result = await addAction("remote-feature", {}, tmpDir);
+
+    // The manifest is cached, but there are no actual feature files to copy
+    // so installSingleFeature will succeed with files copied from cached template
+    // The key assertion: fetch was called (registry was consulted)
+    expect(vi.mocked(fetch)).toHaveBeenCalled();
+    // The manifest.json should be cached locally
+    expect(
+      fs.existsSync(
+        path.join(tmpDir, "templates/features/remote-feature/manifest.json"),
+      ),
+    ).toBe(true);
+  });
+
+  test("shows not-found error when no registry configured and name unknown", async () => {
+    // No feather.yaml = no registry config
+    const result = await addAction("nonexistent", {}, tmpDir);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("not found");
+  });
+
+  test("shows registry error message on network failure", async () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "feather.yaml"),
+      "name: test\nregistry:\n  url: https://bad-registry.example.com\n",
+    );
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => {
+        throw new TypeError("fetch failed");
+      }),
+    );
+
+    const result = await addAction("nonexistent", {}, tmpDir);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("Registry fetch failed");
+    expect(result.message).toContain("Network error");
   });
 });

@@ -13,6 +13,10 @@ import {
   topoSort,
   validateDependencies,
 } from "../lib/topo-sort";
+import {
+  fetchFromRegistry,
+  getRegistryConfig,
+} from "../lib/registry";
 
 export interface AddActionResult {
   success: boolean;
@@ -190,13 +194,40 @@ function getInstalledFeatures(projectRoot: string): string[] {
 /**
  * Install a feature or bundle into the current project.
  * Auto-detects bundles (checks bundles/ first, then features/ per D-03).
+ * Falls back to remote registry when name not found locally (per D-04).
  */
-export function addAction(
+export async function addAction(
   name: string,
   options: AddActionOptions,
   projectRoot: string,
-): AddActionResult {
-  const resolution = resolve(name, projectRoot);
+): Promise<AddActionResult> {
+  let resolution = resolve(name, projectRoot);
+
+  // Remote registry fallback (per D-04)
+  if (resolution.type === "not-found") {
+    const registryConfig = getRegistryConfig(projectRoot);
+    if (registryConfig) {
+      try {
+        const token = process.env.FEATHER_REGISTRY_TOKEN;
+        const fetched = await fetchFromRegistry(
+          name,
+          registryConfig.url,
+          projectRoot,
+          token,
+        );
+        if (fetched) {
+          // Re-resolve — files are now cached locally in templates/
+          resolution = resolve(name, projectRoot);
+        }
+      } catch (error) {
+        return {
+          success: false,
+          message: `Registry fetch failed for '${name}': ${(error as Error).message}`,
+          filesCreated: [],
+        };
+      }
+    }
+  }
 
   if (resolution.type === "not-found") {
     const templatesDir = findTemplatesDir(projectRoot);
@@ -292,12 +323,12 @@ export const addCommand = new Command("add")
   .description("Install a feature or bundle into the current project")
   .argument("<name...>", "Feature or bundle name(s) to install")
   .option("-f, --force", "Overwrite existing files", false)
-  .action((names: string[], opts: { force: boolean }) => {
+  .action(async (names: string[], opts: { force: boolean }) => {
     const projectRoot = process.cwd();
 
     for (const name of names) {
       console.log(`\n  Installing ${name}...`);
-      const result = addAction(name, opts, projectRoot);
+      const result = await addAction(name, opts, projectRoot);
       if (result.success) {
         console.log(`  ${result.message}`);
       } else {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -239,5 +239,68 @@ describe("feather update", () => {
 
     const result = await updateAction({}, tempDir);
     expect(result.message).toContain("ERROR");
+  });
+});
+
+describe("feather update — registry sync", () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "update-reg-test-"));
+    setupTempProject(tempDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    vi.restoreAllMocks();
+  });
+
+  it("syncs from registry before regenerating when registry configured", async () => {
+    // Write feather.yaml with registry config and a feature to sync
+    fs.writeFileSync(
+      path.join(tempDir, "feather.yaml"),
+      "name: test\nfeatures:\n  - todos\nregistry:\n  url: https://raw.githubusercontent.com/org/repo/main/templates\n",
+    );
+
+    const todoManifest = {
+      name: "todos",
+      label: "Todos",
+      description: "Todo feature",
+      complexity: "simple",
+      files: { frontend: "src/features/todos/" },
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("bundles/todos/bundle.json")) {
+          return { ok: false, status: 404, json: async () => ({}) } as Response;
+        }
+        if (url.includes("features/todos/manifest.json")) {
+          return { ok: true, status: 200, json: async () => todoManifest } as Response;
+        }
+        return { ok: false, status: 404, json: async () => ({}) } as Response;
+      }),
+    );
+
+    const result = await updateAction({}, tempDir);
+
+    // Registry sync should have been attempted
+    expect(result.message).toContain("Registry:");
+    expect(result.message).toContain("Synced");
+    expect(vi.mocked(fetch)).toHaveBeenCalled();
+  });
+
+  it("regenerates only when no registry configured (backward compat)", async () => {
+    // No feather.yaml with registry config
+    createFeatureYaml(tempDir, "widgets", `name: widgets\nlabel: Widget\nfields:\n  title:\n    type: string\n    required: true\n`);
+
+    const result = await updateAction({}, tempDir);
+
+    // No registry sync line in output
+    expect(result.message).not.toContain("Registry:");
+    // But regeneration still works
+    expect(result.success).toBe(true);
+    expect(result.message).toContain("widgets");
   });
 });
