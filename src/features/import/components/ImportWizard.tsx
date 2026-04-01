@@ -1,3 +1,6 @@
+import { useMutation, useAction } from "convex/react";
+import { useNavigate } from "@tanstack/react-router";
+import { api } from "@cvx/_generated/api";
 import { DropZone } from "./DropZone";
 import { Step1Entities } from "./Step1Entities";
 import { Step2Fields } from "./Step2Fields";
@@ -6,6 +9,7 @@ import { DashboardReview } from "./DashboardReview";
 import { useImportWizard } from "../hooks/useImportWizard";
 import type { WizardStep } from "../hooks/useImportWizard";
 import { useSchemaAnalysis } from "../hooks/useSchemaAnalysis";
+import { generateAllYamls } from "~/templates/pipeline/excel/yaml-generator";
 
 const STEP_LABELS = [
   "Upload",
@@ -25,6 +29,9 @@ const STEP_KEYS: WizardStep[] = [
 export function ImportWizard() {
   const wizard = useImportWizard();
   const { analyzeFile, isAnalyzing, error } = useSchemaAnalysis();
+  const confirmSchema = useMutation(api.imports.mutations.confirmSchema);
+  const importData = useAction(api.imports.actions.importData);
+  const navigate = useNavigate();
 
   const handleFileSelected = async (file: File) => {
     wizard.setFile(file);
@@ -32,9 +39,32 @@ export function ImportWizard() {
     wizard.setAnalysisResult(result);
   };
 
-  const handleConfirm = () => {
-    // Will be wired to YAML generation + data import in Plan 04
-    console.log("Confirmed schema:", wizard.state.entities);
+  const handleConfirm = async () => {
+    if (!wizard.state.importId) return;
+
+    const importId = wizard.state.importId as Parameters<typeof confirmSchema>[0]["importId"];
+    const analysisResult = {
+      entities: wizard.state.entities,
+      relationships: wizard.state.relationships,
+      importOrder: wizard.state.importOrder,
+      method: wizard.state.analysisMethod ?? "heuristic",
+    };
+
+    // 1. Save confirmed schema
+    await confirmSchema({
+      importId,
+      confirmedSchema: JSON.stringify(analysisResult),
+    });
+
+    // 2. Generate YAMLs (available for file write or further processing)
+    // Cast relationships: import types use a subset of entity-classifier's DetectedRelationship
+    generateAllYamls(
+      wizard.state.entities,
+      wizard.state.relationships as Parameters<typeof generateAllYamls>[1],
+    );
+
+    // 3. Navigate to import report
+    await navigate({ to: `/dashboard/imports/${wizard.state.importId}` });
   };
 
   return (

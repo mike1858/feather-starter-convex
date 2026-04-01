@@ -17,11 +17,14 @@
 // |14 | saveImportStats| valid                    | importStats stored, status=complete, completedAt set |
 // |15 | saveImportStats| wrong owner              | throws "Import not found"                           |
 // |16 | saveImportStats| unauthenticated          | throws "Not authenticated"                          |
-// |17 | remove         | existing import          | import deleted                                      |
-// |18 | remove         | cascades errors          | associated importErrors deleted                     |
-// |19 | remove         | cascades mappings        | associated schemaMappings deleted                   |
-// |20 | remove         | wrong owner              | throws "Import not found"                           |
-// |21 | remove         | unauthenticated          | throws "Not authenticated"                          |
+// |17 | saveErrors     | valid batch              | errors inserted into importErrors table             |
+// |18 | saveErrors     | unauthenticated          | throws "Not authenticated"                          |
+// |19 | saveErrors     | empty array              | no errors inserted                                  |
+// |20 | remove         | existing import          | import deleted                                      |
+// |21 | remove         | cascades errors          | associated importErrors deleted                     |
+// |22 | remove         | cascades mappings        | associated schemaMappings deleted                   |
+// |23 | remove         | wrong owner              | throws "Import not found"                           |
+// |24 | remove         | unauthenticated          | throws "Not authenticated"                          |
 
 import { describe, expect } from "vitest";
 import { api } from "../_generated/api";
@@ -324,6 +327,81 @@ describe("saveImportStats", () => {
         importStats: "{}",
       }),
     ).rejects.toThrow("Not authenticated");
+  });
+});
+
+describe("saveErrors", () => {
+  test("inserts errors into importErrors table", async ({
+    client,
+    testClient,
+  }) => {
+    const importId = await client.mutation(api.imports.mutations.create, {
+      fileName: "test.xlsx",
+    });
+
+    await client.mutation(api.imports.mutations.saveErrors, {
+      importId,
+      errors: [
+        {
+          entityName: "employees",
+          rowNumber: 1,
+          severity: "green" as const,
+          column: "salary",
+          originalValue: "$50,000",
+          fixedValue: "50000",
+          errorMessage: 'Auto-converted "$50,000" to 50000',
+        },
+        {
+          entityName: "employees",
+          rowNumber: 2,
+          severity: "red" as const,
+          column: "email",
+          errorMessage: "Invalid email format",
+        },
+      ],
+    });
+
+    const errors = await testClient.run(async (ctx: any) =>
+      ctx.db.query("importErrors").collect(),
+    );
+    expect(errors).toHaveLength(2);
+    expect(errors[0].severity).toBe("green");
+    expect(errors[0].originalValue).toBe("$50,000");
+    expect(errors[1].severity).toBe("red");
+    expect(errors[1].originalValue).toBeUndefined();
+  });
+
+  test("throws for unauthenticated user", async ({ testClient }) => {
+    const fakeId = await testClient.run(async (ctx: any) =>
+      ctx.db.insert("imports", {
+        userId: await ctx.db.insert("users", { name: "tmp" }),
+        fileName: "test.xlsx",
+        status: "draft",
+      }),
+    );
+
+    await expect(
+      testClient.mutation(api.imports.mutations.saveErrors, {
+        importId: fakeId,
+        errors: [],
+      }),
+    ).rejects.toThrow("Not authenticated");
+  });
+
+  test("handles empty errors array", async ({ client, testClient }) => {
+    const importId = await client.mutation(api.imports.mutations.create, {
+      fileName: "test.xlsx",
+    });
+
+    await client.mutation(api.imports.mutations.saveErrors, {
+      importId,
+      errors: [],
+    });
+
+    const errors = await testClient.run(async (ctx: any) =>
+      ctx.db.query("importErrors").collect(),
+    );
+    expect(errors).toHaveLength(0);
   });
 });
 

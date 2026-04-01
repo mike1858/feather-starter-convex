@@ -97,6 +97,37 @@ export const saveImportStats = mutation({
   },
 });
 
+export const saveErrors = mutation({
+  args: {
+    importId: v.id("imports"),
+    errors: v.array(
+      v.object({
+        entityName: v.string(),
+        rowNumber: v.number(),
+        severity: v.union(
+          v.literal("green"),
+          v.literal("yellow"),
+          v.literal("red"),
+        ),
+        column: v.string(),
+        originalValue: v.optional(v.string()),
+        fixedValue: v.optional(v.string()),
+        errorMessage: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    for (const error of args.errors) {
+      await ctx.db.insert("importErrors", {
+        importId: args.importId,
+        ...error,
+      });
+    }
+  },
+});
+
 export const remove = mutation({
   args: { importId: v.id("imports") },
   handler: async (ctx, args) => {
