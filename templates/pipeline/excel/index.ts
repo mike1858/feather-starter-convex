@@ -20,3 +20,9 @@ export {
   type DetectedRelationship,
   type ClassifiedWorkbook,
 } from "./entity-classifier";
+
+export {
+  generateFeatherYaml,
+  generateAllYamls,
+  type GeneratedYaml,
+} from "./yaml-generator";
