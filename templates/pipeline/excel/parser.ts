@@ -107,7 +107,7 @@ export function parseExcelWorkbook(
 /**
  * Detect the predominant cell type from a list of non-empty values.
  */
-function detectCellType(
+export function detectCellType(
   values: unknown[],
 ): "string" | "number" | "boolean" | "date" | "empty" {
   if (values.length === 0) return "empty";
@@ -147,6 +147,6 @@ const DATE_PATTERNS = [
   /^\d{1,2}\s+\w{3}\s+\d{4}$/,              // 15 Jan 2024
 ];
 
-function isDateLike(value: string): boolean {
+export function isDateLike(value: string): boolean {
   return DATE_PATTERNS.some((pattern) => pattern.test(value.trim()));
 }

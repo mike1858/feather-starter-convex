@@ -54,8 +54,7 @@ export async function fetchFromRegistry(
     const bundleUrl = `${normalizedUrl}/bundles/${name}/bundle.json`;
     const bundleRes = await fetch(bundleUrl, { headers });
     if (bundleRes.ok) {
-      const bundleJson = await bundleRes.json();
-      bundleManifestSchema.parse(bundleJson);
+      const bundleJson = bundleManifestSchema.parse(await bundleRes.json());
 
       // Cache bundle.json locally
       const localBundleDir = path.join(

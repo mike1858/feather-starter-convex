@@ -19,7 +19,6 @@ async function storeDevEmail(to: string[], subject: string, html: string) {
   const convexUrl = process.env.CONVEX_URL;
   if (!convexUrl) return;
   const client = new ConvexHttpClient(convexUrl);
-  // @ts-expect-error TS2589: ConvexHttpClient generic type instantiation depth — Convex generated API types are deeply nested. Will auto-surface when fixed upstream.
   await client.mutation(api.devEmails.mutations.store, {
     to,
     subject,

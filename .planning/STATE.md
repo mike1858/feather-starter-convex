@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Ready to plan
-last_updated: "2026-04-01T10:28:07.746Z"
+status: Executing Phase 999.10
+last_updated: "2026-04-01T10:35:05.427Z"
 progress:
   total_phases: 21
   completed_phases: 19
@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 999.4 — 999-1-integration-gaps-backlog
+**Current focus:** Phase 999.10 — e2e-verification-bugs-docs
 
 ## Current Position
 
-Phase: 999.5
-Plan: Not started
+Phase: 999.10 (e2e-verification-bugs-docs) — EXECUTING
+Plan: 1 of 2
 All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
 
 ### Roadmap Evolution

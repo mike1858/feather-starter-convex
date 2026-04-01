@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Architecture Modernization** — Phase 1 (shipped 2026-03-09)
-- 📋 **v2.0 CalmDo Core** — Phases 2-7 (planned)
+- ✅ **v2.0 CalmDo Core** — Phases 2-7 + Backlog (shipped 2026-04-01)
 
 ## Phases
 
@@ -246,14 +246,14 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 7. MECE Test Rewrite | v2.0 | 3/3 | Complete | 2026-03-28 |
 | 999.1 Feather DX Architecture | Backlog | 6/6 | Complete | 2026-03-28 |
 | 999.9 Test Quality Audit | Backlog | 3/3 | Complete    | 2026-03-29 |
-| 999.2 feather start project | Backlog | 0/4 | Planned | - |
+| 999.2 feather start project | Backlog | 4/4 | Complete    | 2026-03-30 |
 | 999.3 LLM Architect Conversation | Backlog | 4/4 | Complete   | 2026-03-30 |
 | 999.4 Integration Gaps | Backlog | 4/4 | Complete    | 2026-03-31 |
-| 999.5 Excel-to-System Pipeline | Backlog | 0/? | Not started | - |
+| 999.5 Excel-to-System Pipeline | Backlog | 5/5 | Complete    | 2026-04-01 |
 | 999.6 Bundle Distribution | Backlog | 3/3 | Complete    | 2026-04-01 |
-| 999.7 Telemetry | Backlog | 3/3 | Complete   | 2026-04-01 |
+| 999.7 Telemetry | Backlog | 3/3 | Complete    | 2026-04-01 |
 | 999.8 Search | Backlog | 2/2 | Complete    | 2026-03-30 |
-| 999.10 E2E, Bugs & Docs Debt | Backlog | 1/2 | In Progress|  |
+| 999.10 E2E, Bugs & Docs Debt | Backlog | 2/2 | Complete    | 2026-04-01 |
 
 ## Backlog
 
@@ -349,7 +349,7 @@ Plans:
 - Fuzzy column rename detection (Jaro-Winkler + position + data fingerprinting)
 - Interactive confirmation UI, schema reconciliation for re-imports
 - Atomic migration with audit trail
-**Plans:** 0 (estimated 4-5)
+**Plans:** 5/5 plans complete
 
 ### Phase 999.6: Bundle Distribution (BACKLOG)
 **Goal:** Curated feature bundles installable in one command
@@ -403,10 +403,10 @@ Plans:
 - **Barrel export gaps:** Fix placeholder barrel exports in subtasks/, work-logs/, activity-logs/
 - **Phase 03.2.1.1 status:** Reconcile roadmap status with actual `feather.yaml` files that already exist
 **Note:** All original 999.10 items (6 DX/UX bugs) were fixed in Phase 03.1 — phase repurposed for remaining gaps.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 999.10-01-PLAN.md — E2E test verification and CalmDo feature E2E tests
+- [x] 999.10-01-PLAN.md — E2E test verification and CalmDo feature E2E tests
 - [x] 999.10-02-PLAN.md — Bug fixes, barrel export cleanup, and documentation updates
 
 ---

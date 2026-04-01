@@ -32,11 +32,13 @@ vi.mock("@clack/prompts", () => ({
 
 const mockXlsxRead = vi.fn().mockReturnValue({
   SheetNames: ["Tasks"],
-  Sheets: { Tasks: {} },
+  Sheets: { Tasks: { "!ref": "A1:C3" } },
 });
+// header:1 mode returns array-of-arrays: first row = headers, rest = data
 const mockSheetToJson = vi.fn().mockReturnValue([
-  { title: "Test Task", priority: "high", due_date: "2026-01-15" },
-  { title: "Another Task", priority: "low", due_date: "2026-02-01" },
+  ["title", "priority", "due_date"],
+  ["Test Task", "high", "2026-01-15"],
+  ["Another Task", "low", "2026-02-01"],
 ]);
 
 vi.mock("xlsx", () => ({
@@ -70,11 +72,12 @@ describe("feather import command", () => {
     // Reset xlsx mock defaults
     mockXlsxRead.mockReturnValue({
       SheetNames: ["Tasks"],
-      Sheets: { Tasks: {} },
+      Sheets: { Tasks: { "!ref": "A1:C3" } },
     });
     mockSheetToJson.mockReturnValue([
-      { title: "Test Task", priority: "high", due_date: "2026-01-15" },
-      { title: "Another Task", priority: "low", due_date: "2026-02-01" },
+      ["title", "priority", "due_date"],
+      ["Test Task", "high", "2026-01-15"],
+      ["Another Task", "low", "2026-02-01"],
     ]);
   });
 
@@ -164,11 +167,20 @@ describe("feather import command", () => {
     // Override xlsx mock for multi-sheet
     mockXlsxRead.mockReturnValueOnce({
       SheetNames: ["Projects", "Tasks"],
-      Sheets: { Projects: {}, Tasks: {} },
+      Sheets: {
+        Projects: { "!ref": "A1:A2" },
+        Tasks: { "!ref": "A1:B2" },
+      },
     });
     mockSheetToJson
-      .mockReturnValueOnce([{ name: "Project A" }])
-      .mockReturnValueOnce([{ title: "Task 1", project_id: "1" }]);
+      .mockReturnValueOnce([
+        ["name"],
+        ["Project A"],
+      ])
+      .mockReturnValueOnce([
+        ["title", "project_id"],
+        ["Task 1", "1"],
+      ]);
 
     const xlsxFile = path.join(tempDir, "multi.xlsx");
     fs.writeFileSync(xlsxFile, "fake-excel-content");

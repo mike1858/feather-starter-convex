@@ -418,7 +418,7 @@ describe("V2: adding a feature produces valid project", () => {
     createFullProjectSnapshot(tmpDir);
     await stripToBase(tmpDir);
 
-    const result = addAction("todos", {}, tmpDir);
+    const result = await addAction("todos", {}, tmpDir);
 
     expect(result.success).toBe(true);
     expect(
@@ -449,7 +449,7 @@ describe("V3: adding all examples restores feature code", () => {
     await stripToBase(tmpDir);
 
     for (const name of ["todos", "tickets", "contacts"]) {
-      addAction(name, {}, tmpDir);
+      await addAction(name, {}, tmpDir);
     }
 
     for (const name of ["todos", "tickets", "contacts"]) {
@@ -478,7 +478,7 @@ describe("V4: add then remove is clean round-trip", () => {
     );
 
     // Add then remove
-    addAction("todos", {}, tmpDir);
+    await addAction("todos", {}, tmpDir);
     removeAction("todos", { confirm: true }, tmpDir);
 
     // State should match stripped

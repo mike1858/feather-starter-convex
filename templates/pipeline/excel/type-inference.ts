@@ -198,6 +198,7 @@ export function toFieldName(columnHeader: string): string {
   return columnHeader
     .trim()
     .replace(/[^a-zA-Z0-9\s]/g, "")
+    .trim()
     .replace(/\s+(.)/g, (_, c) => c.toUpperCase())
     .replace(/^\w/, (c) => c.toLowerCase());
 }

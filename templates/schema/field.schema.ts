@@ -40,7 +40,7 @@ const currencyConfigSchema = z.object({
 
 // ── Reference field config ───────────────────────────────────────────────────
 
-const referenceConfigSchema = z.object({
+export const referenceConfigSchema = z.object({
   target: z.string(),
   displayField: z.string().optional(),
 });
