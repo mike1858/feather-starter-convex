@@ -5,10 +5,10 @@ export interface InferredField {
   name: string;
   type: FieldType;
   required: boolean;
-  confidence: number; // 0-100
-  enumValues?: string[]; // populated when type is "enum"
+  confidence: number;       // 0-100
+  enumValues?: string[];    // populated when type is "enum"
   referenceTarget?: string; // populated when type is "reference"
-  max?: number; // for string/text fields
+  max?: number;             // for string/text fields
 }
 
 export interface InferredEntity {
@@ -21,11 +21,11 @@ export interface InferredEntity {
   sourceSheet: string;
 }
 
-// -- Pattern matchers --------------------------------------------------------
+// ── Pattern matchers ────────────────────────────────────────────────────────
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_PATTERN = /^https?:\/\/.+/;
-const CURRENCY_PATTERN = /^[$\u20AC\u00A3\u00A5\u20B9]\s*[\d,.]+$|^[\d,.]+\s*[$\u20AC\u00A3\u00A5\u20B9]$/;
+const CURRENCY_PATTERN = /^[$€£¥₹]\s*[\d,.]+$|^[\d,.]+\s*[$€£¥₹]$/;
 const PERCENTAGE_PATTERN = /^[\d.]+\s*%$/;
 
 /**
@@ -55,17 +55,13 @@ export function inferFieldType(column: ColumnInfo): InferredField {
     }
 
     // Currency
-    const currencyMatches = strValues.filter((v) =>
-      CURRENCY_PATTERN.test(v),
-    ).length;
+    const currencyMatches = strValues.filter((v) => CURRENCY_PATTERN.test(v)).length;
     if (currencyMatches / strValues.length > 0.8) {
       return { name: fieldName, type: "currency", required, confidence: 85 };
     }
 
     // Percentage
-    const percentMatches = strValues.filter((v) =>
-      PERCENTAGE_PATTERN.test(v),
-    ).length;
+    const percentMatches = strValues.filter((v) => PERCENTAGE_PATTERN.test(v)).length;
     if (percentMatches / strValues.length > 0.8) {
       return { name: fieldName, type: "percentage", required, confidence: 85 };
     }
@@ -82,47 +78,25 @@ export function inferFieldType(column: ColumnInfo): InferredField {
     }
 
     // Text: long strings (average > 100 chars)
-    const avgLength =
-      strValues.reduce((sum, v) => sum + v.length, 0) / strValues.length;
+    const avgLength = strValues.reduce((sum, v) => sum + v.length, 0) / strValues.length;
     if (avgLength > 100) {
-      return {
-        name: fieldName,
-        type: "text",
-        required,
-        confidence: 85,
-        max: 5000,
-      };
+      return { name: fieldName, type: "text", required, confidence: 85, max: 5000 };
     }
 
     // Default string
     const maxLen = Math.max(...strValues.map((v) => v.length));
-    return {
-      name: fieldName,
-      type: "string",
-      required,
-      confidence: 75,
-      max: Math.min(maxLen * 2, 500),
-    };
+    return { name: fieldName, type: "string", required, confidence: 75, max: Math.min(maxLen * 2, 500) };
   }
 
   // Number
   if (detectedType === "number") {
+    // Check if values look like currency (whole numbers or 2 decimal places)
     const nameHint = name.toLowerCase();
-    if (
-      nameHint.includes("price") ||
-      nameHint.includes("cost") ||
-      nameHint.includes("salary") ||
-      nameHint.includes("amount") ||
-      nameHint.includes("total") ||
-      nameHint.includes("fee")
-    ) {
+    if (nameHint.includes("price") || nameHint.includes("cost") || nameHint.includes("salary") ||
+        nameHint.includes("amount") || nameHint.includes("total") || nameHint.includes("fee")) {
       return { name: fieldName, type: "currency", required, confidence: 80 };
     }
-    if (
-      nameHint.includes("percent") ||
-      nameHint.includes("rate") ||
-      nameHint.includes("ratio")
-    ) {
+    if (nameHint.includes("percent") || nameHint.includes("rate") || nameHint.includes("ratio")) {
       return { name: fieldName, type: "percentage", required, confidence: 80 };
     }
     return { name: fieldName, type: "number", required, confidence: 90 };
@@ -170,17 +144,16 @@ export function inferEntityType(
 
   // Master: has email/name-like fields, person/org pattern
   const hasEmail = fieldTypes.includes("email");
-  const hasNameField = fieldNames.some(
-    (n) => n.includes("name") || n.includes("first") || n.includes("last"),
+  const hasNameField = fieldNames.some((n) =>
+    n.includes("name") || n.includes("first") || n.includes("last"),
   );
   if (hasEmail || hasNameField) {
     return { entityType: "master", confidence: 75 };
   }
 
   // Reference: has name + description pattern (products, categories)
-  const hasDescription = fieldNames.some(
-    (n) =>
-      n.includes("description") || n.includes("desc") || n.includes("notes"),
+  const hasDescription = fieldNames.some((n) =>
+    n.includes("description") || n.includes("desc") || n.includes("notes"),
   );
   if (hasNameField && hasDescription) {
     return { entityType: "reference", confidence: 70 };
@@ -219,18 +192,17 @@ export function inferEntities(sheets: SheetMetadata[]): InferredEntity[] {
     });
 }
 
-// -- String utilities --------------------------------------------------------
+// ── String utilities ────────────────────────────────────────────────────────
 
-export function toFieldName(columnHeader: string): string {
+function toFieldName(columnHeader: string): string {
   return columnHeader
     .trim()
     .replace(/[^a-zA-Z0-9\s]/g, "")
-    .trim()
     .replace(/\s+(.)/g, (_, c) => c.toUpperCase())
     .replace(/^\w/, (c) => c.toLowerCase());
 }
 
-export function toEntityName(sheetName: string): string {
+function toEntityName(sheetName: string): string {
   return sheetName
     .trim()
     .replace(/[^a-zA-Z0-9\s]/g, "")
@@ -238,6 +210,6 @@ export function toEntityName(sheetName: string): string {
     .toLowerCase();
 }
 
-export function toLabel(sheetName: string): string {
+function toLabel(sheetName: string): string {
   return sheetName.trim().replace(/([a-z])([A-Z])/g, "$1 $2");
 }

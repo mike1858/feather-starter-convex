@@ -1,9 +1,6 @@
 import { mutation } from "@cvx/_generated/server";
 import { auth } from "@cvx/auth";
 import { v } from "convex/values";
-import { zodToConvex } from "convex-helpers/server/zod4";
-import { importStatus } from "../../src/shared/schemas/imports";
-import { ERRORS } from "../../src/shared/errors";
 
 export const create = mutation({
   args: {
@@ -27,14 +24,21 @@ export const create = mutation({
 export const updateStatus = mutation({
   args: {
     importId: v.id("imports"),
-    status: zodToConvex(importStatus),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("analyzing"),
+      v.literal("confirming"),
+      v.literal("generating"),
+      v.literal("importing"),
+      v.literal("complete"),
+      v.literal("failed"),
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const importDoc = await ctx.db.get(args.importId);
-    if (!importDoc || importDoc.userId !== userId)
-      throw new Error(ERRORS.imports.NOT_FOUND);
+    if (!importDoc || importDoc.userId !== userId) throw new Error("Import not found");
     const patch: Record<string, unknown> = { status: args.status };
     if (args.status === "complete") patch.completedAt = Date.now();
     await ctx.db.patch(args.importId, patch);
@@ -50,8 +54,7 @@ export const saveAnalysis = mutation({
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const importDoc = await ctx.db.get(args.importId);
-    if (!importDoc || importDoc.userId !== userId)
-      throw new Error(ERRORS.imports.NOT_FOUND);
+    if (!importDoc || importDoc.userId !== userId) throw new Error("Import not found");
     await ctx.db.patch(args.importId, {
       analysisResult: args.analysisResult,
       status: "confirming",
@@ -68,8 +71,7 @@ export const confirmSchema = mutation({
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const importDoc = await ctx.db.get(args.importId);
-    if (!importDoc || importDoc.userId !== userId)
-      throw new Error(ERRORS.imports.NOT_FOUND);
+    if (!importDoc || importDoc.userId !== userId) throw new Error("Import not found");
     await ctx.db.patch(args.importId, {
       confirmedSchema: args.confirmedSchema,
       status: "generating",
@@ -86,8 +88,7 @@ export const saveImportStats = mutation({
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const importDoc = await ctx.db.get(args.importId);
-    if (!importDoc || importDoc.userId !== userId)
-      throw new Error(ERRORS.imports.NOT_FOUND);
+    if (!importDoc || importDoc.userId !== userId) throw new Error("Import not found");
     await ctx.db.patch(args.importId, {
       importStats: args.importStats,
       status: "complete",
@@ -102,8 +103,7 @@ export const remove = mutation({
     const userId = await auth.getUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const importDoc = await ctx.db.get(args.importId);
-    if (!importDoc || importDoc.userId !== userId)
-      throw new Error(ERRORS.imports.NOT_FOUND);
+    if (!importDoc || importDoc.userId !== userId) throw new Error("Import not found");
     // Delete associated errors
     const errors = await ctx.db
       .query("importErrors")

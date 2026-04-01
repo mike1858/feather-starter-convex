@@ -20,8 +20,8 @@ import type * as devEmails_queries from "../devEmails/queries.js";
 import type * as email_index from "../email/index.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
+import type * as imports_actions from "../imports/actions.js";
 import type * as imports_mutations from "../imports/mutations.js";
-import type * as imports_queries from "../imports/queries.js";
 import type * as init from "../init.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
@@ -30,8 +30,6 @@ import type * as password_PasswordResetEmail from "../password/PasswordResetEmai
 import type * as password_ResendOTPPasswordReset from "../password/ResendOTPPasswordReset.js";
 import type * as projects_mutations from "../projects/mutations.js";
 import type * as projects_queries from "../projects/queries.js";
-import type * as schemaMappings_mutations from "../schemaMappings/mutations.js";
-import type * as schemaMappings_queries from "../schemaMappings/queries.js";
 import type * as subtasks_mutations from "../subtasks/mutations.js";
 import type * as subtasks_queries from "../subtasks/queries.js";
 import type * as tasks_mutations from "../tasks/mutations.js";
@@ -66,8 +64,8 @@ declare const fullApi: ApiFromModules<{
   "email/index": typeof email_index;
   env: typeof env;
   http: typeof http;
+  "imports/actions": typeof imports_actions;
   "imports/mutations": typeof imports_mutations;
-  "imports/queries": typeof imports_queries;
   init: typeof init;
   "onboarding/mutations": typeof onboarding_mutations;
   "otp/ResendOTP": typeof otp_ResendOTP;
@@ -76,8 +74,6 @@ declare const fullApi: ApiFromModules<{
   "password/ResendOTPPasswordReset": typeof password_ResendOTPPasswordReset;
   "projects/mutations": typeof projects_mutations;
   "projects/queries": typeof projects_queries;
-  "schemaMappings/mutations": typeof schemaMappings_mutations;
-  "schemaMappings/queries": typeof schemaMappings_queries;
   "subtasks/mutations": typeof subtasks_mutations;
   "subtasks/queries": typeof subtasks_queries;
   "tasks/mutations": typeof tasks_mutations;

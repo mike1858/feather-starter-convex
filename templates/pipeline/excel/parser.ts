@@ -107,7 +107,7 @@ export function parseExcelWorkbook(
 /**
  * Detect the predominant cell type from a list of non-empty values.
  */
-export function detectCellType(
+function detectCellType(
   values: unknown[],
 ): "string" | "number" | "boolean" | "date" | "empty" {
   if (values.length === 0) return "empty";
@@ -133,23 +133,20 @@ export function detectCellType(
   }
 
   // Return the most common type
-  const entries = Object.entries(typeCounts) as [
-    keyof typeof typeCounts,
-    number,
-  ][];
+  const entries = Object.entries(typeCounts) as [keyof typeof typeCounts, number][];
   entries.sort((a, b) => b[1] - a[1]);
   return entries[0][0];
 }
 
 const DATE_PATTERNS = [
-  /^\d{4}-\d{2}-\d{2}$/, // 2024-01-15
-  /^\d{2}\/\d{2}\/\d{4}$/, // 01/15/2024
-  /^\d{2}-\d{2}-\d{4}$/, // 01-15-2024
-  /^\d{4}\/\d{2}\/\d{2}$/, // 2024/01/15
-  /^\w{3}\s+\d{1,2},?\s+\d{4}$/, // Jan 15, 2024
-  /^\d{1,2}\s+\w{3}\s+\d{4}$/, // 15 Jan 2024
+  /^\d{4}-\d{2}-\d{2}$/,                    // 2024-01-15
+  /^\d{2}\/\d{2}\/\d{4}$/,                  // 01/15/2024
+  /^\d{2}-\d{2}-\d{4}$/,                    // 01-15-2024
+  /^\d{4}\/\d{2}\/\d{2}$/,                  // 2024/01/15
+  /^\w{3}\s+\d{1,2},?\s+\d{4}$/,            // Jan 15, 2024
+  /^\d{1,2}\s+\w{3}\s+\d{4}$/,              // 15 Jan 2024
 ];
 
-export function isDateLike(value: string): boolean {
+function isDateLike(value: string): boolean {
   return DATE_PATTERNS.some((pattern) => pattern.test(value.trim()));
 }

@@ -1,7 +1,5 @@
 export {
   parseExcelWorkbook,
-  detectCellType,
-  isDateLike,
   type ParsedWorkbook,
   type SheetMetadata,
   type ColumnInfo,
@@ -11,18 +9,20 @@ export {
   inferFieldType,
   inferEntityType,
   inferEntities,
-  toFieldName,
-  toEntityName,
-  toLabel,
   type InferredField,
   type InferredEntity,
 } from "./type-inference";
 
 export {
-  jaroSimilarity,
-  jaroWinklerSimilarity,
-  positionSimilarity,
-  dataFingerprintSimilarity,
-  computeColumnMatchScore,
-  type ColumnMatchScore,
-} from "./jaro-winkler";
+  detectRelationships,
+  computeImportOrder,
+  classifyWorkbook,
+  type DetectedRelationship,
+  type ClassifiedWorkbook,
+} from "./entity-classifier";
+
+export {
+  generateFeatherYaml,
+  generateAllYamls,
+  type GeneratedYaml,
+} from "./yaml-generator";

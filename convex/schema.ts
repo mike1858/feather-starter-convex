@@ -125,6 +125,60 @@ const schema = defineSchema({
     .index("by_status", ["status"])
     .index("by_priority", ["priority"]),
 
+  imports: defineTable({
+    userId: v.id("users"),
+    fileName: v.string(),
+    fileStorageId: v.optional(v.string()),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("analyzing"),
+      v.literal("confirming"),
+      v.literal("generating"),
+      v.literal("importing"),
+      v.literal("complete"),
+      v.literal("failed"),
+    ),
+    sheetMetadata: v.optional(v.string()),
+    analysisResult: v.optional(v.string()),
+    confirmedSchema: v.optional(v.string()),
+    importStats: v.optional(v.string()),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"]),
+
+  schemaMappings: defineTable({
+    userId: v.id("users"),
+    importId: v.id("imports"),
+    entityName: v.string(),
+    systemFieldId: v.string(),
+    systemFieldName: v.string(),
+    excelColumnName: v.string(),
+    excelColumnPosition: v.number(),
+    excelSheetName: v.string(),
+    importHistory: v.string(),
+    dataFingerprint: v.optional(v.string()),
+  })
+    .index("by_entity", ["entityName"])
+    .index("by_import", ["importId"]),
+
+  importErrors: defineTable({
+    importId: v.id("imports"),
+    entityName: v.string(),
+    rowNumber: v.number(),
+    severity: v.union(
+      v.literal("green"),
+      v.literal("yellow"),
+      v.literal("red"),
+    ),
+    column: v.string(),
+    originalValue: v.optional(v.string()),
+    fixedValue: v.optional(v.string()),
+    errorMessage: v.string(),
+  })
+    .index("by_import", ["importId"])
+    .index("by_import_severity", ["importId", "severity"]),
+
   contacts: defineTable({
     name: v.string(),
     email: v.optional(v.string()),
