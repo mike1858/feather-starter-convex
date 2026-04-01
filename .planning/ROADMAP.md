@@ -254,6 +254,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 999.7 Telemetry | Backlog | 3/3 | Complete    | 2026-04-01 |
 | 999.8 Search | Backlog | 2/2 | Complete    | 2026-03-30 |
 | 999.10 E2E, Bugs & Docs Debt | Backlog | 2/2 | Complete    | 2026-04-01 |
+| 999.11 Framework Acceptance Test | Backlog | 0/3 | Planned     | - |
 
 ## Backlog
 
@@ -408,6 +409,26 @@ Plans:
 Plans:
 - [x] 999.10-01-PLAN.md — E2E test verification and CalmDo feature E2E tests
 - [x] 999.10-02-PLAN.md — Bug fixes, barrel export cleanup, and documentation updates
+
+### Phase 999.11: Framework Acceptance Test — Full User Journey E2E (BACKLOG)
+**Goal:** Verify the complete Feather framework works end-to-end: scaffolded projects compile and build, every example app (todos, tickets, contacts) has working CRUD in the browser, and a full navigation journey proves the entire app hangs together
+**Depends on:** Phase 999.2 (create-feather), Phase 999.4 (feather add), Phase 999.10 (E2E infrastructure)
+**Scope:**
+- **Plan 1 — Offline pipeline hardening:** Strengthen `integration.test.ts` to run `tsc --noEmit` and `vite build` on scaffolded projects (catches structural/import errors without Convex)
+- **Plan 2 — Example app CRUD smoke tests:** Playwright E2E tests for todos, tickets, contacts — each creates an item, verifies it appears, edits, deletes, confirms gone
+- **Plan 3 — Full navigation journey test:** One Playwright test that signs up, completes onboarding, visits every nav item, creates one item per feature, proves the whole app works together
+**Success Criteria** (what must be TRUE):
+  1. `integration.test.ts` runs tsc and vite build on a scaffolded project with all 3 example apps — exits 0
+  2. `e2e/todos.spec.ts`, `e2e/tickets.spec.ts`, `e2e/contacts.spec.ts` each test full CRUD and pass
+  3. `e2e/full-journey.spec.ts` walks through signup → every feature → create item per feature — passes
+  4. `npm run test:e2e` exits 0 with all existing + new specs green
+  5. No test is skipped or marked `.skip`
+**Plans:** 3 plans
+
+Plans:
+- [ ] 999.11-01-PLAN.md — Offline pipeline hardening: typecheck + build verification for scaffolded projects
+- [ ] 999.11-02-PLAN.md — Example app CRUD E2E tests (todos, tickets, contacts)
+- [ ] 999.11-03-PLAN.md — Full navigation journey E2E test
 
 ---
 *Roadmap created: 2026-03-10*
