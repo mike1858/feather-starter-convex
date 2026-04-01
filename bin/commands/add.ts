@@ -1,12 +1,18 @@
 /**
- * `feather add <feature>` — install an example feature into the current project.
+ * `feather add <name>` — install a feature or bundle into the current project.
  *
- * Reads the bundled manifest from templates/features/{name}/, copies files
- * to the correct project locations, and wires into schema, nav, i18n, errors.
+ * Auto-detects whether the name is a bundle (templates/bundles/) or feature
+ * (templates/features/). Bundles install all features in dependency order.
  */
 import { Command } from "commander";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { resolve } from "../lib/resolve";
+import {
+  buildDependencyGraph,
+  topoSort,
+  validateDependencies,
+} from "../lib/topo-sort";
 
 export interface AddActionResult {
   success: boolean;
@@ -61,9 +67,10 @@ function findTemplatesDir(projectRoot: string): string {
 }
 
 /**
- * Install a feature into the current project.
+ * Install a single feature from templates/features/{name}/.
+ * Extracted from addAction for reuse by bundle install path.
  */
-export function addAction(
+function installSingleFeature(
   featureName: string,
   options: AddActionOptions,
   projectRoot: string,
@@ -165,6 +172,99 @@ export function addAction(
   };
 }
 
+/** Get list of installed features by checking src/features/ and src/generated/ */
+function getInstalledFeatures(projectRoot: string): string[] {
+  const installed: string[] = [];
+  for (const dir of ["src/features", "src/generated"]) {
+    const absDir = path.join(projectRoot, dir);
+    if (!fs.existsSync(absDir)) continue;
+    for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
+      if (entry.isDirectory() && !installed.includes(entry.name)) {
+        installed.push(entry.name);
+      }
+    }
+  }
+  return installed;
+}
+
+/**
+ * Install a feature or bundle into the current project.
+ * Auto-detects bundles (checks bundles/ first, then features/ per D-03).
+ */
+export function addAction(
+  name: string,
+  options: AddActionOptions,
+  projectRoot: string,
+): AddActionResult {
+  const resolution = resolve(name, projectRoot);
+
+  if (resolution.type === "not-found") {
+    const templatesDir = findTemplatesDir(projectRoot);
+    const features = getAvailableFeatures(templatesDir);
+    const bundles = getAvailableBundles(projectRoot);
+    const available = [...features, ...bundles.map((b) => `${b} (bundle)`)];
+    return {
+      success: false,
+      message: `Feature '${name}' not found. Available: ${available.join(", ")}`,
+      filesCreated: [],
+    };
+  }
+
+  if (resolution.type === "feature") {
+    return installSingleFeature(name, options, projectRoot);
+  }
+
+  // Bundle installation
+  const { manifest } = resolution;
+  const featuresDir = path.join(projectRoot, "templates/features");
+
+  // Build dependency graph and validate
+  const graph = buildDependencyGraph(manifest.features, featuresDir);
+  const installed = getInstalledFeatures(projectRoot);
+  const validation = validateDependencies(graph, installed);
+
+  if (!validation.valid) {
+    const errors = validation.missing
+      .map(
+        (m) =>
+          `Feature '${m.feature}' requires '${m.dependency}', which is not installed and not in this bundle.`,
+      )
+      .join(" ");
+    return {
+      success: false,
+      message: errors,
+      filesCreated: [],
+    };
+  }
+
+  // Sort features in dependency order
+  const sortedFeatures = topoSort(graph);
+
+  // Install each feature in order, force=true for already-installed (per D-10)
+  const allFilesCreated: string[] = [];
+  for (const feature of sortedFeatures) {
+    const result = installSingleFeature(
+      feature,
+      { force: true },
+      projectRoot,
+    );
+    if (!result.success) {
+      return {
+        success: false,
+        message: `Failed to install '${feature}' from bundle '${name}': ${result.message}`,
+        filesCreated: allFilesCreated,
+      };
+    }
+    allFilesCreated.push(...result.filesCreated);
+  }
+
+  return {
+    success: true,
+    message: `Installed bundle '${name}' (${sortedFeatures.length} features): ${allFilesCreated.length} paths`,
+    filesCreated: allFilesCreated,
+  };
+}
+
 function getAvailableFeatures(templatesDir: string): string[] {
   if (!fs.existsSync(templatesDir)) return [];
   return fs
@@ -176,16 +276,28 @@ function getAvailableFeatures(templatesDir: string): string[] {
     .map((e) => e.name);
 }
 
+function getAvailableBundles(projectRoot: string): string[] {
+  const bundlesDir = path.join(projectRoot, "templates/bundles");
+  if (!fs.existsSync(bundlesDir)) return [];
+  return fs
+    .readdirSync(bundlesDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .filter((e) =>
+      fs.existsSync(path.join(bundlesDir, e.name, "bundle.json")),
+    )
+    .map((e) => e.name);
+}
+
 export const addCommand = new Command("add")
-  .description("Install a feature into the current project")
-  .argument("<feature...>", "Feature name(s) to install")
+  .description("Install a feature or bundle into the current project")
+  .argument("<name...>", "Feature or bundle name(s) to install")
   .option("-f, --force", "Overwrite existing files", false)
-  .action((features: string[], opts: { force: boolean }) => {
+  .action((names: string[], opts: { force: boolean }) => {
     const projectRoot = process.cwd();
 
-    for (const feature of features) {
-      console.log(`\n  Installing ${feature}...`);
-      const result = addAction(feature, opts, projectRoot);
+    for (const name of names) {
+      console.log(`\n  Installing ${name}...`);
+      const result = addAction(name, opts, projectRoot);
       if (result.success) {
         console.log(`  ${result.message}`);
       } else {

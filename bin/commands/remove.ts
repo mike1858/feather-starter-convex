@@ -1,12 +1,13 @@
 /**
- * `feather remove <feature>` — remove a feature from the current project.
+ * `feather remove <name>` — remove a feature or bundle from the current project.
  *
- * Reads the bundled manifest to know what files to delete, then removes
- * the feature's directories, schema, route, locales, and unwires from project files.
+ * Auto-detects bundles (templates/bundles/) vs features (templates/features/).
+ * Bundle removal removes all features in the bundle.
  */
 import { Command } from "commander";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { resolve } from "../lib/resolve";
 
 export interface RemoveActionResult {
   success: boolean;
@@ -34,11 +35,11 @@ function findTemplatesDir(projectRoot: string): string {
 }
 
 /**
- * Remove a feature from the current project.
+ * Remove a single feature from the current project.
+ * Extracted for reuse by bundle removal path.
  */
-export function removeAction(
+function removeSingleFeature(
   featureName: string,
-  _options: RemoveActionOptions,
   projectRoot: string,
 ): RemoveActionResult {
   const templatesDir = findTemplatesDir(projectRoot);
@@ -115,15 +116,59 @@ export function removeAction(
   };
 }
 
+/**
+ * Remove a feature or bundle from the current project.
+ * Auto-detects bundles vs features via resolve().
+ */
+export function removeAction(
+  name: string,
+  _options: RemoveActionOptions,
+  projectRoot: string,
+): RemoveActionResult {
+  const resolution = resolve(name, projectRoot);
+
+  if (resolution.type === "not-found") {
+    return {
+      success: false,
+      message: `Feature '${name}' not found in templates.`,
+      filesRemoved: [],
+    };
+  }
+
+  if (resolution.type === "feature") {
+    return removeSingleFeature(name, projectRoot);
+  }
+
+  // Bundle removal — remove all features in the bundle
+  const { manifest } = resolution;
+  const allFilesRemoved: string[] = [];
+  let removedCount = 0;
+
+  for (const feature of manifest.features) {
+    const result = removeSingleFeature(feature, projectRoot);
+    if (result.success) {
+      allFilesRemoved.push(...result.filesRemoved);
+      removedCount++;
+    }
+    // If not installed, skip silently (partial removal is OK)
+  }
+
+  return {
+    success: true,
+    message: `Removed bundle '${name}' (${removedCount}/${manifest.features.length} features): ${allFilesRemoved.length} paths`,
+    filesRemoved: allFilesRemoved,
+  };
+}
+
 export const removeCommand = new Command("remove")
-  .description("Remove a feature from the current project")
-  .argument("<feature>", "Feature name to remove")
+  .description("Remove a feature or bundle from the current project")
+  .argument("<name>", "Feature or bundle name to remove")
   .option("-y, --confirm", "Skip confirmation prompt", false)
-  .action((feature: string, opts: { confirm: boolean }) => {
+  .action((name: string, opts: { confirm: boolean }) => {
     const projectRoot = process.cwd();
 
-    console.log(`\n  Removing ${feature}...`);
-    const result = removeAction(feature, opts, projectRoot);
+    console.log(`\n  Removing ${name}...`);
+    const result = removeAction(name, opts, projectRoot);
     if (result.success) {
       console.log(`  ${result.message}`);
     } else {
