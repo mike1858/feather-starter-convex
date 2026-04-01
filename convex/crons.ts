@@ -8,7 +8,7 @@ const crons = cronJobs();
 crons.daily(
   "error digest",
   { hourUTC: 9, minuteUTC: 0 },
-  // @ts-expect-error TS2589: Convex deep type instantiation — will auto-surface when fixed upstream
+  // @ts-ignore TS2589: Convex deep type instantiation — non-deterministic, alternates between files
   internal.devErrors.actions.sendDigest,
 );
 

@@ -68,7 +68,7 @@ describe("get", () => {
 describe("list", () => {
   test("returns user's imports in descending order", async ({
     client,
-    testClient,
+    testClient: _testClient,
   }) => {
     await client.mutation(api.imports.mutations.create, {
       fileName: "first.xlsx",

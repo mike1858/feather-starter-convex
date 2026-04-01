@@ -11,6 +11,7 @@ async function storeDevEmail(to: string[], subject: string, html: string) {
   const convexUrl = process.env.CONVEX_URL;
   if (!convexUrl) return;
   const client = new ConvexHttpClient(convexUrl);
+  // @ts-ignore TS2589: Convex deep type instantiation — non-deterministic, alternates between files
   await client.mutation(api.devEmails.mutations.store, {
     to,
     subject,

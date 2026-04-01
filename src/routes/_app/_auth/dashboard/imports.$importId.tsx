@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "@cvx/_generated/api";
 import { ImportReport } from "@/features/import/components/ImportReport";
+import type { ImportError } from "~/templates/pipeline/excel/data-importer";
 import type { Id } from "@cvx/_generated/dataModel";
 
 export const Route = createFileRoute(
@@ -21,5 +22,5 @@ function ImportDetailPage() {
 
   if (!importDoc) return <div>Loading...</div>;
 
-  return <ImportReport importDoc={importDoc} errors={errors ?? []} />;
+  return <ImportReport importDoc={importDoc} errors={(errors ?? []) as ImportError[]} />;
 }

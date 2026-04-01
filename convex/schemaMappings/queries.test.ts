@@ -18,7 +18,7 @@ import { test } from "../test.setup";
 describe("getMappingsForEntity", () => {
   test("returns mappings filtered by entity name and user", async ({
     client,
-    testClient,
+    testClient: _testClient,
   }) => {
     const importId = await client.mutation(api.imports.mutations.create, {
       fileName: "test.xlsx",
@@ -100,7 +100,7 @@ describe("getMappingsForEntity", () => {
 describe("getMappingsForImport", () => {
   test("returns all mappings for a specific import", async ({
     client,
-    testClient,
+    testClient: _testClient,
   }) => {
     const importId = await client.mutation(api.imports.mutations.create, {
       fileName: "test.xlsx",
@@ -157,7 +157,7 @@ describe("getMappingsForImport", () => {
 describe("findMatchingMappings", () => {
   test("returns mappings matching sheet names", async ({
     client,
-    testClient,
+    testClient: _testClient,
   }) => {
     const importId = await client.mutation(api.imports.mutations.create, {
       fileName: "test.xlsx",
@@ -185,7 +185,7 @@ describe("findMatchingMappings", () => {
 
   test("returns mappings matching column names", async ({
     client,
-    testClient,
+    testClient: _testClient,
   }) => {
     const importId = await client.mutation(api.imports.mutations.create, {
       fileName: "test.xlsx",

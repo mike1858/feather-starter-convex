@@ -13,6 +13,9 @@ export const clearAll = mutation({
       "subtasks",
       "tasks",
       "projects",
+      "todos",
+      "tickets",
+      "contacts",
       "users",
       "devEmails",
       // Auth tables from @convex-dev/auth

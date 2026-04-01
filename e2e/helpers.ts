@@ -44,6 +44,39 @@ export function createProject(session: Session, name: string): Session {
     .assertText(name);
 }
 
+/**
+ * Create a todo from the Todos page.
+ * Assumes the user is already on /dashboard/todos.
+ */
+export function createTodo(session: Session, title: string): Session {
+  return session
+    .fillIn("Add todo...", title)
+    .clickButton("Add")
+    .assertText(title);
+}
+
+/**
+ * Create a ticket from the Tickets page.
+ * Assumes the user is already on /dashboard/tickets.
+ */
+export function createTicket(session: Session, title: string): Session {
+  return session
+    .fillIn("Add ticket...", title)
+    .clickButton("Add")
+    .assertText(title);
+}
+
+/**
+ * Create a contact from the Contacts page.
+ * Assumes the user is already on /dashboard/contacts.
+ */
+export function createContact(session: Session, name: string): Session {
+  return session
+    .fillIn("Add contact...", name)
+    .clickButton("Add")
+    .assertText(name);
+}
+
 function uniqueEmail(): string {
   return `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
 }

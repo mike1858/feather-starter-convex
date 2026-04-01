@@ -421,7 +421,6 @@ describe("remove", () => {
 
   test("cascades delete to importErrors", async ({
     client,
-    userId,
     testClient,
   }) => {
     const importId = await client.mutation(api.imports.mutations.create, {

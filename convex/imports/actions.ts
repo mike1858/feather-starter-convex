@@ -65,7 +65,7 @@ export const analyzeExcel = action({
     }
 
     // 4. Store analysis result
-    // @ts-expect-error TS2589: Convex deep type instantiation — will auto-surface when fixed upstream
+    // @ts-ignore TS2589: Convex deep type instantiation — non-deterministic, alternates between files
     await ctx.runMutation(api.imports.mutations.saveAnalysis, {
       importId: args.importId,
       analysisResult: JSON.stringify(result),

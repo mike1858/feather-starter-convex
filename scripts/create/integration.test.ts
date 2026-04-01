@@ -4,10 +4,11 @@
  * Strategy: Copy a real project snapshot to a temp dir, run strip,
  * then scaffold/add to verify the round-trip. No network (git clone) needed.
  */
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, afterAll } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
+import { execSync } from "node:child_process";
 import { stripToBase } from "../strip-to-base";
 import { defaultStripConfig } from "../strip-config";
 import { getAuthTemplate } from "./auth-config";
@@ -566,4 +567,55 @@ describe("V7: branding replacement works correctly", () => {
     expect(siteConfig).toContain("My Cool App");
     expect(siteConfig).not.toContain("Feather Starter");
   });
+});
+
+// ── Build verification ──────────────────────────────────────────────────────
+// Validates the current project (with all features installed) typechecks and
+// builds successfully. Runs against the real codebase, not a temp scaffold.
+
+describe("Build verification", () => {
+  afterAll(() => {
+    fs.rmSync(path.join(process.cwd(), "dist"), {
+      recursive: true,
+      force: true,
+    });
+  });
+
+  test(
+    "typecheck passes for all tsconfigs",
+    () => {
+      try {
+        execSync("npm run typecheck", {
+          encoding: "utf-8",
+          timeout: 60_000,
+          cwd: process.cwd(),
+        });
+      } catch (error) {
+        const err = error as { stderr?: string; stdout?: string };
+        throw new Error(
+          `Typecheck failed:\n${err.stderr ?? err.stdout ?? "unknown error"}`,
+        );
+      }
+    },
+    65_000,
+  );
+
+  test(
+    "vite build succeeds",
+    () => {
+      try {
+        execSync("npm run build", {
+          encoding: "utf-8",
+          timeout: 60_000,
+          cwd: process.cwd(),
+        });
+      } catch (error) {
+        const err = error as { stderr?: string; stdout?: string };
+        throw new Error(
+          `Build failed:\n${err.stderr ?? err.stdout ?? "unknown error"}`,
+        );
+      }
+    },
+    65_000,
+  );
 });

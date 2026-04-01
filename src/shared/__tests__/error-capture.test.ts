@@ -13,7 +13,7 @@
 // | 10 | captureError      | Sentry initialized          | calls Sentry.captureException with error+extra  |
 // | 11 | captureError      | Sentry NOT initialized      | does NOT call Sentry.captureException           |
 
-import { describe, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   captureError,
   setConvexClient,

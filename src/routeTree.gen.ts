@@ -14,16 +14,20 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAuthRouteImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutRouteImport } from './routes/_app/login/_layout'
 import { Route as AppDevMailboxRouteImport } from './routes/_app/dev/mailbox'
+import { Route as AppDevErrorsRouteImport } from './routes/_app/dev/errors'
 import { Route as AppLoginLayoutIndexRouteImport } from './routes/_app/login/_layout.index'
 import { Route as AppAuthOnboardingLayoutRouteImport } from './routes/_app/_auth/onboarding/_layout'
 import { Route as AppAuthDashboardLayoutRouteImport } from './routes/_app/_auth/dashboard/_layout'
 import { Route as AppAuthDashboardLayoutIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.index'
 import { Route as AppAuthOnboardingLayoutUsernameRouteImport } from './routes/_app/_auth/onboarding/_layout.username'
+import { Route as AppAuthDashboardImportsImportIdRouteImport } from './routes/_app/_auth/dashboard/imports.$importId'
 import { Route as AppAuthDashboardLayoutTodosRouteImport } from './routes/_app/_auth/dashboard/_layout.todos'
 import { Route as AppAuthDashboardLayoutTicketsRouteImport } from './routes/_app/_auth/dashboard/_layout.tickets'
 import { Route as AppAuthDashboardLayoutTeamPoolRouteImport } from './routes/_app/_auth/dashboard/_layout.team-pool'
 import { Route as AppAuthDashboardLayoutTasksRouteImport } from './routes/_app/_auth/dashboard/_layout.tasks'
 import { Route as AppAuthDashboardLayoutSettingsRouteImport } from './routes/_app/_auth/dashboard/_layout.settings'
+import { Route as AppAuthDashboardLayoutImportsRouteImport } from './routes/_app/_auth/dashboard/_layout.imports'
+import { Route as AppAuthDashboardLayoutImportRouteImport } from './routes/_app/_auth/dashboard/_layout.import'
 import { Route as AppAuthDashboardLayoutContactsRouteImport } from './routes/_app/_auth/dashboard/_layout.contacts'
 import { Route as AppAuthDashboardLayoutSettingsIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.settings.index'
 import { Route as AppAuthDashboardLayoutProjectsIndexRouteImport } from './routes/_app/_auth/dashboard/_layout.projects.index'
@@ -52,6 +56,11 @@ const AppDevMailboxRoute = AppDevMailboxRouteImport.update({
   path: '/dev/mailbox',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDevErrorsRoute = AppDevErrorsRouteImport.update({
+  id: '/dev/errors',
+  path: '/dev/errors',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLoginLayoutIndexRoute = AppLoginLayoutIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -78,6 +87,12 @@ const AppAuthOnboardingLayoutUsernameRoute =
     id: '/username',
     path: '/username',
     getParentRoute: () => AppAuthOnboardingLayoutRoute,
+  } as any)
+const AppAuthDashboardImportsImportIdRoute =
+  AppAuthDashboardImportsImportIdRouteImport.update({
+    id: '/dashboard/imports/$importId',
+    path: '/dashboard/imports/$importId',
+    getParentRoute: () => AppAuthRoute,
   } as any)
 const AppAuthDashboardLayoutTodosRoute =
   AppAuthDashboardLayoutTodosRouteImport.update({
@@ -109,6 +124,18 @@ const AppAuthDashboardLayoutSettingsRoute =
     path: '/settings',
     getParentRoute: () => AppAuthDashboardLayoutRoute,
   } as any)
+const AppAuthDashboardLayoutImportsRoute =
+  AppAuthDashboardLayoutImportsRouteImport.update({
+    id: '/imports',
+    path: '/imports',
+    getParentRoute: () => AppAuthDashboardLayoutRoute,
+  } as any)
+const AppAuthDashboardLayoutImportRoute =
+  AppAuthDashboardLayoutImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AppAuthDashboardLayoutRoute,
+  } as any)
 const AppAuthDashboardLayoutContactsRoute =
   AppAuthDashboardLayoutContactsRouteImport.update({
     id: '/contacts',
@@ -136,17 +163,21 @@ const AppAuthDashboardLayoutProjectsProjectIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dev/errors': typeof AppDevErrorsRoute
   '/dev/mailbox': typeof AppDevMailboxRoute
   '/login': typeof AppLoginLayoutRouteWithChildren
   '/dashboard': typeof AppAuthDashboardLayoutRouteWithChildren
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login/': typeof AppLoginLayoutIndexRoute
   '/dashboard/contacts': typeof AppAuthDashboardLayoutContactsRoute
+  '/dashboard/import': typeof AppAuthDashboardLayoutImportRoute
+  '/dashboard/imports': typeof AppAuthDashboardLayoutImportsRoute
   '/dashboard/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   '/dashboard/tasks': typeof AppAuthDashboardLayoutTasksRoute
   '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/dashboard/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/dashboard/todos': typeof AppAuthDashboardLayoutTodosRoute
+  '/dashboard/imports/$importId': typeof AppAuthDashboardImportsImportIdRoute
   '/onboarding/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/dashboard/': typeof AppAuthDashboardLayoutIndexRoute
   '/dashboard/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -155,14 +186,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dev/errors': typeof AppDevErrorsRoute
   '/dev/mailbox': typeof AppDevMailboxRoute
   '/onboarding': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/login': typeof AppLoginLayoutIndexRoute
   '/dashboard/contacts': typeof AppAuthDashboardLayoutContactsRoute
+  '/dashboard/import': typeof AppAuthDashboardLayoutImportRoute
+  '/dashboard/imports': typeof AppAuthDashboardLayoutImportsRoute
   '/dashboard/tasks': typeof AppAuthDashboardLayoutTasksRoute
   '/dashboard/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/dashboard/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/dashboard/todos': typeof AppAuthDashboardLayoutTodosRoute
+  '/dashboard/imports/$importId': typeof AppAuthDashboardImportsImportIdRoute
   '/onboarding/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/dashboard': typeof AppAuthDashboardLayoutIndexRoute
   '/dashboard/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -174,17 +209,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_app/_auth': typeof AppAuthRouteWithChildren
+  '/_app/dev/errors': typeof AppDevErrorsRoute
   '/_app/dev/mailbox': typeof AppDevMailboxRoute
   '/_app/login/_layout': typeof AppLoginLayoutRouteWithChildren
   '/_app/_auth/dashboard/_layout': typeof AppAuthDashboardLayoutRouteWithChildren
   '/_app/_auth/onboarding/_layout': typeof AppAuthOnboardingLayoutRouteWithChildren
   '/_app/login/_layout/': typeof AppLoginLayoutIndexRoute
   '/_app/_auth/dashboard/_layout/contacts': typeof AppAuthDashboardLayoutContactsRoute
+  '/_app/_auth/dashboard/_layout/import': typeof AppAuthDashboardLayoutImportRoute
+  '/_app/_auth/dashboard/_layout/imports': typeof AppAuthDashboardLayoutImportsRoute
   '/_app/_auth/dashboard/_layout/settings': typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   '/_app/_auth/dashboard/_layout/tasks': typeof AppAuthDashboardLayoutTasksRoute
   '/_app/_auth/dashboard/_layout/team-pool': typeof AppAuthDashboardLayoutTeamPoolRoute
   '/_app/_auth/dashboard/_layout/tickets': typeof AppAuthDashboardLayoutTicketsRoute
   '/_app/_auth/dashboard/_layout/todos': typeof AppAuthDashboardLayoutTodosRoute
+  '/_app/_auth/dashboard/imports/$importId': typeof AppAuthDashboardImportsImportIdRoute
   '/_app/_auth/onboarding/_layout/username': typeof AppAuthOnboardingLayoutUsernameRoute
   '/_app/_auth/dashboard/_layout/': typeof AppAuthDashboardLayoutIndexRoute
   '/_app/_auth/dashboard/_layout/projects/$projectId': typeof AppAuthDashboardLayoutProjectsProjectIdRoute
@@ -195,17 +234,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dev/errors'
     | '/dev/mailbox'
     | '/login'
     | '/dashboard'
     | '/onboarding'
     | '/login/'
     | '/dashboard/contacts'
+    | '/dashboard/import'
+    | '/dashboard/imports'
     | '/dashboard/settings'
     | '/dashboard/tasks'
     | '/dashboard/team-pool'
     | '/dashboard/tickets'
     | '/dashboard/todos'
+    | '/dashboard/imports/$importId'
     | '/onboarding/username'
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
@@ -214,14 +257,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dev/errors'
     | '/dev/mailbox'
     | '/onboarding'
     | '/login'
     | '/dashboard/contacts'
+    | '/dashboard/import'
+    | '/dashboard/imports'
     | '/dashboard/tasks'
     | '/dashboard/team-pool'
     | '/dashboard/tickets'
     | '/dashboard/todos'
+    | '/dashboard/imports/$importId'
     | '/onboarding/username'
     | '/dashboard'
     | '/dashboard/projects/$projectId'
@@ -232,17 +279,21 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/_app/_auth'
+    | '/_app/dev/errors'
     | '/_app/dev/mailbox'
     | '/_app/login/_layout'
     | '/_app/_auth/dashboard/_layout'
     | '/_app/_auth/onboarding/_layout'
     | '/_app/login/_layout/'
     | '/_app/_auth/dashboard/_layout/contacts'
+    | '/_app/_auth/dashboard/_layout/import'
+    | '/_app/_auth/dashboard/_layout/imports'
     | '/_app/_auth/dashboard/_layout/settings'
     | '/_app/_auth/dashboard/_layout/tasks'
     | '/_app/_auth/dashboard/_layout/team-pool'
     | '/_app/_auth/dashboard/_layout/tickets'
     | '/_app/_auth/dashboard/_layout/todos'
+    | '/_app/_auth/dashboard/imports/$importId'
     | '/_app/_auth/onboarding/_layout/username'
     | '/_app/_auth/dashboard/_layout/'
     | '/_app/_auth/dashboard/_layout/projects/$projectId'
@@ -292,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDevMailboxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/dev/errors': {
+      id: '/_app/dev/errors'
+      path: '/dev/errors'
+      fullPath: '/dev/errors'
+      preLoaderRoute: typeof AppDevErrorsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/login/_layout/': {
       id: '/_app/login/_layout/'
       path: '/'
@@ -327,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthOnboardingLayoutUsernameRouteImport
       parentRoute: typeof AppAuthOnboardingLayoutRoute
     }
+    '/_app/_auth/dashboard/imports/$importId': {
+      id: '/_app/_auth/dashboard/imports/$importId'
+      path: '/dashboard/imports/$importId'
+      fullPath: '/dashboard/imports/$importId'
+      preLoaderRoute: typeof AppAuthDashboardImportsImportIdRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
     '/_app/_auth/dashboard/_layout/todos': {
       id: '/_app/_auth/dashboard/_layout/todos'
       path: '/todos'
@@ -360,6 +425,20 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/dashboard/settings'
       preLoaderRoute: typeof AppAuthDashboardLayoutSettingsRouteImport
+      parentRoute: typeof AppAuthDashboardLayoutRoute
+    }
+    '/_app/_auth/dashboard/_layout/imports': {
+      id: '/_app/_auth/dashboard/_layout/imports'
+      path: '/imports'
+      fullPath: '/dashboard/imports'
+      preLoaderRoute: typeof AppAuthDashboardLayoutImportsRouteImport
+      parentRoute: typeof AppAuthDashboardLayoutRoute
+    }
+    '/_app/_auth/dashboard/_layout/import': {
+      id: '/_app/_auth/dashboard/_layout/import'
+      path: '/import'
+      fullPath: '/dashboard/import'
+      preLoaderRoute: typeof AppAuthDashboardLayoutImportRouteImport
       parentRoute: typeof AppAuthDashboardLayoutRoute
     }
     '/_app/_auth/dashboard/_layout/contacts': {
@@ -410,6 +489,8 @@ const AppAuthDashboardLayoutSettingsRouteWithChildren =
 
 interface AppAuthDashboardLayoutRouteChildren {
   AppAuthDashboardLayoutContactsRoute: typeof AppAuthDashboardLayoutContactsRoute
+  AppAuthDashboardLayoutImportRoute: typeof AppAuthDashboardLayoutImportRoute
+  AppAuthDashboardLayoutImportsRoute: typeof AppAuthDashboardLayoutImportsRoute
   AppAuthDashboardLayoutSettingsRoute: typeof AppAuthDashboardLayoutSettingsRouteWithChildren
   AppAuthDashboardLayoutTasksRoute: typeof AppAuthDashboardLayoutTasksRoute
   AppAuthDashboardLayoutTeamPoolRoute: typeof AppAuthDashboardLayoutTeamPoolRoute
@@ -423,6 +504,8 @@ interface AppAuthDashboardLayoutRouteChildren {
 const AppAuthDashboardLayoutRouteChildren: AppAuthDashboardLayoutRouteChildren =
   {
     AppAuthDashboardLayoutContactsRoute: AppAuthDashboardLayoutContactsRoute,
+    AppAuthDashboardLayoutImportRoute: AppAuthDashboardLayoutImportRoute,
+    AppAuthDashboardLayoutImportsRoute: AppAuthDashboardLayoutImportsRoute,
     AppAuthDashboardLayoutSettingsRoute:
       AppAuthDashboardLayoutSettingsRouteWithChildren,
     AppAuthDashboardLayoutTasksRoute: AppAuthDashboardLayoutTasksRoute,
@@ -458,11 +541,13 @@ const AppAuthOnboardingLayoutRouteWithChildren =
 interface AppAuthRouteChildren {
   AppAuthDashboardLayoutRoute: typeof AppAuthDashboardLayoutRouteWithChildren
   AppAuthOnboardingLayoutRoute: typeof AppAuthOnboardingLayoutRouteWithChildren
+  AppAuthDashboardImportsImportIdRoute: typeof AppAuthDashboardImportsImportIdRoute
 }
 
 const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthDashboardLayoutRoute: AppAuthDashboardLayoutRouteWithChildren,
   AppAuthOnboardingLayoutRoute: AppAuthOnboardingLayoutRouteWithChildren,
+  AppAuthDashboardImportsImportIdRoute: AppAuthDashboardImportsImportIdRoute,
 }
 
 const AppAuthRouteWithChildren =
@@ -482,12 +567,14 @@ const AppLoginLayoutRouteWithChildren = AppLoginLayoutRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAuthRoute: typeof AppAuthRouteWithChildren
+  AppDevErrorsRoute: typeof AppDevErrorsRoute
   AppDevMailboxRoute: typeof AppDevMailboxRoute
   AppLoginLayoutRoute: typeof AppLoginLayoutRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthRoute: AppAuthRouteWithChildren,
+  AppDevErrorsRoute: AppDevErrorsRoute,
   AppDevMailboxRoute: AppDevMailboxRoute,
   AppLoginLayoutRoute: AppLoginLayoutRouteWithChildren,
 }

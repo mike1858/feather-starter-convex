@@ -1,4 +1,4 @@
-import { useMutation, useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { useNavigate } from "@tanstack/react-router";
 import { api } from "@cvx/_generated/api";
 import { DropZone } from "./DropZone";
@@ -30,7 +30,8 @@ export function ImportWizard() {
   const wizard = useImportWizard();
   const { analyzeFile, isAnalyzing, error } = useSchemaAnalysis();
   const confirmSchema = useMutation(api.imports.mutations.confirmSchema);
-  const importData = useAction(api.imports.actions.importData);
+  // TODO: Wire up importData action when import execution step is implemented
+  // const importData = useAction(api.imports.actions.importData);
   const navigate = useNavigate();
 
   const handleFileSelected = async (file: File) => {

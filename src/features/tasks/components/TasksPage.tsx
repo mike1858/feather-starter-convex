@@ -8,6 +8,7 @@ import { TaskList } from "./TaskList";
 import { TaskDetailPanel } from "./TaskDetailPanel";
 import { TaskFilterBar } from "./TaskFilterBar";
 import type { Id } from "~/convex/_generated/dataModel";
+import type { TaskStatus } from "@/shared/schemas/tasks";
 
 interface FilterSearch {
   status?: string;
@@ -21,12 +22,12 @@ export function TasksPage() {
 
   // Build query args from URL params
   const filterArgs: {
-    status?: string;
+    status?: TaskStatus;
     priority?: boolean;
     assigneeId?: string;
     projectId?: Id<"projects">;
   } = {};
-  if (search.status) filterArgs.status = search.status;
+  if (search.status) filterArgs.status = search.status as TaskStatus;
   if (search.priority)
     filterArgs.priority = search.priority === "high";
   if (search.assignee) filterArgs.assigneeId = search.assignee;

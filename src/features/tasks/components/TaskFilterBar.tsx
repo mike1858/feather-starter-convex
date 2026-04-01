@@ -36,18 +36,18 @@ export function TaskFilterBar() {
 
   const updateFilter = (key: string, value: string | undefined) => {
     void navigate({
-      search: (prev: Record<string, unknown>) => {
+      search: ((prev: Record<string, unknown>) => {
         const next = { ...prev, [key]: value };
         for (const k of Object.keys(next)) {
           if (!next[k]) delete next[k];
         }
         return next;
-      },
+      }) as never,
     });
   };
 
   const clearFilters = () => {
-    void navigate({ search: {} });
+    void navigate({ search: {} as never });
   };
 
   const formatStatus = (s: string): string => {
