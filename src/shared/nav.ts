@@ -62,6 +62,11 @@ export const navItems: NavItem[] = [
         to: "/dashboard/activityLogs",
       },
     {
+    label: "Imports",
+    i18nKey: "imports.nav.imports",
+    to: "/dashboard/imports",
+  },
+    {
     label: "Settings",
     i18nKey: "dashboard.nav.settings",
     to: "/dashboard/settings",

@@ -20,6 +20,7 @@ import type * as devEmails_queries from "../devEmails/queries.js";
 import type * as email_index from "../email/index.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
+import type * as imports_queries from "../imports/queries.js";
 import type * as init from "../init.js";
 import type * as onboarding_mutations from "../onboarding/mutations.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "email/index": typeof email_index;
   env: typeof env;
   http: typeof http;
+  "imports/queries": typeof imports_queries;
   init: typeof init;
   "onboarding/mutations": typeof onboarding_mutations;
   "otp/ResendOTP": typeof otp_ResendOTP;
