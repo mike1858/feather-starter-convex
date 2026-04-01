@@ -194,7 +194,7 @@ export function inferEntities(sheets: SheetMetadata[]): InferredEntity[] {
 
 // ── String utilities ────────────────────────────────────────────────────────
 
-function toFieldName(columnHeader: string): string {
+export function toFieldName(columnHeader: string): string {
   return columnHeader
     .trim()
     .replace(/[^a-zA-Z0-9\s]/g, "")
@@ -202,7 +202,7 @@ function toFieldName(columnHeader: string): string {
     .replace(/^\w/, (c) => c.toLowerCase());
 }
 
-function toEntityName(sheetName: string): string {
+export function toEntityName(sheetName: string): string {
   return sheetName
     .trim()
     .replace(/[^a-zA-Z0-9\s]/g, "")

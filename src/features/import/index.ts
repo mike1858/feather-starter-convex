@@ -9,3 +9,7 @@ export { SampleDataPreview } from "./components/SampleDataPreview";
 export { ColumnGroupAccordion } from "./components/ColumnGroupAccordion";
 export { useImportWizard } from "./hooks/useImportWizard";
 export { useSchemaAnalysis } from "./hooks/useSchemaAnalysis";
+export { ImportHistory } from "./components/ImportHistory";
+export { ImportReport } from "./components/ImportReport";
+export { ReconciliationDiff } from "./components/ReconciliationDiff";
+export { useReconciliation } from "./hooks/useReconciliation";
