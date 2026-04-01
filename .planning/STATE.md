@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to plan
-last_updated: "2026-03-31T01:43:17.627Z"
+last_updated: "2026-04-01T04:16:00.015Z"
 progress:
   total_phases: 21
   completed_phases: 16
   total_plans: 56
-  completed_plans: 50
+  completed_plans: 51
 ---
 
 # Project State
@@ -69,6 +69,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.4 P02 | 11min | 5 tasks | 10 files |
 | Phase 999.4 | P03 | ~30min | 6 tasks | 20 files |
 | Phase 999.4 | P04 | 270s | 5 tasks | 6 files |
+| Phase 999.5 P02 | 33min | 4 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,9 @@ Recent:
 - [Phase 999.4]: Conditional imports in panel templates (useMutation, Plus) via {{#unless readonly}} — avoids unused imports in generated readonly panels
 - [Phase 999.4]: renderCrossEntityPanels() as separate exported function in render.ts — clean separation from renderFeatureTemplates, ScaffoldOptions.relatedYamls optional for backward compat
 - [Phase 999.4]: FEATHER_USE_PIPELINE env var for Plop-to-pipeline toggle (default: pipeline)
+- [Phase 999.5]: Used api (not internal) for action-to-mutation calls since imports mutations are public
+- [Phase 999.5]: Created Plan 01 prerequisite files (parser, type-inference) as blocking dependency resolution in parallel execution
+- [Phase 999.5]: Fixed YAML generator to match actual featureYamlSchema (identity, statusFlow, views had incorrect structure in plan)
 
 ### Pending Todos
 
