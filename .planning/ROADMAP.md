@@ -250,8 +250,8 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 999.3 LLM Architect Conversation | Backlog | 4/4 | Complete   | 2026-03-30 |
 | 999.4 Integration Gaps | Backlog | 4/4 | Complete    | 2026-03-31 |
 | 999.5 Excel-to-System Pipeline | Backlog | 0/? | Not started | - |
-| 999.6 Bundle Distribution | Backlog | 3/3 | Complete   | 2026-04-01 |
-| 999.7 Telemetry | Backlog | 0/? | Not started | - |
+| 999.6 Bundle Distribution | Backlog | 3/3 | Complete    | 2026-04-01 |
+| 999.7 Telemetry | Backlog | 0/3 | Planned | - |
 | 999.8 Search | Backlog | 2/2 | Complete    | 2026-03-30 |
 | 999.10 E2E, Bugs & Docs Debt | Backlog | 1/2 | In Progress|  |
 
@@ -362,13 +362,19 @@ Plans:
 **Plans:** 3/3 plans complete
 
 ### Phase 999.7: Telemetry (BACKLOG)
-**Goal:** Understand what users build and surface errors proactively
+**Goal:** CLI telemetry tracking, zero-config error capture with devErrors dashboard, scheduled error digests, and opt-in Sentry integration
 **Depends on:** Phase 999.2
 **Scope:**
-- Build-tool telemetry: generator usage counts, feature types, error rates (opt-out)
-- One-click error reporting: zero-config error boundary with context capture
-- Maintainer dashboard (simple analytics)
-**Plans:** 0 (estimated 2)
+- CLI telemetry: NDJSON event logging, opt-out, remote POST, privacy tiers, `feather stats`
+- Error capture: devErrors Convex table, React 19 ErrorBoundary, backend error wrapper, `/dev/errors` dashboard
+- Scheduled digest: Convex cron job, admin HTTP endpoint, consent-based reporting
+- Sentry opt-in: Layer 2 production error monitoring when DSN configured
+**Plans:** 3 plans
+
+Plans:
+- [ ] 999.7-01-PLAN.md — CLI telemetry library, feather stats command, feather.yaml schema extension
+- [ ] 999.7-02-PLAN.md — devErrors backend, error capture from 4 sources, /dev/errors dashboard route
+- [ ] 999.7-03-PLAN.md — Scheduled error digest (cron + HTTP endpoint) and Sentry opt-in Layer 2
 
 ### Phase 999.8: Search (BACKLOG)
 **Goal:** Users can text-search across task titles and project names with filter controls
@@ -405,4 +411,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-03-10*
-*Last updated: 2026-03-29*
+*Last updated: 2026-04-01*
