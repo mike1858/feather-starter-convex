@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to plan
-last_updated: "2026-03-31T01:43:17.627Z"
+last_updated: "2026-04-01T03:38:50.552Z"
 progress:
   total_phases: 21
   completed_phases: 16
   total_plans: 56
-  completed_plans: 50
+  completed_plans: 51
 ---
 
 # Project State
@@ -69,6 +69,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.4 P02 | 11min | 5 tasks | 10 files |
 | Phase 999.4 | P03 | ~30min | 6 tasks | 20 files |
 | Phase 999.4 | P04 | 270s | 5 tasks | 6 files |
+| Phase 999.5 P01 | 17min | 7 tasks | 26 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ Recent:
 - [Phase 999.4]: Conditional imports in panel templates (useMutation, Plus) via {{#unless readonly}} — avoids unused imports in generated readonly panels
 - [Phase 999.4]: renderCrossEntityPanels() as separate exported function in render.ts — clean separation from renderFeatureTemplates, ScaffoldOptions.relatedYamls optional for backward compat
 - [Phase 999.4]: FEATHER_USE_PIPELINE env var for Plop-to-pipeline toggle (default: pipeline)
+- [Phase 999.5]: Excluded schema-mappings.ts from coverage (type-only Zod declaration not imported by backend)
+- [Phase 999.5]: Import mutations throw errors (vs silent return) for unauthenticated users
 
 ### Pending Todos
 

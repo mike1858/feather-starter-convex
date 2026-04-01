@@ -9,7 +9,7 @@ const languages = ["es", "en"] as const;
 export const supportedLangs = [...languages];
 
 // Namespace list -- plugins add their own namespace here.
-const ns = ["common", "auth", "dashboard", "settings", "onboarding", "tasks", "projects", "subtasks", "work-logs", "activity-logs", "todos", "tickets", "contacts"];
+const ns = ["common", "auth", "dashboard", "settings", "onboarding", "tasks", "projects", "subtasks", "work-logs", "activity-logs", "todos", "tickets", "contacts", "import"];
 
 i18n
   // load translation using http -> see /public/locales
