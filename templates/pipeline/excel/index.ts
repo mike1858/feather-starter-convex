@@ -17,3 +17,12 @@ export {
   type InferredField,
   type InferredEntity,
 } from "./type-inference";
+
+export {
+  jaroSimilarity,
+  jaroWinklerSimilarity,
+  positionSimilarity,
+  dataFingerprintSimilarity,
+  computeColumnMatchScore,
+  type ColumnMatchScore,
+} from "./jaro-winkler";
