@@ -125,6 +125,15 @@ const schema = defineSchema({
     .index("by_status", ["status"])
     .index("by_priority", ["priority"]),
 
+  imports: defineTable({
+    fileName: v.string(),
+    status: v.string(),
+    userId: v.id("users"),
+    importStats: v.optional(v.string()),
+    reportData: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"]),
+
   contacts: defineTable({
     name: v.string(),
     email: v.optional(v.string()),

@@ -31,6 +31,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.81.0",
     "@auth/core": "^0.37.0",
+    "@clack/prompts": "^1.2.0",
     "@convex-dev/auth": "^0.0.91",
     "@convex-dev/react-query": "^0.1.0",
     "@dnd-kit/core": "^6.3.1",
