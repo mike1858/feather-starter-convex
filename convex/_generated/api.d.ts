@@ -30,6 +30,8 @@ import type * as password_PasswordResetEmail from "../password/PasswordResetEmai
 import type * as password_ResendOTPPasswordReset from "../password/ResendOTPPasswordReset.js";
 import type * as projects_mutations from "../projects/mutations.js";
 import type * as projects_queries from "../projects/queries.js";
+import type * as schemaMappings_mutations from "../schemaMappings/mutations.js";
+import type * as schemaMappings_queries from "../schemaMappings/queries.js";
 import type * as subtasks_mutations from "../subtasks/mutations.js";
 import type * as subtasks_queries from "../subtasks/queries.js";
 import type * as tasks_mutations from "../tasks/mutations.js";
@@ -74,6 +76,8 @@ declare const fullApi: ApiFromModules<{
   "password/ResendOTPPasswordReset": typeof password_ResendOTPPasswordReset;
   "projects/mutations": typeof projects_mutations;
   "projects/queries": typeof projects_queries;
+  "schemaMappings/mutations": typeof schemaMappings_mutations;
+  "schemaMappings/queries": typeof schemaMappings_queries;
   "subtasks/mutations": typeof subtasks_mutations;
   "subtasks/queries": typeof subtasks_queries;
   "tasks/mutations": typeof tasks_mutations;
