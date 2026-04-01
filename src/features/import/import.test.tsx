@@ -7,10 +7,9 @@
 // | 4 | Import stats         | Integration | Parses and displays stats JSON               |
 // | 5 | Helper functions     | Unit        | statusBadgeClass and formatImportStats       |
 
-import { expect, describe, it } from "vitest";
+import { expect, describe } from "vitest";
 import { waitFor, screen } from "@testing-library/react";
 import { test } from "@cvx/test.setup";
-import { api } from "~/convex/_generated/api";
 import { renderWithRouter } from "@/test-helpers";
 import { ImportHistory } from "./components/ImportHistory";
 
@@ -207,31 +206,5 @@ test("displays stats with defaults when fields missing", async ({
 
 // -- Backend query ---------------------------------------------------------------
 
-test("list query returns user imports sorted newest first", async ({
-  client,
-  testClient,
-  userId,
-}) => {
-  await testClient.run(async (ctx: any) => {
-    await ctx.db.insert("imports", {
-      fileName: "first.xlsx",
-      status: "complete",
-      userId,
-    });
-  });
-
-  // Small delay to ensure different creation times
-  await testClient.run(async (ctx: any) => {
-    await ctx.db.insert("imports", {
-      fileName: "second.xlsx",
-      status: "pending",
-      userId,
-    });
-  });
-
-  const imports = await client.query(api.imports.queries.list, {});
-  expect(imports).toHaveLength(2);
-  // Newest first
-  expect(imports[0].fileName).toBe("second.xlsx");
-  expect(imports[1].fileName).toBe("first.xlsx");
-});
+// Backend query tests (unauthenticated, sort order, user isolation)
+// are in convex/imports/queries.test.ts
