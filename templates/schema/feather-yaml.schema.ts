@@ -102,6 +102,7 @@ export const projectYamlSchema = z.object({
     .optional(),
   features: z.array(z.string()).default([]),
   bundles: z.array(z.string()).default([]),
+  registry: z.object({ url: z.string().url() }).optional(),
   settings: z
     .object({
       i18n: z
