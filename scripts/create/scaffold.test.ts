@@ -12,7 +12,7 @@ let templatesDir: string;
 
 beforeEach(() => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "scaffold-test-"));
-  templatesDir = path.join(tmpDir, "templates/examples");
+  templatesDir = path.join(tmpDir, "templates/features");
 
   // Create a minimal "project" directory with wiring files
   const projectDir = path.join(tmpDir, "project");

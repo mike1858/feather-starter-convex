@@ -18,7 +18,7 @@ export interface RemoveActionOptions {
   confirm?: boolean;
 }
 
-interface ExampleManifest {
+interface FeatureManifest {
   name: string;
   files: {
     frontend: string;
@@ -30,7 +30,7 @@ interface ExampleManifest {
 }
 
 function findTemplatesDir(projectRoot: string): string {
-  return path.join(projectRoot, "templates/examples");
+  return path.join(projectRoot, "templates/features");
 }
 
 /**
@@ -56,7 +56,7 @@ export function removeAction(
     };
   }
 
-  const manifest: ExampleManifest = JSON.parse(
+  const manifest: FeatureManifest = JSON.parse(
     fs.readFileSync(manifestPath, "utf-8"),
   );
 

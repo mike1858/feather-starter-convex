@@ -285,7 +285,7 @@ export default ns;
 }
 
 function createExampleBundle(root: string, name: string): void {
-  const exampleDir = path.join(root, "templates/examples", name);
+  const exampleDir = path.join(root, "templates/features", name);
   fs.mkdirSync(path.join(exampleDir, "frontend/components"), {
     recursive: true,
   });
