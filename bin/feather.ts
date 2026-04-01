@@ -6,6 +6,7 @@ import { updateCommand } from "./commands/update";
 import { initCommand } from "./commands/init";
 import { addCommand } from "./commands/add";
 import { removeCommand } from "./commands/remove";
+import { listCommand } from "./commands/list";
 import { importCommand } from "./commands/import";
 
 const program = new Command();
@@ -23,6 +24,7 @@ program.addCommand(updateCommand);
 program.addCommand(initCommand);
 program.addCommand(addCommand);
 program.addCommand(removeCommand);
+program.addCommand(listCommand);
 program.addCommand(importCommand);
 
 program.parse();
