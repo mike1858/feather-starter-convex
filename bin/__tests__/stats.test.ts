@@ -92,7 +92,7 @@ describe("feather stats", () => {
         makeEvent({ command: "generate", feature: "projects" }),
         makeEvent({ command: "generate", feature: "tasks" }),
         makeEvent({ command: "add", feature: "contacts" }),
-        makeEvent({ command: "validate" }), // no feature
+        makeEvent({ command: "validate", feature: undefined }), // no feature
       ];
       writeTelemetry(events);
 
