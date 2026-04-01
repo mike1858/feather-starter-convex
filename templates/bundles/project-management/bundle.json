@@ -1,0 +1,7 @@
+{
+  "name": "project-management",
+  "label": "Project Management",
+  "description": "Tasks, projects, subtasks, work logs, and activity tracking",
+  "complexity": "advanced",
+  "features": ["tasks", "projects", "subtasks", "work-logs", "activity-logs"]
+}

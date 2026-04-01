@@ -1,7 +1,7 @@
 /**
  * Scaffold selected example apps into a project.
  *
- * Reads manifest.json from each bundled example under templates/examples/{name}/,
+ * Reads manifest.json from each bundled example under templates/features/{name}/,
  * copies files to the correct project locations, and wires into schema, nav, i18n, errors.
  */
 import * as fs from "node:fs";
@@ -15,7 +15,7 @@ const PROJECT_ROOT = path.resolve(__dirname, "../..");
 export interface ScaffoldOptions {
   projectRoot: string;
   exampleApps: string[];
-  /** Override templates location (for testing). Defaults to templates/examples/ in this repo. */
+  /** Override templates location (for testing). Defaults to templates/features/ in this repo. */
   templatesDir?: string;
 }
 
@@ -161,7 +161,7 @@ function installExample(
  * Scaffold selected example apps into the project.
  *
  * For each app:
- * 1. Read manifest.json from templates/examples/{name}/
+ * 1. Read manifest.json from templates/features/{name}/
  * 2. Copy all bundled files to the correct project locations
  * 3. Wire into project (schema, nav, i18n — handled by caller or post-step)
  */
@@ -170,7 +170,7 @@ export async function scaffoldExamples(
 ): Promise<ScaffoldResult> {
   const templatesDir =
     options.templatesDir ??
-    path.join(PROJECT_ROOT, "templates/examples");
+    path.join(PROJECT_ROOT, "templates/features");
 
   const installed: string[] = [];
   const skipped: string[] = [];
@@ -222,7 +222,7 @@ export function readManifest(
   templatesDir?: string,
 ): ExampleManifest | null {
   const dir =
-    templatesDir ?? path.join(PROJECT_ROOT, "templates/examples");
+    templatesDir ?? path.join(PROJECT_ROOT, "templates/features");
   const manifestPath = path.join(dir, exampleName, "manifest.json");
 
   if (!fs.existsSync(manifestPath)) return null;

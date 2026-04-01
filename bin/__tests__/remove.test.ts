@@ -27,7 +27,7 @@ function createMinimalProjectWithTemplates(root: string): void {
   fs.mkdirSync(path.join(root, "public/locales/es"), { recursive: true });
 
   // Create a bundled example
-  const exampleDir = path.join(root, "templates/examples/todos");
+  const exampleDir = path.join(root, "templates/features/todos");
   fs.mkdirSync(path.join(exampleDir, "frontend/components"), {
     recursive: true,
   });

@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Bundle example app files from the main project into templates/examples/{name}/.
+ * Bundle feature app files from the main project into templates/features/{name}/.
  *
  * This script copies actual feature files into a self-contained bundle format
  * that feather add/remove can install. Run after updating example features.
@@ -30,7 +30,7 @@ interface ExampleConfig {
   navPath: string;
 }
 
-const EXAMPLES: ExampleConfig[] = [
+const FEATURES: ExampleConfig[] = [
   {
     name: "todos",
     label: "Todos",
@@ -89,7 +89,7 @@ function copyDirContents(src: string, dest: string, skipTests = true): number {
 }
 
 function bundleExample(config: ExampleConfig): number {
-  const destDir = path.join(ROOT, "templates/examples", config.name);
+  const destDir = path.join(ROOT, "templates/features", config.name);
 
   // Clean and recreate
   if (fs.existsSync(destDir)) {
@@ -191,9 +191,9 @@ function bundleExample(config: ExampleConfig): number {
 
 // Main
 let totalFiles = 0;
-for (const example of EXAMPLES) {
-  const count = bundleExample(example);
-  console.log(`  Bundled ${example.name}: ${count} files`);
+for (const feature of FEATURES) {
+  const count = bundleExample(feature);
+  console.log(`  Bundled ${feature.name}: ${count} files`);
   totalFiles += count;
 }
-console.log(`\n  Total: ${totalFiles} files in ${EXAMPLES.length} bundles`);
+console.log(`\n  Total: ${totalFiles} files in ${FEATURES.length} bundles`);

@@ -1,7 +1,7 @@
 /**
  * `feather add <feature>` — install an example feature into the current project.
  *
- * Reads the bundled manifest from templates/examples/{name}/, copies files
+ * Reads the bundled manifest from templates/features/{name}/, copies files
  * to the correct project locations, and wires into schema, nav, i18n, errors.
  */
 import { Command } from "commander";
@@ -18,7 +18,7 @@ export interface AddActionOptions {
   force?: boolean;
 }
 
-interface ExampleManifest {
+interface FeatureManifest {
   name: string;
   label: string;
   description: string;
@@ -57,7 +57,7 @@ function copyDirRecursive(src: string, dest: string): void {
 }
 
 function findTemplatesDir(projectRoot: string): string {
-  return path.join(projectRoot, "templates/examples");
+  return path.join(projectRoot, "templates/features");
 }
 
 /**
@@ -75,12 +75,12 @@ export function addAction(
   if (!fs.existsSync(manifestPath)) {
     return {
       success: false,
-      message: `Feature '${featureName}' not found. Available: ${getAvailableExamples(templatesDir).join(", ")}`,
+      message: `Feature '${featureName}' not found. Available: ${getAvailableFeatures(templatesDir).join(", ")}`,
       filesCreated: [],
     };
   }
 
-  const manifest: ExampleManifest = JSON.parse(
+  const manifest: FeatureManifest = JSON.parse(
     fs.readFileSync(manifestPath, "utf-8"),
   );
 
@@ -165,7 +165,7 @@ export function addAction(
   };
 }
 
-function getAvailableExamples(templatesDir: string): string[] {
+function getAvailableFeatures(templatesDir: string): string[] {
   if (!fs.existsSync(templatesDir)) return [];
   return fs
     .readdirSync(templatesDir, { withFileTypes: true })
