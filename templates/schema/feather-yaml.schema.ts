@@ -116,6 +116,11 @@ export const projectYamlSchema = z.object({
         .optional(),
     })
     .optional(),
+  registry: z
+    .object({
+      url: z.string().url(),
+    })
+    .optional(),
 });
 
 export type ProjectYaml = z.infer<typeof projectYamlSchema>;
