@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
 status: Ready to plan
-last_updated: "2026-04-01T10:12:55.096Z"
+last_updated: "2026-04-01T10:28:07.746Z"
 progress:
   total_phases: 21
-  completed_phases: 16
-  total_plans: 56
-  completed_plans: 50
+  completed_phases: 19
+  total_plans: 62
+  completed_plans: 61
 ---
 
 # Project State
@@ -70,6 +70,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.4 | P03 | ~30min | 6 tasks | 20 files |
 | Phase 999.4 | P04 | 270s | 5 tasks | 6 files |
 | Phase 999.7 P01 | 4min | 2 tasks | 7 files |
+| Phase 999.7 P03 | 10min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,9 @@ Recent:
 - [Phase 999.4]: FEATHER_USE_PIPELINE env var for Plop-to-pipeline toggle (default: pipeline)
 - [Phase 999.7]: NDJSON format for telemetry file (one JSON per line, append-only)
 - [Phase 999.7]: Sensitive data sanitization via regex patterns on string fields
+- [Phase 999.7]: errorDigests separate table for digest aggregation (not devErrors)
+- [Phase 999.7]: Dynamic import for @sentry/react -- tree-shaken when VITE_SENTRY_DSN not set
+- [Phase 999.7]: Deploy-time cron schedule (daily 9:00 UTC) -- Convex crons baked at deploy time
 
 ### Pending Todos
 
