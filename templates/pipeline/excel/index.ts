@@ -35,3 +35,12 @@ export {
   type ImportRowResult,
   type EntityImportResult,
 } from "./data-importer";
+
+export {
+  reconcileSheet,
+  detectReimport,
+  type ChangeType,
+  type SchemaChange,
+  type ReconciliationResult,
+  type StoredMapping,
+} from "./reconciliation";
