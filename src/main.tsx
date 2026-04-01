@@ -2,7 +2,10 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "@/app";
-import { captureError } from "@/shared/error-capture";
+import { captureError, initErrorCapture } from "@/shared/error-capture";
+
+// Initialize error capture (Sentry opt-in when VITE_SENTRY_DSN is set)
+initErrorCapture();
 
 // Render the app
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
