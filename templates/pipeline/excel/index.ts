@@ -26,3 +26,12 @@ export {
   generateAllYamls,
   type GeneratedYaml,
 } from "./yaml-generator";
+
+export {
+  coerceValue,
+  processRow,
+  type ErrorSeverity,
+  type ImportError,
+  type ImportRowResult,
+  type EntityImportResult,
+} from "./data-importer";
