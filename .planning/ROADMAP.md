@@ -250,7 +250,7 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 999.3 LLM Architect Conversation | Backlog | 4/4 | Complete   | 2026-03-30 |
 | 999.4 Integration Gaps | Backlog | 4/4 | Complete    | 2026-03-31 |
 | 999.5 Excel-to-System Pipeline | Backlog | 0/? | Not started | - |
-| 999.6 Bundle Distribution | Backlog | 0/? | Not started | - |
+| 999.6 Bundle Distribution | Backlog | 1/1 | Complete   | 2026-04-01 |
 | 999.7 Telemetry | Backlog | 0/? | Not started | - |
 | 999.8 Search | Backlog | 2/2 | Complete    | 2026-03-30 |
 | 999.10 E2E, Bugs & Docs Debt | Backlog | 1/2 | In Progress|  |
@@ -359,7 +359,7 @@ Plans:
 - `feather add bundle <name>` command
 - Dependency resolution, bundle registry (local first, remote later)
 - Validation: all features compatible, no conflicts
-**Plans:** 0 (estimated 2-3)
+**Plans:** 1/1 plans complete
 
 ### Phase 999.7: Telemetry (BACKLOG)
 **Goal:** Understand what users build and surface errors proactively
