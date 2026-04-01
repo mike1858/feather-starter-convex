@@ -78,6 +78,25 @@ const schema = defineSchema({
     text: v.optional(v.string()),
     sentAt: v.number(),
   }).index("sentAt", ["sentAt"]),
+  devErrors: defineTable({
+    source: v.union(
+      v.literal("frontend"),
+      v.literal("backend"),
+      v.literal("silent"),
+      v.literal("startup"),
+    ),
+    message: v.string(),
+    stack: v.optional(v.string()),
+    route: v.optional(v.string()),
+    functionName: v.optional(v.string()),
+    args: v.optional(v.string()),
+    browserInfo: v.optional(v.string()),
+    timestamp: v.number(),
+    digested: v.optional(v.boolean()),
+  })
+    .index("by_timestamp", ["timestamp"])
+    .index("by_source", ["source"])
+    .index("by_digested", ["digested"]),
   subtasks: defineTable({
     title: v.string(),
     status: zodToConvex(subtaskStatus),
