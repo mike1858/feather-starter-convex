@@ -364,6 +364,74 @@ describe("projectYamlSchema", () => {
     const result = projectYamlSchema.safeParse({ version: "1.0" });
     expect(result.success).toBe(false);
   });
+
+  it("accepts telemetry section with all fields", () => {
+    const result = projectYamlSchema.safeParse({
+      name: "my-project",
+      telemetry: {
+        enabled: true,
+        level: "full",
+        remote: "https://example.com/telemetry",
+        errorDigest: {
+          enabled: true,
+          schedule: "daily",
+          endpoint: "https://admin.example.com/errors",
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.telemetry?.enabled).toBe(true);
+      expect(result.data.telemetry?.level).toBe("full");
+      expect(result.data.telemetry?.remote).toBe("https://example.com/telemetry");
+      expect(result.data.telemetry?.errorDigest?.schedule).toBe("daily");
+    }
+  });
+
+  it("accepts telemetry.level enum values (basic, schema, full)", () => {
+    for (const level of ["basic", "schema", "full"] as const) {
+      const result = projectYamlSchema.safeParse({
+        name: "my-project",
+        telemetry: { level },
+      });
+      expect(result.success).toBe(true);
+    }
+
+    const invalid = projectYamlSchema.safeParse({
+      name: "my-project",
+      telemetry: { level: "invalid" },
+    });
+    expect(invalid.success).toBe(false);
+  });
+
+  it("accepts errorReporting.sentry.dsn", () => {
+    const result = projectYamlSchema.safeParse({
+      name: "my-project",
+      errorReporting: {
+        sentry: {
+          dsn: "https://abc123@sentry.io/456",
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.errorReporting?.sentry?.dsn).toBe(
+        "https://abc123@sentry.io/456",
+      );
+    }
+  });
+
+  it("telemetry section is optional (backward compat)", () => {
+    const result = projectYamlSchema.safeParse({
+      name: "my-project",
+      version: "2.0.0",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.telemetry).toBeUndefined();
+      expect(result.data.errorReporting).toBeUndefined();
+    }
+  });
 });
 
 describe("validateProjectYaml", () => {
