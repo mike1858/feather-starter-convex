@@ -1,4 +1,4 @@
-import type { InferredEntity, InferredField } from "./type-inference";
+import type { InferredEntity } from "./type-inference";
 import type { SheetMetadata } from "./parser";
 
 export interface DetectedRelationship {
@@ -24,7 +24,7 @@ export interface ClassifiedWorkbook {
  */
 export function detectRelationships(
   entities: InferredEntity[],
-  sheets: SheetMetadata[],
+  _sheets: SheetMetadata[],
 ): DetectedRelationship[] {
   const relationships: DetectedRelationship[] = [];
 

@@ -9,7 +9,7 @@ import { inferEntities } from "../../templates/pipeline/excel/type-inference";
 import { classifyWorkbook } from "../../templates/pipeline/excel/entity-classifier";
 import type { InferredEntity } from "../../templates/pipeline/excel/type-inference";
 import type { SheetMetadata } from "../../templates/pipeline/excel/parser";
-import { internal } from "@cvx/_generated/api";
+import { api } from "@cvx/_generated/api";
 
 const FIELD_TYPES = [
   "string", "text", "number", "boolean", "enum", "date",
@@ -64,7 +64,7 @@ export const analyzeExcel = action({
     }
 
     // 4. Store analysis result
-    await ctx.runMutation(internal.imports.mutations.saveAnalysis, {
+    await ctx.runMutation(api.imports.mutations.saveAnalysis, {
       importId: args.importId,
       analysisResult: JSON.stringify(result),
     });

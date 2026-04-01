@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { SheetMetadata } from "../../templates/pipeline/excel/parser";
 
 // ── Mock @anthropic-ai/sdk before importing action module ───────────────────
