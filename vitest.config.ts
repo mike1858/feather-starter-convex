@@ -92,6 +92,9 @@ export default defineConfig({
         // --- Type-only files ---
         "types.ts",
         "src/types/**",
+        // schema-mappings.ts is a pure Zod type definition used only for TypeScript types
+        // (not imported by convex/schema.ts — backend uses inline JSON.parse typing)
+        "src/shared/schemas/schema-mappings.ts",
 
         // --- Pure pass-through Radix wrappers (no props transformation, no logic) ---
         "src/ui/switch.tsx",
