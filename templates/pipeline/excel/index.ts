@@ -6,3 +6,14 @@ export {
   type SheetMetadata,
   type ColumnInfo,
 } from "./parser";
+
+export {
+  inferFieldType,
+  inferEntityType,
+  inferEntities,
+  toFieldName,
+  toEntityName,
+  toLabel,
+  type InferredField,
+  type InferredEntity,
+} from "./type-inference";
