@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Ready to plan
+status: Executing Phase 999.5
 last_updated: "2026-04-01T03:38:50.552Z"
 progress:
   total_phases: 21
@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-10)
 
 **Core value:** Developer velocity -- new features are faster to build because every file has a clear, predictable home
-**Current focus:** Phase 999.4 — 999-1-integration-gaps-backlog
+**Current focus:** Phase 999.5 — excel-to-system-pipeline-backlog
 
 ## Current Position
 
-Phase: 999.5
-Plan: Not started
+Phase: 999.5 (excel-to-system-pipeline-backlog) — EXECUTING
+Plan: 1 of 5
 All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
 
 ### Roadmap Evolution
