@@ -1205,3 +1205,358 @@ describe("Step2Fields", () => {
     expect(onUpdateField).toHaveBeenCalledWith(0, expect.any(String), { type: "number" });
   });
 });
+
+// ── ReconciliationDiff component tests ───────────────────────────────────────
+
+import { ReconciliationDiff } from "./components/ReconciliationDiff";
+import type { SchemaChange } from "~/templates/pipeline/excel/reconciliation";
+
+describe("ReconciliationDiff", () => {
+  function makeRenameChange(overrides: Partial<SchemaChange> = {}): SchemaChange {
+    return {
+      type: "rename",
+      entityName: "employees",
+      oldColumnName: "Emp Name",
+      newColumnName: "Employee Name",
+      matchScore: {
+        score: 0.85,
+        stringScore: 0.9,
+        positionScore: 1,
+        dataScore: 0.7,
+        isLikelyRename: true,
+        isPossibleRename: true,
+      },
+      ...overrides,
+    };
+  }
+
+  function makeAddChange(overrides: Partial<SchemaChange> = {}): SchemaChange {
+    return {
+      type: "add",
+      entityName: "employees",
+      addedColumn: {
+        name: "Phone",
+        position: 2,
+        detectedType: "string",
+        sampleValues: [],
+        uniqueCount: 0,
+        emptyCount: 0,
+      },
+      ...overrides,
+    };
+  }
+
+  function makeRemoveChange(overrides: Partial<SchemaChange> = {}): SchemaChange {
+    return {
+      type: "remove",
+      entityName: "employees",
+      removedColumn: "Department",
+      removedColumnDataCount: 50,
+      ...overrides,
+    };
+  }
+
+  test("renders rename changes with old->new names and confidence", () => {
+    const changes = [makeRenameChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={vi.fn()} />,
+    );
+
+    expect(screen.getByText("Emp Name")).toBeInTheDocument();
+    expect(screen.getByText("Employee Name")).toBeInTheDocument();
+    expect(screen.getByText("(85%)")).toBeInTheDocument();
+    expect(screen.getByText("Renamed Columns")).toBeInTheDocument();
+  });
+
+  test("renders addition and removal changes", () => {
+    const changes = [makeAddChange(), makeRemoveChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={vi.fn()} />,
+    );
+
+    expect(screen.getByText("Added Columns")).toBeInTheDocument();
+    expect(screen.getByText(/Phone/)).toBeInTheDocument();
+    expect(screen.getByText("Removed Columns")).toBeInTheDocument();
+    expect(screen.getByText(/Department/)).toBeInTheDocument();
+  });
+
+  test("toggles between flat and diff view", () => {
+    const changes = [makeRenameChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={vi.fn()} />,
+    );
+
+    // Default is flat (List button active)
+    expect(screen.getByText("Renamed Columns")).toBeInTheDocument();
+
+    // Click Diff button
+    fireEvent.click(screen.getByText("Diff"));
+
+    // Should show diff view with Previous/New Schema labels
+    expect(screen.getByText("Previous Schema")).toBeInTheDocument();
+    expect(screen.getByText("New Schema")).toBeInTheDocument();
+
+    // Click List button to go back
+    fireEvent.click(screen.getByText("List"));
+    expect(screen.getByText("Renamed Columns")).toBeInTheDocument();
+  });
+
+  test("shows empty state when no changes", () => {
+    render(
+      <ReconciliationDiff changes={[]} onUpdateAction={vi.fn()} />,
+    );
+
+    expect(screen.getByText("No schema changes detected. Schema is identical.")).toBeInTheDocument();
+  });
+
+  test("calls onUpdateAction when rename dropdown changes", () => {
+    const onUpdateAction = vi.fn();
+    const changes = [makeRenameChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={onUpdateAction} />,
+    );
+
+    const select = screen.getAllByRole("combobox")[0];
+    fireEvent.change(select, { target: { value: "reject" } });
+    expect(onUpdateAction).toHaveBeenCalledWith(0, "reject");
+  });
+
+  test("calls onUpdateAction when removal dropdown changes", () => {
+    const onUpdateAction = vi.fn();
+    const changes = [makeRemoveChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={onUpdateAction} />,
+    );
+
+    const select = screen.getAllByRole("combobox")[0];
+    fireEvent.change(select, { target: { value: "delete" } });
+    expect(onUpdateAction).toHaveBeenCalledWith(0, "delete");
+  });
+
+  test("shows data count for removed columns", () => {
+    const changes = [makeRemoveChange({ removedColumnDataCount: 100 })];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={vi.fn()} />,
+    );
+
+    expect(screen.getByText("(100 rows with data)")).toBeInTheDocument();
+  });
+
+  test("renders change count in header", () => {
+    const changes = [makeRenameChange(), makeAddChange()];
+    render(
+      <ReconciliationDiff changes={changes} onUpdateAction={vi.fn()} />,
+    );
+
+    expect(screen.getByText("2 changes detected")).toBeInTheDocument();
+  });
+});
+
+// ── ImportReport component tests ─────────────────────────────────────────────
+
+import { ImportReport } from "./components/ImportReport";
+import type { ImportError } from "~/templates/pipeline/excel/data-importer";
+
+describe("ImportReport", () => {
+  function makeImportDoc(overrides: Record<string, unknown> = {}) {
+    return {
+      fileName: "test-data.xlsx",
+      status: "complete",
+      completedAt: Date.now(),
+      importStats: JSON.stringify({
+        entities: [
+          { entityName: "employees", totalRows: 100, importedRows: 90, skippedRows: 10 },
+          { entityName: "departments", totalRows: 20, importedRows: 20, skippedRows: 0 },
+        ],
+        method: "heuristic",
+      }),
+      ...overrides,
+    };
+  }
+
+  function makeImportError(overrides: Partial<ImportError> = {}): ImportError {
+    return {
+      entityName: "employees",
+      rowNumber: 5,
+      severity: "green",
+      column: "salary",
+      originalValue: "$50,000",
+      fixedValue: "50000",
+      errorMessage: 'Auto-converted "$50,000" to 50000',
+      ...overrides,
+    };
+  }
+
+  test("renders error sections grouped by severity", () => {
+    const errors: ImportError[] = [
+      makeImportError({ severity: "green" }),
+      makeImportError({ severity: "yellow", column: "status", errorMessage: "Ambiguous value" }),
+      makeImportError({ severity: "red", column: "email", errorMessage: "Invalid email" }),
+    ];
+
+    render(<ImportReport importDoc={makeImportDoc()} errors={errors} />);
+
+    expect(screen.getByText("Auto-fixed")).toBeInTheDocument();
+    expect(screen.getByText("Needs Review")).toBeInTheDocument();
+    expect(screen.getByText("Unfixable")).toBeInTheDocument();
+  });
+
+  test("shows correct per-entity row counts", () => {
+    render(<ImportReport importDoc={makeImportDoc()} errors={[]} />);
+
+    expect(screen.getByText("employees")).toBeInTheDocument();
+    expect(screen.getByText("departments")).toBeInTheDocument();
+    // Check the grid rows contain the expected numbers
+    // Multiple "20" values exist (departments imported=20, total=20) so use getAllByText
+    expect(screen.getByText("90")).toBeInTheDocument(); // employees importedRows
+    expect(screen.getByText("100")).toBeInTheDocument(); // employees totalRows
+    expect(screen.getAllByText("20").length).toBeGreaterThanOrEqual(1); // departments
+  });
+
+  test("shows import metadata: file name, status, method", () => {
+    render(<ImportReport importDoc={makeImportDoc()} errors={[]} />);
+
+    expect(screen.getByText("Import Report")).toBeInTheDocument();
+    expect(screen.getByText("test-data.xlsx")).toBeInTheDocument();
+    expect(screen.getByText("complete")).toBeInTheDocument();
+    expect(screen.getByText("heuristic")).toBeInTheDocument();
+  });
+
+  test("renders without stats when importStats is not set", () => {
+    const doc = makeImportDoc({ importStats: undefined });
+    render(<ImportReport importDoc={doc} errors={[]} />);
+
+    expect(screen.getByText("Import Report")).toBeInTheDocument();
+    expect(screen.queryByText("Entity Summary")).not.toBeInTheDocument();
+  });
+
+  test("hides error sections when no errors of that severity exist", () => {
+    const errors: ImportError[] = [
+      makeImportError({ severity: "red", errorMessage: "Bad value" }),
+    ];
+
+    render(<ImportReport importDoc={makeImportDoc()} errors={errors} />);
+
+    // Only red section should show
+    expect(screen.getByText("Unfixable")).toBeInTheDocument();
+    expect(screen.queryByText("Auto-fixed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Needs Review")).not.toBeInTheDocument();
+  });
+
+  test("shows original and fixed values for green errors after expanding", () => {
+    const errors: ImportError[] = [
+      makeImportError({
+        severity: "green",
+        originalValue: "$50,000",
+        fixedValue: "50000",
+      }),
+    ];
+
+    render(<ImportReport importDoc={makeImportDoc()} errors={errors} />);
+
+    // Green section is collapsed by default — expand it first
+    const expandButton = screen.getByText("Auto-fixed").closest("button")!;
+    fireEvent.click(expandButton);
+
+    expect(screen.getByText("$50,000")).toBeInTheDocument();
+    expect(screen.getByText("50000")).toBeInTheDocument();
+  });
+
+  test("collapses green section by default and expands yellow/red", () => {
+    const errors: ImportError[] = [
+      makeImportError({ severity: "green" }),
+      makeImportError({ severity: "yellow", column: "status", errorMessage: "Ambiguous" }),
+    ];
+
+    render(<ImportReport importDoc={makeImportDoc()} errors={errors} />);
+
+    // Green section collapsed: should show "Expand" button
+    const greenSection = screen.getByText("Auto-fixed").closest("button")!;
+    expect(greenSection.textContent).toContain("Expand");
+
+    // Yellow section expanded: should show "Collapse" button
+    const yellowSection = screen.getByText("Needs Review").closest("button")!;
+    expect(yellowSection.textContent).toContain("Collapse");
+  });
+});
+
+// ── useReconciliation hook tests ─────────────────────────────────────────────
+
+import { useReconciliation } from "./hooks/useReconciliation";
+import type { SheetMetadata } from "~/templates/pipeline/excel/parser";
+import type { StoredMapping } from "~/templates/pipeline/excel/reconciliation";
+
+describe("useReconciliation", () => {
+  function makeTestSheet(): SheetMetadata {
+    return {
+      name: "Employees",
+      rowCount: 10,
+      columnCount: 2,
+      columns: [
+        { name: "Name", position: 0, detectedType: "string", sampleValues: [], uniqueCount: 5, emptyCount: 0 },
+        { name: "Email", position: 1, detectedType: "string", sampleValues: [], uniqueCount: 5, emptyCount: 0 },
+      ],
+      sampleRows: [],
+    };
+  }
+
+  function makeTestMapping(colName: string, position: number): StoredMapping {
+    return {
+      systemFieldId: `f_${colName}`,
+      systemFieldName: colName,
+      excelColumnName: colName,
+      excelColumnPosition: position,
+      excelSheetName: "Sheet1",
+    };
+  }
+
+  test("initial state has empty results and isChecking=false", () => {
+    const { result } = renderHook(() => useReconciliation());
+
+    expect(result.current.results.size).toBe(0);
+    expect(result.current.isChecking).toBe(false);
+  });
+
+  test("checkForReimport populates results when match found", () => {
+    const { result } = renderHook(() => useReconciliation());
+
+    const sheets = [makeTestSheet()];
+    const mappings = new Map([
+      ["employees", [makeTestMapping("Name", 0), makeTestMapping("Email", 1)]],
+    ]);
+
+    act(() => result.current.checkForReimport(sheets, mappings));
+
+    expect(result.current.results.size).toBe(1);
+    expect(result.current.results.get("Employees")!.isReimport).toBe(true);
+    expect(result.current.isChecking).toBe(false);
+  });
+
+  test("checkForReimport returns empty results when no match", () => {
+    const { result } = renderHook(() => useReconciliation());
+
+    const sheets = [makeTestSheet()];
+    const mappings = new Map([
+      ["products", [makeTestMapping("SKU", 0), makeTestMapping("Price", 1)]],
+    ]);
+
+    act(() => result.current.checkForReimport(sheets, mappings));
+
+    expect(result.current.results.size).toBe(0);
+  });
+
+  test("reset clears results", () => {
+    const { result } = renderHook(() => useReconciliation());
+
+    const sheets = [makeTestSheet()];
+    const mappings = new Map([
+      ["employees", [makeTestMapping("Name", 0), makeTestMapping("Email", 1)]],
+    ]);
+
+    act(() => result.current.checkForReimport(sheets, mappings));
+    expect(result.current.results.size).toBe(1);
+
+    act(() => result.current.reset());
+    expect(result.current.results.size).toBe(0);
+  });
+});
