@@ -116,6 +116,29 @@ export const projectYamlSchema = z.object({
         .optional(),
     })
     .optional(),
+  telemetry: z
+    .object({
+      enabled: z.boolean().default(true),
+      level: z.enum(["basic", "schema", "full"]).default("basic"),
+      remote: z.string().url().optional(),
+      errorDigest: z
+        .object({
+          enabled: z.boolean().default(false),
+          schedule: z.enum(["hourly", "daily", "weekly"]).default("daily"),
+          endpoint: z.string().url(),
+        })
+        .optional(),
+    })
+    .optional(),
+  errorReporting: z
+    .object({
+      sentry: z
+        .object({
+          dsn: z.string(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type ProjectYaml = z.infer<typeof projectYamlSchema>;
