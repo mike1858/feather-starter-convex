@@ -1,0 +1,30 @@
+{
+  "title": "Import Data",
+  "dropZone": {
+    "title": "Drop your Excel file here",
+    "subtitle": "or click to browse",
+    "formats": "Supports .xlsx and .xls files"
+  },
+  "wizard": {
+    "step1": "Entities",
+    "step2": "Fields",
+    "step3": "Relationships",
+    "next": "Next",
+    "back": "Back",
+    "confirm": "Confirm & Generate"
+  },
+  "status": {
+    "draft": "Draft",
+    "analyzing": "Analyzing",
+    "confirming": "Confirming",
+    "generating": "Generating",
+    "importing": "Importing",
+    "complete": "Complete",
+    "failed": "Failed"
+  },
+  "errors": {
+    "green": "Auto-fixed",
+    "yellow": "Needs review",
+    "red": "Unfixable"
+  }
+}

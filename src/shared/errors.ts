@@ -47,4 +47,12 @@ export const ERRORS = {
     NOT_FOUND: "Contact not found.",
     INVALID_STATUS_TRANSITION: "Invalid status transition.",
   },
+  imports: {
+    NOT_FOUND: "Import not found.",
+    INVALID_FILE: "Invalid file format. Please upload an .xlsx or .xls file.",
+    ANALYSIS_FAILED: "Schema analysis failed. Please try again.",
+    IMPORT_FAILED: "Data import failed. Check the error report for details.",
+    NO_SHEETS: "No data sheets found in the uploaded file.",
+    EMPTY_SHEET: "Sheet contains no data rows.",
+  },
 } as const;

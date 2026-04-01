@@ -1,0 +1,30 @@
+{
+  "title": "Importar Datos",
+  "dropZone": {
+    "title": "Suelta tu archivo Excel aqui",
+    "subtitle": "o haz clic para buscar",
+    "formats": "Soporta archivos .xlsx y .xls"
+  },
+  "wizard": {
+    "step1": "Entidades",
+    "step2": "Campos",
+    "step3": "Relaciones",
+    "next": "Siguiente",
+    "back": "Atras",
+    "confirm": "Confirmar y Generar"
+  },
+  "status": {
+    "draft": "Borrador",
+    "analyzing": "Analizando",
+    "confirming": "Confirmando",
+    "generating": "Generando",
+    "importing": "Importando",
+    "complete": "Completo",
+    "failed": "Fallido"
+  },
+  "errors": {
+    "green": "Auto-corregido",
+    "yellow": "Necesita revision",
+    "red": "No corregible"
+  }
+}
