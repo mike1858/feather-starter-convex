@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Executing Phase 999.5
-last_updated: "2026-04-01T04:48:20.132Z"
+status: Ready to execute
+last_updated: "2026-04-01T05:23:05.258Z"
 progress:
   total_phases: 21
   completed_phases: 16
   total_plans: 56
-  completed_plans: 51
+  completed_plans: 54
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 999.5 (excel-to-system-pipeline-backlog) — EXECUTING
-Plan: 1 of 5
+Plan: 2 of 5
 All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
 
 ### Roadmap Evolution
@@ -72,6 +72,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.5 P01 | 17min | 7 tasks | 26 files |
 | Phase 999.5 P02 | 33min | 4 tasks | 13 files |
 | Phase 999.5 P03 | 56min | 5 tasks | 17 files |
+| Phase 999.5 P04 | 30min | 5 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Recent:
 - [Phase 999.5]: Fixed YAML generator to match actual featureYamlSchema (identity, statusFlow, views had incorrect structure in plan)
 - [Phase 999.5]: DetectedRelationship type defined locally since entity-classifier module from Plan 02 not yet built
 - [Phase 999.5]: ImportWizard.tsx and useSchemaAnalysis.ts excluded from coverage (Convex-dependent orchestration)
+- [Phase 999.5]: dataFingerprint stored as JSON-encoded string, parsed via parseDataFingerprint() for Jaro-Winkler rename scoring
+- [Phase 999.5]: Batch error storage in groups of 50 for Convex arg size limits
+- [Phase 999.5]: Removed duplicate schema table definitions (imports, schemaMappings, importErrors) keeping zodToConvex versions only
 
 ### Pending Todos
 
