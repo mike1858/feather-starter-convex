@@ -1,4 +1,11 @@
 export { DropZone } from "./components/DropZone";
 export { ImportWizard } from "./components/ImportWizard";
+export { DashboardReview } from "./components/DashboardReview";
+export { Step1Entities } from "./components/Step1Entities";
+export { Step2Fields } from "./components/Step2Fields";
+export { Step3Relationships } from "./components/Step3Relationships";
+export { FieldTypeDropdown } from "./components/FieldTypeDropdown";
+export { SampleDataPreview } from "./components/SampleDataPreview";
+export { ColumnGroupAccordion } from "./components/ColumnGroupAccordion";
 export { useImportWizard } from "./hooks/useImportWizard";
 export { useSchemaAnalysis } from "./hooks/useSchemaAnalysis";
