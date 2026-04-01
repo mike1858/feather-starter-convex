@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "@cvx/_generated/server";
+import { mutation, internalMutation } from "@cvx/_generated/server";
 
 export const store = mutation({
   args: {
@@ -40,5 +40,26 @@ export const markDigested = mutation({
     for (const id of args.ids) {
       await ctx.db.patch(id, { digested: true });
     }
+  },
+});
+
+export const markDigestedInternal = internalMutation({
+  args: {
+    ids: v.array(v.id("devErrors")),
+  },
+  handler: async (ctx, { ids }) => {
+    for (const id of ids) {
+      await ctx.db.patch(id, { digested: true });
+    }
+  },
+});
+
+export const storeDigest = internalMutation({
+  args: {
+    digest: v.string(),
+    receivedAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("errorDigests", args);
   },
 });

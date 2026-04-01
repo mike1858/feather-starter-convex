@@ -97,6 +97,11 @@ const schema = defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_source", ["source"])
     .index("by_digested", ["digested"]),
+  errorDigests: defineTable({
+    digest: v.string(),
+    receivedAt: v.number(),
+    sourceUrl: v.optional(v.string()),
+  }).index("by_receivedAt", ["receivedAt"]),
   subtasks: defineTable({
     title: v.string(),
     status: zodToConvex(subtaskStatus),

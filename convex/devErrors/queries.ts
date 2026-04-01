@@ -1,4 +1,4 @@
-import { query } from "@cvx/_generated/server";
+import { query, internalQuery } from "@cvx/_generated/server";
 
 export const list = query({
   args: {},
@@ -31,5 +31,16 @@ export const summary = query({
       bySource,
       undigested,
     };
+  },
+});
+
+export const listUndigested = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("devErrors")
+      .withIndex("by_digested")
+      .filter((q) => q.neq(q.field("digested"), true))
+      .collect();
   },
 });

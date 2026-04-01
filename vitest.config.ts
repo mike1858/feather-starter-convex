@@ -76,6 +76,8 @@ export default defineConfig({
 
         // --- Backend infra (no testable logic) ---
         "convex/http.ts",
+        // Static cron declaration (no testable logic — schedule config only)
+        "convex/crons.ts",
         "convex/email/**",
         "convex/otp/**",
         "convex/password/**",
