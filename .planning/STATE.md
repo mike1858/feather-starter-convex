@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CalmDo Core
-status: Executing Phase 999.6
-last_updated: "2026-04-01T09:15:09.223Z"
+status: Ready to execute
+last_updated: "2026-04-01T09:33:19.695Z"
 progress:
   total_phases: 21
   completed_phases: 17
   total_plans: 59
-  completed_plans: 55
+  completed_plans: 57
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-10)
 ## Current Position
 
 Phase: 999.6 (bundle-distribution-backlog) — EXECUTING
-Plan: 1 of 3
+Plan: 2 of 3
 All 4 plans executed: strip script, auth templates, create wizard, feather add/remove
 
 ### Roadmap Evolution
@@ -73,6 +73,7 @@ All 4 plans executed: strip script, auth templates, create wizard, feather add/r
 | Phase 999.5 P02 | 33min | 4 tasks | 13 files |
 | Phase 999.5 P03 | 56min | 5 tasks | 17 files |
 | Phase 999.5 P04 | 30min | 5 tasks | 15 files |
+| Phase 999.6 P02 | 5min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,8 @@ Recent:
 - [Phase 999.5]: dataFingerprint stored as JSON-encoded string, parsed via parseDataFingerprint() for Jaro-Winkler rename scoring
 - [Phase 999.5]: Batch error storage in groups of 50 for Convex arg size limits
 - [Phase 999.5]: Removed duplicate schema table definitions (imports, schemaMappings, importErrors) keeping zodToConvex versions only
+- [Phase 999.6]: Bundle install uses force=true for all features (per D-10 update policy)
+- [Phase 999.6]: Bundle removal is partial-tolerant: removes what's installed, skips missing
 
 ### Pending Todos
 
