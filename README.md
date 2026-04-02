@@ -1,6 +1,8 @@
 # Feather Starter (Convex)
 
-A production-ready SaaS starter kit built with React 19, Convex, TanStack Router/Query/Form, Zod v4, Tailwind v4, and i18n. Feature-folder architecture with shared validation, YAML-driven code generators, git-branch plugin system, and 100% test coverage.
+A production-ready SaaS starter kit built with React 19, Convex, TanStack Router/Query/Form, Zod v4, Tailwind v4, and i18n. Feature-folder architecture with shared validation, YAML-driven code generators, Feather CLI, git-branch plugin system, and 100% test coverage.
+
+> **New here?** Start with [docs/getting-started.md](./docs/getting-started.md) — covers setup, project structure, generators, and working with an AI agent.
 
 ## Architecture
 
@@ -25,6 +27,11 @@ graph TB
             ActivityLogs["activity-logs/"]
             Settings["settings/"]
             Uploads["uploads/"]
+            Todos["todos/ (example)"]
+            Tickets["tickets/ (example)"]
+            Contacts["contacts/ (example)"]
+            Import["import/"]
+            DevErrors["dev-errors/"]
         end
 
         subgraph SharedLayer["Shared Layer"]
@@ -50,6 +57,12 @@ graph TB
         UploadsBE["uploads/"]
         PasswordBE["password/"]
         DevEmailsBE["devEmails/"]
+        DevErrorsBE["devErrors/"]
+        ImportsBE["imports/"]
+        SchemaMappingsBE["schemaMappings/"]
+        TodosBE["todos/ (example)"]
+        TicketsBE["tickets/ (example)"]
+        ContactsBE["contacts/ (example)"]
         Schema["schema.ts"]
         AuthBE["auth.ts"]
         HTTP["http.ts"]
@@ -100,37 +113,55 @@ feather-starter-convex/
     devEmails/               #   Dev email capture (queries + mutations)
     email/                   #   React Email templates
     otp/                     #   OTP email sender (Resend)
+    imports/                 #   Excel import pipeline backend
+    schemaMappings/          #   Schema mapping persistence
+    devErrors/               #   Error capture + digest (dev)
+    todos/, tickets/, contacts/  #   Example app backends
     auth.ts                  #   Auth configuration
-    schema.ts                #   Database schema
+    schema.ts                #   Database schema (19 tables + auth tables)
     http.ts                  #   HTTP routes
+    crons.ts                 #   Scheduled jobs (error digest)
     test.setup.ts            #   Shared test fixture (createConvexTest)
   src/
-    features/                # Feature folders
+    features/                # Feature folders (16 total)
       auth/                  #   Login UI (email OTP, password, GitHub OAuth)
-      dashboard/             #   Dashboard page, navigation shell
+      dashboard/             #   Dashboard page, navigation shell, search
       onboarding/            #   Username setup page
-      tasks/                 #   Task list, detail, forms, filtered views
+      tasks/                 #   Task list, detail panel, forms, filtered views
       projects/              #   Project list, status lifecycle, task counts
-      subtasks/              #   Subtask management within tasks
-      work-logs/             #   Time tracking UI
-      activity-logs/         #   Audit trail display
+      subtasks/              #   Subtask data (UI via task detail panel)
+      work-logs/             #   Work log data (UI via task detail panel)
+      activity-logs/         #   Audit trail data (UI via task detail panel)
       settings/              #   Settings page (general tab)
       uploads/               #   File upload (embedded in settings)
-    routes/                  # TanStack Router (thin wrappers)
+      todos/                 #   Example: simple todo list
+      tickets/               #   Example: issue tracker with status/priority
+      contacts/              #   Example: contact manager with views
+      import/                #   Excel import wizard with schema inference
+      dev-errors/            #   Dev error dashboard + digest
+    routes/                  # TanStack Router (thin wrappers, 25 route files)
       _app/_auth/dashboard/  #   Authenticated dashboard routes
       _app/login/            #   Public login route
+      _app/dev/              #   Dev tools (mailbox, errors)
     shared/                  # Cross-feature code
-      schemas/               #   Zod schemas (tasks, projects, subtasks, work-logs, activity-logs, username)
-      errors.ts              #   Feature-grouped error constants
-      nav.ts                 #   Data-driven navigation items
-      hooks/                 #   Shared React hooks
-      utils/                 #   Utility functions
-    ui/                      # shadcn/ui components
-  templates/                 # Plop.js Handlebars templates + defaults.yaml
-  scripts/                   # Setup and management scripts
-    create.sh                #   One-command project creation
+      schemas/               #   Zod schemas (11 files)
+      errors.ts              #   Feature-grouped error constants (12 groups)
+      nav.ts                 #   Data-driven navigation items (14 entries)
+      utils/                 #   Utility functions (misc, validators, time-parser)
+    ui/                      # Radix UI primitives (Button, Input, Sheet, Select, etc.)
+    custom/                  # Your code — generators never touch this
+  convex/custom/             # Your backend code — generators never touch this
+  templates/
+    feature/                 # 26 Handlebars templates for code generation
+    features/                # Example app source (todos, tickets, contacts)
+    pipeline/                # Modern generation pipeline (ts-morph based)
+    defaults.yaml            # Field/behavior/view defaults for generators
+  bin/                       # Feather CLI (validate, generate, add, remove, list, etc.)
+  scripts/
+    create/                  #   Project creation wizard (create-feather)
     setup.ts                 #   Interactive branding setup
     plugin.sh                #   Plugin management (list/preview/install)
+  e2e/                       # Playwright E2E tests (10 spec files)
   public/locales/            # i18n translation files (en/, es/)
 ```
 
@@ -166,8 +197,17 @@ User profile settings with avatar upload and username editing. Uses TanStack For
 ### Uploads
 File upload functionality using Convex's built-in storage. Currently embedded in the settings feature for avatar uploads. Backend mutations in `convex/uploads/mutations.ts`.
 
+### Example Apps (Todos, Tickets, Contacts)
+Three generator-produced example apps demonstrating different complexity levels. Todos is a simple title + completed toggle. Tickets adds status/priority enums with filter bar. Contacts adds multiple views (list + table) with a view switcher. All follow the same generated patterns — study them to understand what the generator produces.
+
+### Import
+Excel file import wizard with automatic schema inference. Upload a spreadsheet, review inferred columns and types, map to existing entities or create new ones. Backend in `convex/imports/`.
+
 ### Dev Mailbox
 In the dev environment, all emails (OTP codes, password resets) are captured to a `devEmails` table and viewable at `/dev/mailbox`. No external email service needed for local development.
+
+### Dev Errors Dashboard
+Error capture and monitoring dashboard at `/dev/errors`. Captures frontend errors, sends scheduled digest emails. Backend in `convex/devErrors/`.
 
 ## Getting Started
 
@@ -261,6 +301,21 @@ Plugin extension points (append-only, minimal merge conflicts):
 - `src/shared/nav.ts` -- navigation items array
 - `src/shared/errors.ts` -- error constant groups
 - `src/i18n.ts` -- namespace list
+
+## Feather CLI
+
+The `feather` CLI manages features and bundles:
+
+```sh
+npx tsx bin/feather.ts validate <yaml-path>    # Validate a feather.yaml spec
+npx tsx bin/feather.ts generate <name>         # Generate feature from YAML
+npx tsx bin/feather.ts add <name>              # Install a feature or bundle
+npx tsx bin/feather.ts remove <name>           # Remove a feature
+npx tsx bin/feather.ts list                    # List available features/bundles
+npx tsx bin/feather.ts update                  # Update generated code after schema changes
+npx tsx bin/feather.ts stats                   # Show project statistics
+npx tsx bin/feather.ts import                  # Import from external registry
+```
 
 ## Generators
 
@@ -370,17 +425,17 @@ npm run test:watch    # Watch mode
 npm run test:e2e      # Playwright E2E tests
 ```
 
-489 tests across 59 test files with 100% coverage enforced. Pre-commit hooks (lefthook) run typecheck and full test suite -- commits are blocked if either fails.
+1186 tests across 101 test files (Vitest) + 10 Playwright E2E specs. 100% coverage enforced. Pre-commit hooks (lefthook) run typecheck and full test suite — commits are blocked if either fails.
 
-Tests are co-located with their features (`*.test.tsx` / `*.test.ts`). Frontend tests use Testing Library with a custom `renderWithRouter` helper. Backend tests use `feather-testing-convex` which provides an in-memory Convex backend with typed `mutation`, `query`, and `auth` helpers.
+Tests are co-located with their features (`*.test.tsx` / `*.test.ts`). Frontend tests use Testing Library with a custom `renderWithRouter` helper. Backend tests use `feather-testing-convex` which provides an in-memory Convex backend with typed `mutation`, `query`, and `auth` helpers. E2E tests use Playwright with a `feather-testing-core` Session DSL for fluent assertions.
 
-Coverage excludes route files (thin wrappers) and barrel exports.
+Coverage excludes route files (thin wrappers), barrel exports, and pure Radix UI pass-through wrappers. See `vitest.config.ts` for the full include/exclude globs.
 
 ## Deployment
 
 1. Build: `npm run build`
 2. Deploy Convex: `npx convex deploy`
-3. Deploy frontend to any static host (Vercel, Netlify, Cloudflare Pages)
+3. Deploy frontend to any static host (Vercel, Netlify, Cloudflare Pages — `netlify.toml` included)
 4. Set `VITE_CONVEX_URL` in your hosting provider
 
 ## Vendor Documentation

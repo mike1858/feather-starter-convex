@@ -1,6 +1,6 @@
 # feather-starter-convex — Project Overview
 
-**Last Updated:** 2026-03-25
+**Last Updated:** 2026-04-02
 
 ## Tech Stack
 

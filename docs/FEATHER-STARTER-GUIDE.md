@@ -19,7 +19,7 @@ Build and maintain real product features (tasks, projects, auth, settings, etc.)
 - **Domains** — task/project/subtask/work-log/activity-log features with Convex queries/mutations and React UI; plus onboarding, settings, uploads, and a dev mailbox.
 - **Generators** — Plop-based CLI (`npm run gen:*`) that scaffold from per-feature `feather.yaml` specs.
 - **Plugins** — optional features delivered as git branches you merge (billing, command palette, etc.).
-- **Strict quality bar** — Vitest with 100% coverage enforced by pre-commit hooks. Frontend tests use a Phoenix Test-inspired fluent Session DSL (`feather-testing-core`).
+- **Strict quality bar** — Vitest with 100% coverage enforced by pre-commit hooks (1186 tests across 101 files). E2E tests use Playwright with a Phoenix Test-inspired fluent Session DSL (`feather-testing-core`).
 
 ### When this repo is a strong fit
 
@@ -232,31 +232,9 @@ Both frontend and backend tests use the same `test` fixture from `convex/test.se
 
 Backend tests call mutations/queries via `client` and verify database state via `testClient.run()`. Frontend tests pass `client` to render helpers.
 
-### Frontend testing: two approaches
+### Frontend testing: `renderWithRouter`
 
-#### 1) Session DSL (preferred) — `feather-testing-core`
-
-A Phoenix Test-inspired fluent API from `feather-testing-core`. Import `renderWithSession` from `feather-testing-convex/rtl`:
-
-```tsx
-import { renderWithSession } from "feather-testing-convex/rtl";
-
-test("creates a task", async ({ client }) => {
-  const session = renderWithSession(<TasksPage />, client);
-  await session
-    .fillIn("Add a task...", "Buy groceries")
-    .click("Add")
-    .assertText("Buy groceries");
-});
-```
-
-Key Session methods: `visit`, `click`, `clickLink`, `clickButton`, `fillIn`, `selectOption`, `check`, `uncheck`, `submit`, `assertText`, `refuteText`, `assertHas`, `refuteHas`, `assertPath`, `within`, `debug`. Session chains are thenable — `await` executes all queued steps.
-
-Options: `{ authenticated?: boolean, signInError?: Error }`.
-
-#### 2) Raw Testing Library — `renderWithRouter`
-
-Lower-level approach when you need direct access to Testing Library APIs. `renderWithRouter(ui, client, options?)` from `src/test-helpers.tsx` renders with:
+All frontend tests use `renderWithRouter(ui, client, options?)` from `src/test-helpers.tsx`. This renders with:
 
 - **Real TanStack Router** (memory history, catch-all route) — so `<Link>`, `useNavigate()`, `useRouter()` all work
 - **Real Convex context** (`ConvexTestQueryAuthProvider`) — so `useQuery(convexQuery(...))`, `useConvexMutation(...)`, `useConvexAuth()`, and `useAuthActions()` all work

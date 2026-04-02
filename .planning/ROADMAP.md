@@ -254,7 +254,8 @@ Phases execute in numeric order: 2 -> 02.1 -> 3 -> 03.1 -> 03.2 -> 4 -> 5 -> 6 -
 | 999.7 Telemetry | Backlog | 3/3 | Complete    | 2026-04-01 |
 | 999.8 Search | Backlog | 2/2 | Complete    | 2026-03-30 |
 | 999.10 E2E, Bugs & Docs Debt | Backlog | 2/2 | Complete    | 2026-04-01 |
-| 999.11 Framework Acceptance Test | Backlog | 0/3 | Planned     | - |
+| 999.11 Framework Acceptance Test | Backlog | 3/3 | Complete    | 2026-04-02 |
+| 999.12 Documentation Overhaul | Backlog | 1/1 | Complete    | 2026-04-02 |
 
 ## Backlog
 
@@ -426,10 +427,27 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 999.11-01-PLAN.md — Offline pipeline hardening: typecheck + build verification for scaffolded projects
-- [ ] 999.11-02-PLAN.md — Example app CRUD E2E tests (todos, tickets, contacts)
-- [ ] 999.11-03-PLAN.md — Full navigation journey E2E test
+- [x] 999.11-01-PLAN.md — Offline pipeline hardening: typecheck + build verification for scaffolded projects
+- [x] 999.11-02-PLAN.md — Example app CRUD E2E tests (todos, tickets, contacts)
+- [x] 999.11-03-PLAN.md — Full navigation journey E2E test
+
+### Phase 999.12: Documentation Overhaul (BACKLOG)
+**Goal:** Write accurate, verified documentation for Feather Starter users (human + AI agent). Every claim verified against source code.
+**Depends on:** All prior phases (docs describe the current state)
+**Scope:**
+- **Plan 1 — Full docs overhaul:** New Getting Started guide, updated README, updated PROVIDERS.md, updated CLAUDE.md/rules, fixed FEATHER-STARTER-GUIDE and EXAMPLE-APPS-GUIDE inaccuracies
+**Success Criteria** (what must be TRUE):
+  1. `docs/getting-started.md` exists with setup, structure, generators, AI workflow
+  2. README.md reflects all 16 features, 19 backend domains, correct test counts (1186/101)
+  3. PROVIDERS.md accurate — Stripe marked as plugin-only, Netlify as primary host
+  4. CLAUDE.md and .claude/rules/ have correct feature lists and test counts
+  5. No `.gen.yaml` references remain (all replaced with `feather.yaml`)
+  6. docs/README.md has no dead links and no contradicting quick start
+**Plans:** 1/1
+
+Plans:
+- [x] 999.12-01-PLAN.md — Full documentation overhaul
 
 ---
 *Roadmap created: 2026-03-10*
-*Last updated: 2026-04-01*
+*Last updated: 2026-04-02*

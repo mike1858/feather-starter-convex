@@ -46,15 +46,15 @@ Shared code in `src/shared/`: schemas, hooks, utils, nav items, error constants.
 
 ### Frontend Features
 
-auth, dashboard, onboarding, settings, uploads, tasks, projects, subtasks, work-logs, activity-logs
+auth, dashboard, onboarding, settings, uploads, tasks, projects, subtasks, work-logs, activity-logs, todos, tickets, contacts, import, dev-errors
 
 ### Backend Domains
 
-tasks, projects, subtasks, work-logs, activity-logs, auth, devEmails, email, onboarding, otp, password, uploads, users
+tasks, projects, subtasks, work-logs, activity-logs, auth, devEmails, devErrors, email, imports, schemaMappings, onboarding, otp, password, uploads, users, todos, tickets, contacts
 
 ### Shared Schemas (`src/shared/schemas/`)
 
-tasks.ts, projects.ts, subtasks.ts, work-logs.ts, activity-logs.ts, username.ts
+tasks.ts, projects.ts, subtasks.ts, work-logs.ts, activity-logs.ts, todos.ts, tickets.ts, contacts.ts, imports.ts, schema-mappings.ts, username.ts
 
 ## Path Aliases
 
@@ -128,9 +128,11 @@ Dev environment: OTP and password-reset emails are intercepted and stored in `de
 
 ## Testing Patterns
 
-- 489 tests across 59 test files, 100% coverage enforced by pre-commit hook
+- 1186 tests across 101 test files (Vitest) + 10 Playwright E2E specs, 100% coverage enforced by pre-commit hook
 - Backend tests: `convex/{name}/*.test.ts` using `feather-testing-convex` with `test` fixture from `@cvx/test.setup`
 - Frontend tests: `src/features/{name}/{name}.test.tsx` using Testing Library with `renderWithRouter` from `@/test-helpers` and `ConvexTestClient` from `feather-testing-convex`
+- CLI/generator tests: `bin/__tests__/*.test.ts`, `generators/__tests__/*.test.ts`, `templates/**/*.test.ts`
+- E2E tests: `e2e/*.spec.ts` using Playwright with `feather-testing-core` Session DSL
 - Tests are co-located with source (not in a separate `tests/` directory)
 - Run `npm test` to verify (must pass with 100% coverage)
 

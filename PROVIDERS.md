@@ -1,20 +1,23 @@
 # Providers
 
-Every external vendor/service used by Feather Starter Kit, with swap guides.
+Every external vendor/service used by Feather Starter, with swap guides.
 
 ## Convex
 
 **What it does:** Backend-as-a-service providing database, real-time subscriptions, server functions (queries/mutations/actions), file storage, scheduled jobs, and authentication via `@convex-dev/auth`.
 
 **Files that use it:**
-- `convex/` -- all backend logic
+- `convex/` -- all backend logic (19 domain directories)
 - `src/` -- any file importing `api` from `~/convex/_generated/api`
-- `convex/schema.ts` -- database schema
+- `convex/schema.ts` -- database schema (19 tables + auth tables)
 - `convex/auth.ts`, `convex/auth.config.ts` -- authentication setup
+- `convex/crons.ts` -- scheduled jobs (error digest)
+- `convex/http.ts` -- HTTP routes
 
 **Env vars:**
-- `CONVEX_DEPLOYMENT` -- deployment identifier
-- `VITE_CONVEX_URL` -- public Convex URL for the frontend
+- `CONVEX_DEPLOYMENT` -- deployment identifier (in `.env.local`)
+- `VITE_CONVEX_URL` -- public Convex URL for the frontend (in `.env.local`)
+- `VITE_CONVEX_SITE_URL` -- public site URL (in `.env.local`)
 
 **Swap guide:**
 Convex is deeply integrated. Swapping it requires replacing:
@@ -29,49 +32,25 @@ Convex is deeply integrated. Swapping it requires replacing:
 
 ## Resend
 
-**What it does:** Transactional email delivery. Sends OTP verification codes during authentication.
+**What it does:** Transactional email delivery. Sends OTP verification codes and password reset emails.
 
 **Files that use it:**
-- `convex/otp/ResendOTP.ts` -- OTP email sender using Resend API
+- `convex/otp/ResendOTP.ts` -- OTP email sender
+- `convex/password/ResendOTPPasswordReset.ts` -- password reset email sender
 - `convex/email/index.ts` -- email rendering with `@react-email/components`
 
 **Env vars:**
-- `RESEND_API_KEY` -- Resend API key (set in Convex dashboard)
+- `AUTH_RESEND_KEY` -- Resend API key (set in Convex dashboard via `npx convex env set`)
 
 **Swap guide:**
-1. Replace `convex/otp/ResendOTP.ts` with your email provider's SDK (SendGrid, Postmark, AWS SES)
+1. Replace `convex/otp/ResendOTP.ts` and `convex/password/ResendOTPPasswordReset.ts` with your email provider's SDK (SendGrid, Postmark, AWS SES)
 2. Update the `send()` call to use your provider's API
 3. Keep `convex/email/index.ts` -- it renders React Email templates (provider-agnostic)
 4. Update env var name if different
 
 ---
 
-## Stripe
-
-**What it does:** Payment processing, subscription billing, webhook handling for plan changes.
-
-**Files that use it:**
-- `convex/billing/stripe.ts` -- Stripe SDK calls (create customer, create checkout, manage subscriptions)
-- `convex/billing/actions.ts` -- webhook handler for Stripe events
-- `convex/billing/queries.ts` -- plan/subscription queries
-- `convex/http.ts` -- HTTP route for Stripe webhook endpoint
-- `src/features/billing/` -- checkout and billing settings UI
-
-**Env vars:**
-- `STRIPE_SECRET_KEY` -- Stripe secret key (set in Convex dashboard)
-- `STRIPE_WEBHOOK_SECRET` -- webhook signing secret (set in Convex dashboard)
-
-**Swap guide:**
-1. Replace `convex/billing/stripe.ts` with your payment provider's SDK (Paddle, Lemon Squeezy, etc.)
-2. Update `convex/billing/actions.ts` webhook handler for your provider's event format
-3. Update `convex/http.ts` webhook route if endpoint changes
-4. Keep `convex/schema.ts` tables (`plans`, `subscriptions`) -- adjust fields as needed
-5. Update `src/features/billing/` components for your provider's checkout flow
-6. Update env vars
-
----
-
-## GitHub OAuth
+## GitHub OAuth (Optional)
 
 **What it does:** Social login via GitHub. Configured through `@convex-dev/auth`.
 
@@ -91,16 +70,55 @@ Convex is deeply integrated. Swapping it requires replacing:
 
 ---
 
-## Vercel (Hosting)
+## Hosting (Vercel / Netlify / Any Static Host)
 
 **What it does:** Frontend hosting with automatic deployments from Git.
 
-**Files that use it:**
-- No code files directly reference Vercel
-- Build command: `npm run build`
-- Output: `dist/`
+**Files that reference it:**
+- `netlify.toml` -- Netlify build config (included in repo)
+- No `vercel.json` -- Vercel works with zero config for Vite apps
 
-**Swap guide:**
-1. Any static hosting works (Netlify, Cloudflare Pages, AWS Amplify)
-2. Set build command to `npm run build` and output directory to `dist/`
+**Setup for any host:**
+1. Build command: `npm run build` (or `npx convex deploy --cmd 'npm run build'` for production)
+2. Output directory: `dist/`
 3. Set `VITE_CONVEX_URL` environment variable in your hosting provider
+
+---
+
+## Stripe (Plugin Only)
+
+**What it does:** Payment processing, subscription billing. Available as an optional plugin on the `plugin/billing` branch -- **not part of the core starter**.
+
+**To install:**
+```sh
+bash scripts/plugin.sh install plugin/billing
+```
+
+**Env vars (after installation):**
+- `STRIPE_SECRET_KEY` -- Stripe secret key (set in Convex dashboard)
+- `STRIPE_WEBHOOK_SECRET` -- webhook signing secret (set in Convex dashboard)
+
+---
+
+## Other Dependencies
+
+These are npm packages, not external services. No API keys or accounts needed.
+
+| Package | Purpose | Used In |
+|---------|---------|---------|
+| `@tanstack/react-router` | File-based routing | `src/routes/` |
+| `@tanstack/react-query` | Data fetching (via `@convex-dev/react-query`) | Feature components |
+| `@tanstack/react-form` | Form management with Zod validation | Feature forms |
+| `@radix-ui/*` | Accessible UI primitives | `src/ui/` |
+| `tailwindcss` v4 | Utility-first CSS | All components |
+| `zod` v4 | Schema validation (shared frontend ↔ backend) | `src/shared/schemas/`, `convex/` |
+| `i18next` | Internationalization (en, es) | All features |
+| `xlsx` | Excel file parsing | `templates/pipeline/excel/` |
+| `@xixixao/uploadstuff` | File upload to Convex storage | Settings (avatar) |
+| `@dnd-kit/*` | Drag-and-drop reordering | Tasks, subtasks |
+| `@sentry/react` | Error tracking (opt-in) | Error capture |
+| `plop` | Code generation engine | `npm run gen:*` |
+| `ts-morph` | AST manipulation for code wiring | `templates/pipeline/`, `templates/wiring/` |
+| `commander` | CLI framework | `bin/feather.ts` |
+| `feather-testing-convex` | Convex test helpers (in-memory backend) | All backend + frontend tests |
+| `feather-testing-core` | Fluent Session DSL for E2E | Playwright E2E tests |

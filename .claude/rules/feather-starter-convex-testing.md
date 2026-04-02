@@ -8,6 +8,8 @@
 |---------|------------|--------|
 | Frontend (`src/`) | `jsdom` | `vitest.config.ts` |
 | Backend (`convex/`) | `edge-runtime` | `environmentMatchGlobs` in vitest config |
+| Generators/CLI (`generators/`, `bin/`, `lib/`) | `node` | `environmentMatchGlobs` in vitest config |
+| E2E (`e2e/`) | Chromium (Playwright) | `playwright.config.ts` |
 
 ## Coverage — 100% Required
 

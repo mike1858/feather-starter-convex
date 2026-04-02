@@ -1,26 +1,31 @@
 # Feather Starter Documentation
 
-Feather Starter is a lightweight, production-ready starter template for building SaaS applications with Convex.
+Feather Starter is a production-ready SaaS starter kit built with React 19, Convex, TanStack, Zod v4, and Tailwind v4. Feature-folder architecture with YAML-driven code generation and 100% test coverage.
 
 ## Guides
 
-- [Feather Starter — Maintainer Guide](./FEATHER-STARTER-GUIDE.md) — what the repo is, how to use it, conventions (built incrementally).
-- [Introduction](./guide/01-introduction.md)
-- [Production Deployment](./guide/09-deployment.md)
+| Guide | Audience | What It Covers |
+|-------|----------|---------------|
+| [Getting Started](./getting-started.md) | New users (human + AI agent) | Setup, project structure, generators, AI workflow |
+| [Feather Starter Guide](./FEATHER-STARTER-GUIDE.md) | Developers going deeper | Architecture, patterns, testing, backend conventions |
+| [Example Apps Guide](./EXAMPLE-APPS-GUIDE.md) | Learning the generator | Step-by-step YAML spec → generated feature walkthrough |
 
-Check the [Guide](./guide) directory for full documentation.
+## Reference
+
+| Document | What It Covers |
+|----------|---------------|
+| [CLAUDE.md](../CLAUDE.md) | AI agent instructions, project conventions, design principles |
+| [PROVIDERS.md](../PROVIDERS.md) | External services (Convex, Resend, GitHub OAuth) with swap guides |
+| [Main README](../README.md) | Architecture diagram, tech stack, full feature list |
 
 ## Quick Start
 
 ```sh
-# Install dependencies
 npm install
-
-# Set up a new Convex project
-npx convex dev --configure=new --once
-
-# Set up Convex Auth
+npx convex dev --once
 npx @convex-dev/auth
+npx convex env set AUTH_RESEND_KEY re_your_key
+npm run dev
 ```
 
-See the [main README](../README.md) for environment variable setup and more details.
+> **Warning:** Do not use `npx convex dev --configure=new` — it overwrites `convex/tsconfig.json` and breaks path aliases. See [Getting Started](./getting-started.md) for full setup instructions.

@@ -1,11 +1,12 @@
 # Example Apps Guide
 
-How to generate working features using the Feather generators. Two examples included:
+How to generate working features using the Feather generators. Three example apps included:
 
-- **Todos** -- simple TodoMVC (title + completed)
-- **Tickets** -- issue tracker (status workflow, priority, assignment)
+- **Todos** -- simple TodoMVC (title + completed boolean)
+- **Tickets** -- issue tracker (status workflow with open/in_progress/resolved/closed, priority enum)
+- **Contacts** -- contact manager (name, email, company, status, phone, list + table views)
 
-Both examples already exist in the repo. This guide walks through recreating them from scratch so you understand the full generator workflow.
+All three examples are already installed in the repo. This guide walks through recreating them from scratch so you understand the full generator workflow.
 
 ---
 
@@ -21,13 +22,13 @@ Both examples already exist in the repo. This guide walks through recreating the
 
 Every feature follows the same 5-step process:
 
-1. **Create `.gen.yaml` spec** -- define your entity's fields, behaviors, and views
+1. **Create `feather.yaml` spec** -- define your entity's fields, behaviors, and views
 2. **Run `npm run gen:feature`** -- generates schema, backend, frontend, tests, routes, translations
 3. **Run `npx convex dev --once`** -- regenerates Convex types so imports resolve
 4. **Wire into the app** -- add nav entry, i18n namespace, error constants, schema table
 5. **Verify** -- typecheck, test, run the live app
 
-The generator reads `src/features/{name}/{name}.gen.yaml` and produces files across the entire stack. It does NOT create the Zod schema, schema table, or app wiring -- those are manual steps.
+The generator reads `src/features/{name}/feather.yaml` and produces files across the entire stack. It also auto-wires shared files (schema.ts, nav.ts, errors.ts, i18n.ts, locale files).
 
 ### What the Generator Creates
 
@@ -70,7 +71,7 @@ A basic TodoMVC: each todo has a `title` (string) and `completed` (boolean). Own
 
 ### Step 1: Create the YAML Spec
 
-Create `src/features/todos/todos.gen.yaml`:
+Create `src/features/todos/todosfeather.yaml`:
 
 ```yaml
 name: todos
@@ -130,7 +131,7 @@ operations:
 npm run gen:feature -- --name todos
 ```
 
-This reads `src/features/todos/todos.gen.yaml` and generates all files listed in the table above.
+This reads `src/features/todos/todosfeather.yaml` and generates all files listed in the table above.
 
 ### Step 3: What Gets Created
 
@@ -228,7 +229,7 @@ An issue tracker: each ticket has a `title` (string), `description` (text), `sta
 
 ### Step 1: Create the YAML Spec
 
-Create `src/features/tickets/tickets.gen.yaml`:
+Create `src/features/tickets/ticketsfeather.yaml`:
 
 ```yaml
 name: tickets
@@ -449,11 +450,11 @@ import { myCustomHelper } from "./helpers";  // This survives re-generation
 // @custom-end imports
 ```
 
-**Resolved spec** -- after generation, a `{name}.resolved.yaml` file is written next to the `.gen.yaml`. This shows the final merged config (your spec + defaults from `templates/defaults.yaml`). Useful for debugging why certain features were or weren't generated.
+**Resolved spec** -- after generation, a `{name}.resolved.yaml` file is written next to the `feather.yaml`. This shows the final merged config (your spec + defaults from `templates/defaults.yaml`). Useful for debugging why certain features were or weren't generated.
 
 ### Defaults Reference
 
-The file `templates/defaults.yaml` defines fallback values for every field and behavior. Your `.gen.yaml` only needs to specify what differs from the defaults. Key defaults:
+The file `templates/defaults.yaml` defines fallback values for every field and behavior. Your `feather.yaml` only needs to specify what differs from the defaults. Key defaults:
 
 | Setting | Default |
 |---------|---------|
